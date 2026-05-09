@@ -1,0 +1,487 @@
+/* ============================================================
+   Reset & base
+   Eliminăm toate marginile și padding-urile implicite ale browserului
+   și setăm box-sizing global.
+   ============================================================ */
+
+/* Selector universal: se aplică pe ORICE element, inclusiv ::before și ::after.
+   box-sizing: border-box — lățimea/înălțimea elementului include padding și border,
+   nu le adaugă în plus. Mult mai predictibil pentru layout. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ============================================================
+   Variabile CSS (Custom Properties)
+   Definite pe :root = elementul <html>.
+   Accesibile în tot fișierul cu var(--nume-variabila).
+   Centralizează culorile și valorile reutilizate.
+   ============================================================ */
+:root {
+    --clr-bg:        #f0f4f8; /* Culoarea de fundal a paginii (gri-albăstrui deschis) */
+    --clr-surface:   #ffffff; /* Fundalul cardurilor și suprafețelor albe */
+    --clr-primary:   #2563eb; /* Albastru principal — butoane, link-uri, accente */
+    --clr-primary-h: #1d4ed8; /* Albastru mai închis pentru hover pe butonul primar */
+    --clr-accent:    #0ea5e9; /* Albastru deschis — accente secundare */
+    --clr-danger:    #dc2626; /* Roșu pentru erori și câmpuri invalide */
+    --clr-success:   #16a34a; /* Verde pentru mesaje de succes */
+    --clr-text:      #1e293b; /* Culoarea principală a textului (aproape negru) */
+    --clr-muted:     #64748b; /* Text secundar, etichete, placeholder-uri */
+    --clr-border:    #cbd5e1; /* Culoarea bordering-urilor (gri-albăstrui) */
+    --radius:        0.5rem;  /* Raza colțurilor rotunjite (8px) */
+    --shadow:        0 4px 24px rgba(0,0,0,.08); /* Umbra subtilă pentru carduri */
+    --transition:    .2s ease; /* Durata animațiilor hover */
+}
+
+/* Font-size de bază: 16px pe elementul rădăcină.
+   Toate unitățile rem se calculează relativ la acesta.
+   1rem = 16px, 0.5rem = 8px etc. */
+html { font-size: 16px; }
+
+/* Stiluri globale pentru <body> */
+body {
+    /* Font stack: Segoe UI (Windows), system-ui (macOS/Linux), fallback generic */
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--clr-bg);  /* Fundalul paginii */
+    color: var(--clr-text);     /* Culoarea implicită a textului */
+    line-height: 1.6;           /* Înălțimea rândului pentru lizibilitate */
+    min-height: 100vh;          /* Pagina ocupă cel puțin toată înălțimea viewport-ului */
+}
+
+/* Link-uri globale */
+a { color: var(--clr-primary); text-decoration: none; }
+a:hover { text-decoration: underline; } /* Subliniere la hover pentru feedback vizual */
+
+/* ============================================================
+   Auth layout — structura paginilor de login și register
+   ============================================================ */
+
+/* Container principal: grilă cu două coloane egale (50% | 50%) */
+.auth-wrapper {
+    min-height: 100vh;          /* Ocupă toată înălțimea ecranului */
+    display: grid;              /* Activăm CSS Grid */
+    grid-template-columns: 1fr 1fr; /* Două coloane de lățime egală */
+}
+
+/* ============================================================
+   Panoul stâng — brandul aplicației
+   ============================================================ */
+.auth-brand {
+    /* Gradient diagonal de la albastru închis la albastru deschis */
+    background: linear-gradient(145deg, #1e40af 0%, #0369a1 60%, #0ea5e9 100%);
+    color: #fff;                /* Text alb pe fundal colorat */
+    display: flex;              /* Flexbox pentru centrare verticală a conținutului */
+    flex-direction: column;     /* Elementele se stivuiesc vertical */
+    justify-content: center;    /* Centrare pe axa principală (verticală) */
+    align-items: center;        /* Centrare pe axa secundară (orizontală) */
+    padding: 3rem 2.5rem;       /* Spațiu interior generos */
+    text-align: center;         /* Text centrat orizontal */
+    gap: 1.5rem;                /* Spațiu între elementele flex */
+}
+
+.auth-brand .brand-icon {
+    font-size: 5rem;  /* Emoji mare ca logo */
+    line-height: 1;   /* Înălțimea rândului 1 = dimensiunea fontului, fără spațiu extra */
+}
+
+.auth-brand h1 {
+    font-size: 2rem;
+    font-weight: 700;       /* Bold */
+    letter-spacing: -.5px; /* Litere ușor apropiate pentru titluri mari */
+}
+
+.auth-brand p {
+    font-size: 1rem;
+    opacity: .85;      /* Ușor transparent față de alb pur */
+    max-width: 26ch;   /* Lățime maximă în caractere — previne rânduri prea lungi */
+}
+
+.auth-brand .brand-features {
+    list-style: none;      /* Eliminăm bullet-urile implicite */
+    margin-top: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;            /* Spațiu între elementele listei */
+}
+
+.auth-brand .brand-features li {
+    font-size: .9rem;
+    opacity: .9;
+    display: flex;
+    align-items: center;  /* Alinierea verticală a iconului cu textul */
+    gap: .5rem;
+}
+
+/* Pseudo-elementul ::before creează un cerc cu bife în fața fiecărui <li>.
+   Nu necesită HTML suplimentar — pur CSS. */
+.auth-brand .brand-features li::before {
+    content: '✓';                      /* Caracterul afișat */
+    background: rgba(255,255,255,.2); /* Cerc semi-transparent alb */
+    border-radius: 50%;               /* 50% = cerc perfect */
+    width: 1.4rem;
+    height: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    flex-shrink: 0; /* Împiedică micșorarea cercului dacă textul e lung */
+}
+
+/* ============================================================
+   Panoul drept — formularul de autentificare
+   ============================================================ */
+.auth-form-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;  /* Centrare verticală a cardului */
+    align-items: center;      /* Centrare orizontală a cardului */
+    padding: 2rem 1.5rem;
+    background: var(--clr-surface); /* Fundal alb */
+    overflow-y: auto; /* Scroll vertical dacă formularul e mai înalt decât ecranul */
+}
+
+/* Cardul interior cu formularul — lățime maximă fixă pentru lizibilitate */
+.auth-card {
+    width: 100%;
+    max-width: 420px; /* Pe ecrane mari, formularul nu se întinde mai lat de 420px */
+}
+
+.auth-card h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: .4rem;
+    color: var(--clr-text);
+}
+
+/* Subtitlu gri sub titlul formularului */
+.auth-card .subtitle {
+    color: var(--clr-muted);
+    font-size: .95rem;
+    margin-bottom: 2rem; /* Spațiu mare înainte de formular */
+}
+
+/* ============================================================
+   Elemente de formular
+   ============================================================ */
+
+/* Grupul câmp: container pentru label + input + mesaj de eroare */
+.form-group {
+    margin-bottom: 1.1rem; /* Spațiu între câmpuri consecutive */
+}
+
+/* Eticheta câmpului */
+.form-group label {
+    display: block;       /* Pe propriul rând (nu inline cu input-ul) */
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--clr-text);
+    margin-bottom: .35rem; /* Spațiu mic între etichetă și input */
+}
+
+/* Input-ul de text/email/parolă */
+.form-group input {
+    width: 100%;          /* Ocupă toată lățimea disponibilă */
+    padding: .65rem .9rem; /* Spațiu interior: vertical | orizontal */
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .95rem;
+    color: var(--clr-text);
+    background: var(--clr-bg); /* Fundal ușor gri-albăstrui în stare normală */
+    /* transition aplică animație la schimbarea proprietăților specificate */
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none; /* Eliminăm outline-ul implicit al browserului (îl înlocuim cu box-shadow) */
+}
+
+/* Stilul input-ului când este focusat (utilizatorul dă click sau Tab pe el) */
+.form-group input:focus {
+    border-color: var(--clr-primary); /* Bordura devine albastră */
+    /* box-shadow creează un "inel de focus" albastru semi-transparent în jurul input-ului */
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    background: #fff; /* Fundalul devine alb pur la focus */
+}
+
+/* Input invalid — borderul devine roșu */
+.form-group input.error {
+    border-color: var(--clr-danger);
+}
+
+/* Mesajul de eroare sub câmp */
+.field-error {
+    color: var(--clr-danger);
+    font-size: .8rem;
+    margin-top: .3rem;
+    display: none; /* Ascuns implicit */
+}
+
+/* JavaScript adaugă clasa 'visible' pentru a afișa mesajul */
+.field-error.visible { display: block; }
+
+/* ============================================================
+   Container parolă cu buton de toggle
+   ============================================================ */
+
+/* position: relative pe container = butonul se poziționează față de el */
+.password-wrapper {
+    position: relative;
+}
+
+/* Spațiu extra la dreapta pentru butonul de toggle */
+.password-wrapper input { padding-right: 2.8rem; }
+
+/* Butonul ochiului pentru afișare/ascundere parolă */
+.toggle-pw {
+    position: absolute; /* Scos din flow, poziționat față de .password-wrapper */
+    right: .7rem;       /* La dreapta, cu puțin spațiu de margine */
+    top: 50%;           /* La mijlocul înălțimii container-ului */
+    transform: translateY(-50%); /* Centrare precisă: compensăm înălțimea proprie */
+    background: none;   /* Fără fundal */
+    border: none;       /* Fără border */
+    cursor: pointer;    /* Cursorul mână la hover */
+    color: var(--clr-muted);
+    font-size: 1.1rem;
+    padding: .2rem;
+    line-height: 1;
+    transition: color var(--transition);
+}
+
+.toggle-pw:hover { color: var(--clr-primary); } /* Devine albastru la hover */
+
+/* ============================================================
+   Indicatorul de putere al parolei (bara colorată)
+   ============================================================ */
+
+.pw-strength {
+    margin-top: .45rem;
+    display: none; /* Ascuns implicit */
+}
+
+.pw-strength.visible { display: block; } /* Afișat de JS când userul scrie */
+
+/* Container bara: fundal gri = "bara goală" */
+.pw-strength-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--clr-border);
+    overflow: hidden; /* Conținutul (fill-ul) nu depășește colțurile rotunjite */
+    margin-bottom: .25rem;
+}
+
+/* Bara de umplere: lățimea și culoarea se schimbă dinamic prin JS */
+.pw-strength-fill {
+    height: 100%;
+    border-radius: 2px;
+    /* transition animează lin schimbarea de lățime și culoare */
+    transition: width .3s ease, background .3s ease;
+    width: 0; /* Începe goală */
+}
+
+/* Textul "Slabă / Medie / Excelentă" */
+.pw-strength-label {
+    font-size: .75rem;
+    color: var(--clr-muted);
+}
+
+/* ============================================================
+   Alerta (banner de eroare sau succes)
+   ============================================================ */
+.alert {
+    padding: .75rem 1rem;
+    border-radius: var(--radius);
+    font-size: .9rem;
+    margin-bottom: 1.2rem;
+    display: none;        /* Ascunsă implicit */
+    align-items: flex-start;
+    gap: .5rem;
+}
+
+/* JavaScript adaugă 'visible' pentru a o afișa */
+.alert.visible { display: flex; }
+
+/* Varianta de eroare (roșu) */
+.alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--clr-danger);
+}
+
+/* Varianta de succes (verde) */
+.alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: var(--clr-success);
+}
+
+/* ============================================================
+   Butonul principal (btn-primary)
+   ============================================================ */
+
+/* Stiluri comune tuturor variantelor de butoane */
+.btn {
+    display: inline-flex;    /* Flex pentru a alinia spinner + text */
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;              /* Spațiu între spinner și text */
+    width: 100%;             /* Buton pe toată lățimea */
+    padding: .75rem 1rem;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition), opacity var(--transition);
+}
+
+/* Butonul albastru primar */
+.btn-primary {
+    background: var(--clr-primary);
+    color: #fff;
+}
+
+/* Hover — culoare mai închisă, dar nu dacă butonul e dezactivat */
+.btn-primary:hover:not(:disabled) { background: var(--clr-primary-h); }
+
+/* Click — ușoară micșorare vizuală */
+.btn:active:not(:disabled) { transform: scale(.98); }
+
+/* Buton dezactivat — aspectual estompat, cursorul indică "nu se poate da click" */
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Spinner-ul de loading — cerc care se rotește */
+.btn .spinner {
+    width: 1rem;
+    height: 1rem;
+    /* Cerc cu border transparent în majoritate + border-top alb = efect de rotire */
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite; /* Rotire continuă */
+    display: none; /* Ascuns implicit */
+}
+
+/* JavaScript adaugă 'loading' pe buton când cererea e în curs */
+.btn.loading .spinner { display: block; }  /* Spinner apare */
+.btn.loading .btn-text { display: none; }  /* Textul dispare */
+
+/* Keyframe-ul animației de rotire: de la 0° la 360° */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   Separatorul "sau" între formular și link-ul de redirect
+   ============================================================ */
+.auth-divider {
+    text-align: center;
+    margin: 1.5rem 0 1rem;
+    color: var(--clr-muted);
+    font-size: .88rem;
+    position: relative; /* Necesar pentru liniile absolute din ::before/::after */
+}
+
+/* Linia orizontală din stânga cuvântului "sau" */
+.auth-divider::before,
+.auth-divider::after {
+    content: '';         /* Pseudo-element fără text */
+    position: absolute;
+    top: 50%;            /* La mijlocul înălțimii textului */
+    width: calc(50% - 1.5rem); /* Jumătate din lățime minus spațiu pentru text */
+    height: 1px;
+    background: var(--clr-border);
+}
+
+.auth-divider::before { left: 0; }   /* Linia din stânga */
+.auth-divider::after  { right: 0; }  /* Linia din dreapta */
+
+/* Text-ul link de redirect ("Nu ai cont? Înregistrează-te") */
+.auth-footer {
+    text-align: center;
+    font-size: .9rem;
+    color: var(--clr-muted);
+    margin-top: 1.5rem;
+}
+
+/* ============================================================
+   Responsive — adaptare la ecrane mici (mobil)
+   @media = regulă CSS care se aplică DOAR dacă condiția e adevărată
+   max-width: 768px înseamnă "ecrane mai înguste de 768px"
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Pe mobil: grid cu o singură coloană (formular pe toată lățimea) */
+    .auth-wrapper { grid-template-columns: 1fr; }
+    /* Ascundem panoul de brand pe mobil — economisim spațiu */
+    .auth-brand   { display: none; }
+    /* Padding mai mic pe mobil */
+    .auth-form-panel { padding: 2rem 1rem; }
+}
+
+/* Ajustare și pentru ecrane foarte mici (ex: iPhone SE) */
+@media (max-width: 400px) {
+    .auth-card h2 { font-size: 1.35rem; }
+}
+
+/* ============================================================
+   Bara de navigare superioară (topbar)
+   Apare pe paginile post-login: dashboard, băuturi etc.
+   ============================================================ */
+.topbar {
+    background: var(--clr-surface);
+    border-bottom: 1px solid var(--clr-border); /* Linie de separare subtilă */
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;          /* Centrare verticală a elementelor din navbar */
+    justify-content: space-between; /* Brand | nav | user — la extremități și centru */
+    position: sticky; /* Rămâne fixă la scroll — "se lipește" de vârful viewport-ului */
+    top: 0;           /* Lipită de vârf */
+    z-index: 100;     /* Deasupra oricărui alt element din pagină */
+    box-shadow: 0 1px 4px rgba(0,0,0,.06); /* Umbră subtilă sub navbar */
+}
+
+/* Logo-ul + numele aplicației din navbar */
+.topbar-brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--clr-primary);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* Lista de link-uri din navbar */
+.topbar-nav {
+    display: flex;
+    gap: .25rem;      /* Spațiu mic între link-uri */
+    list-style: none; /* Fără bullet-uri */
+}
+
+/* Link-urile individuale din navbar */
+.topbar-nav a {
+    padding: .4rem .8rem;
+    border-radius: var(--radius);
+    font-size: .9rem;
+    color: var(--clr-text);
+    transition: background var(--transition);
+}
+
+/* Fundal gri la hover */
+.topbar-nav a:hover { background: var(--clr-bg); text-decoration: none; }
+/* Link-ul paginii curente: albastru + bold */
+.topbar-nav a.active { color: var(--clr-primary); font-weight: 600; }
+
+/* Zona utilizator (dreapta navbar): avatar + username + logout */
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: .9rem;
+}
+
+/* Avatar circular cu inițiala utilizatorului */
+.avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;          /* Cerc perfect */
+    background: var(--clr-primary); /* Fundal albastru */
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .85rem;
+}
