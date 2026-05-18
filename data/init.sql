@@ -195,3 +195,34 @@ INSERT OR IGNORE INTO categories (name, description) VALUES
     ('Sucuri',   'Sucuri naturale sau din concentrate, fresh-uri'),
     ('Siropuri', 'Siropuri pentru diluat sau pentru aroma'),
     ('Ape',      'Ape plate, minerale, carbogazoase');
+
+-- Ingrediente de baza
+INSERT OR IGNORE INTO ingredients (name) VALUES
+    ('Lamaie'), ('Menta'), ('Ghimbir'), ('Miere'), ('Musetel'),
+    ('Lapte'), ('Vanilie'), ('Portocale'), ('Mere'), ('Zmeura');
+
+-- Bauturi de test
+INSERT OR IGNORE INTO beverages (name, category_id, price, description, perishability_days, season, region, created_by) VALUES
+    ('Ceai de musetel',     1, 8.00,  'Ceai relaxant din flori de musetel',         2,   'all',    'Romania', 1),
+    ('Ceai de ghimbir',     1, 9.50,  'Ceai energizant cu ghimbir si lamaie',       2,   'winter', 'Romania', 1),
+    ('Lapte de vanilie',    2, 7.00,  'Lapte cald cu aroma de vanilie',             3,   'all',    'Romania', 1),
+    ('Kefir natural',       2, 6.50,  'Kefir din lapte integral',                   5,   'all',    'Romania', 1),
+    ('Fresh de portocale',  3, 12.00, 'Suc proaspat stors din portocale',           1,   'winter', 'Romania', 1),
+    ('Suc de mere',         3, 10.00, 'Suc natural din mere romanesti',             1,   'autumn', 'Romania', 1),
+    ('Limonada cu menta',   3, 11.00, 'Limonada racoritoare cu menta proaspata',    1,   'summer', 'Romania', 1),
+    ('Sirop de zmeura',     4, 15.00, 'Sirop concentrat din zmeura de padure',      180, 'summer', 'Romania', 1),
+    ('Apa minerala plata',  5, 4.00,  'Apa minerala naturala plata',                365, 'all',    'Romania', 1),
+    ('Apa carbogazoasa',    5, 4.50,  'Apa minerala carbogazoasa',                  365, 'all',    'Romania', 1);
+
+-- Asocieri ingrediente - bauturi (exemple)
+INSERT OR IGNORE INTO beverage_ingredients (beverage_id, ingredient_id, quantity) VALUES
+    (1, 5, '2g'),      -- Ceai musetel: musetel
+    (2, 4, '100ml'),   -- Ceai ghimbir: ghimbir
+    (2, 1, '1 felie'), -- Ceai ghimbir: lamaie
+    (3, 6, '200ml'),   -- Lapte vanilie: lapte
+    (3, 7, '1 lingurita'), -- Lapte vanilie: vanilie
+    (5, 8, '3 buc'),   -- Fresh portocale: portocale
+    (6, 9, '4 buc'),   -- Suc mere: mere
+    (7, 1, '1 buc'),   -- Limonada: lamaie
+    (7, 2, '5 frunze'),-- Limonada: menta
+    (8, 10, '500g');   -- Sirop zmeura: zmeura
