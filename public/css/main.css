@@ -485,3 +485,446 @@ a:hover { text-decoration: underline; } /* Subliniere la hover pentru feedback v
     font-weight: 700;
     font-size: .85rem;
 }
+
+/* ============================================================
+   Pagina internă (post-login) — layout general
+   Folosit pe beverages.php și paginile viitoare.
+   ============================================================ */
+
+/* Conținutul principal al paginii — padding și lățime maximă centrate */
+.page-main {
+    padding: 2rem 1.5rem;   /* Spațiu interior: sus/jos | stânga/dreapta */
+    max-width: 1100px;      /* Limităm lățimea pentru lizibilitate pe ecrane mari */
+    margin: 0 auto;         /* Centrăm orizontal față de pagină */
+}
+
+/* Antetul paginii: titlu + buton de acțiune pe același rând */
+.page-header {
+    display: flex;
+    align-items: center;          /* Aliniere verticală la mijloc */
+    justify-content: space-between; /* Titlul la stânga, butonul la dreapta */
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+}
+
+/* Titlul principal al paginii (ex: "Băuturi") */
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: .2rem;
+}
+
+/* Subtitlul descriptiv sub titlu */
+.page-subtitle {
+    color: var(--clr-muted);
+    font-size: .9rem;
+}
+
+/* ============================================================
+   Bara de filtrare — conține dropdown-uri și input-uri de căutare
+   ============================================================ */
+.filters-bar {
+    display: flex;
+    flex-wrap: wrap;  /* Elementele trec pe rândul următor pe ecrane mici */
+    gap: .75rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--clr-surface); /* Fundal alb */
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* Dropdown-urile din bara de filtrare și formulare */
+.filter-select {
+    padding: .55rem .75rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .9rem;
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    cursor: pointer;
+    transition: border-color var(--transition);
+    /* Eliminar outline implicit al browserului — înlocuit cu border-color */
+    outline: none;
+}
+
+/* Câmpul text din bara de filtrare (ex: "Caută după regiune") */
+.filter-input {
+    padding: .55rem .75rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .9rem;
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    outline: none;
+    flex: 1;           /* Ocupă spațiul disponibil rămas */
+    min-width: 150px;  /* Nu se micșorează sub 150px pe ecrane înguste */
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+/* Focus pe filter-select și filter-input: bordură albastră */
+.filter-select:focus,
+.filter-input:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    background: #fff;
+}
+
+/* ============================================================
+   Variante de butoane (suplimentare față de btn-primary)
+   ============================================================ */
+
+/* Buton cu bordură vizibilă — pentru acțiuni secundare (ex: "Filtrează") */
+.btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--clr-primary);
+    color: var(--clr-primary);
+    width: auto;  /* Nu ocupă toată lățimea — suprascrie width:100% din .btn */
+}
+.btn-outline:hover:not(:disabled) {
+    background: var(--clr-primary);
+    color: #fff;
+}
+
+/* Buton transparent fără bordură — pentru acțiuni terțiare (ex: "Resetează") */
+.btn-ghost {
+    background: transparent;
+    border: 1.5px solid var(--clr-border);
+    color: var(--clr-muted);
+    width: auto;
+}
+.btn-ghost:hover:not(:disabled) {
+    background: var(--clr-bg);
+    color: var(--clr-text);
+}
+
+/* Dimensiune mai mică pentru butoane în contextul paginii (nu formular full-width) */
+.btn-sm {
+    padding: .5rem 1rem;
+    font-size: .9rem;
+    width: auto; /* Suprascrie width:100% din .btn — butoanele nu ocupă toată lățimea */
+}
+
+/* ============================================================
+   Stări speciale ale grilei (loading, empty)
+   ============================================================ */
+
+/* Mesajul afișat cât timp se încarcă datele din API */
+.loading-state {
+    grid-column: 1 / -1; /* Ocupă toate coloanele grilei — se întinde pe tot rândul */
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--clr-muted);
+    font-size: 1rem;
+}
+
+/* Mesajul afișat când nu există rezultate (grilă goală) */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--clr-muted);
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+/* ============================================================
+   Grila de carduri de băuturi
+   ============================================================ */
+
+/* Container grilă cu coloane responsivă:
+   auto-fill = creează cât mai multe coloane posibil;
+   minmax(260px, 1fr) = fiecare coloană are minim 260px, maxim 1fr (egale). */
+.beverages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem; /* Spațiu uniform între carduri */
+}
+
+/* ============================================================
+   Cardul individual de băutură
+   ============================================================ */
+.beverage-card {
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column; /* Elementele se stivuiesc vertical */
+    gap: .6rem;
+    box-shadow: var(--shadow);
+    /* Animație de ridicare la hover — feedback vizual de interactivitate */
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.beverage-card:hover {
+    transform: translateY(-2px);                  /* Ridicare ușoară */
+    box-shadow: 0 8px 32px rgba(0,0,0,.12);       /* Umbră mai pronunțată */
+}
+
+/* Antetul cardului: categoria (stânga) + butoanele admin (dreapta) */
+.beverage-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+/* Eticheta cu categoria băuturii (ex: "Ceaiuri") */
+.beverage-category {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--clr-primary);
+    text-transform: uppercase;  /* Majuscule pentru aspect de etichetă */
+    letter-spacing: .5px;
+}
+
+/* Numele băuturii — elementul principal al cardului */
+.beverage-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    line-height: 1.3;
+}
+
+/* Descrierea scurtă a băuturii */
+.beverage-desc {
+    font-size: .88rem;
+    color: var(--clr-muted);
+    line-height: 1.5;
+    /* Limităm la 3 rânduri pentru a menține cardurile la înălțime uniformă */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;        /* Maxim 3 rânduri */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Zona cu badge-urile de metadate (preț, sezon, regiune, perisabilitate) */
+.beverage-meta {
+    display: flex;
+    flex-wrap: wrap;   /* Badge-urile trec pe rândul următor dacă nu încap */
+    gap: .4rem;
+    margin-top: auto;  /* Împinge zona de badge-uri la baza cardului */
+}
+
+/* Badge-ul individual (etichetă mică cu text) */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .55rem;
+    border-radius: 99px;   /* 99px = colțuri complet rotunjite (pill shape) */
+    font-size: .75rem;
+    font-weight: 500;
+    background: var(--clr-bg);
+    color: var(--clr-muted);
+    border: 1px solid var(--clr-border);
+    white-space: nowrap;   /* Textul nu se împarte pe mai multe rânduri */
+}
+
+/* Badge-ul de preț — evidențiat cu albastru */
+.badge-price {
+    background: #eff6ff;        /* Albastru foarte deschis */
+    color: var(--clr-primary);  /* Text albastru */
+    border-color: #bfdbfe;      /* Bordură albastru deschis */
+    font-weight: 700;
+}
+
+/* ============================================================
+   Butoanele de acțiune din cardul de băutură (admin)
+   ============================================================ */
+
+/* Grupul butoanelor de editare și ștergere */
+.card-actions {
+    display: flex;
+    gap: .25rem;
+}
+
+/* Butonul-icon mic (emoji) pentru editare/ștergere */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: .25rem .35rem;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    line-height: 1;
+    transition: background var(--transition);
+    opacity: .6;  /* Ușor transparent în stare normală */
+}
+
+.btn-icon:hover {
+    background: var(--clr-bg);
+    opacity: 1; /* Complet opac la hover */
+}
+
+/* Varianta de danger (ștergere) — roșu la hover */
+.btn-icon-danger:hover {
+    background: #fee2e2;  /* Roșu foarte deschis */
+}
+
+/* ============================================================
+   Modal — dialogul de adăugare / editare
+   ============================================================ */
+
+/* Fundalul întunecat semi-transparent care acoperă restul paginii */
+.modal-overlay {
+    position: fixed;     /* Fixat față de viewport, nu față de pagină */
+    inset: 0;            /* Shorthand pentru top:0; right:0; bottom:0; left:0 */
+    background: rgba(0, 0, 0, .45); /* Negru semi-transparent */
+    display: flex;
+    align-items: center;     /* Centrăm modalul vertical */
+    justify-content: center; /* Centrăm modalul orizontal */
+    z-index: 200;            /* Deasupra topbar-ului (z-index: 100) */
+    /* Animație de apariție — opacity de la 0 la 1 */
+    animation: fadeIn .15s ease;
+}
+
+/* Starea hidden — clasa adăugată/scoasă de JavaScript */
+.modal-overlay.hidden {
+    display: none; /* Ascunde complet elementul (nu e în flow, nu captează click-uri) */
+}
+
+/* Animația de apariție a overlay-ului */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Cardul alb al modalului — containerul propriu-zis al dialogului */
+.modal {
+    background: var(--clr-surface);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,.2); /* Umbră pronunțată pentru adâncime */
+    width: 100%;
+    max-width: 540px;  /* Lățimea maximă a dialogului */
+    max-height: 90vh;  /* Nu depășește 90% din înălțimea viewport-ului */
+    display: flex;
+    flex-direction: column; /* Header | Body | Footer pe verticală */
+    /* Animație de apariție — glisare ușoară din sus */
+    animation: slideDown .2s ease;
+    overflow: hidden;  /* Conținutul nu depășește colțurile rotunjite */
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-16px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* Header-ul modalului: titlu + buton X */
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--clr-border);
+}
+
+.modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* Butonul X de închidere a modalului */
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--clr-muted);
+    line-height: 1;
+    padding: .1rem .3rem;
+    border-radius: var(--radius);
+    transition: color var(--transition), background var(--transition);
+}
+.modal-close:hover {
+    color: var(--clr-text);
+    background: var(--clr-bg);
+}
+
+/* Corpul modalului cu formularul — scroll dacă conținutul e prea înalt */
+.modal-body {
+    padding: 1.25rem 1.5rem;
+    overflow-y: auto; /* Scroll vertical dacă formularul depășește înălțimea disponibilă */
+    flex: 1;          /* Ocupă spațiul disponibil între header și footer */
+}
+
+/* Footer-ul modalului: butoanele Anulează și Salvează */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end; /* Butoanele la dreapta */
+    gap: .75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--clr-border);
+}
+
+/* ============================================================
+   Componente suplimentare de formular (pentru modal)
+   ============================================================ */
+
+/* Rând cu două coloane egale — pentru câmpuri care merg natural perechi */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Două coloane de lățime egală */
+    gap: 1rem;
+}
+
+/* Pe ecrane înguste, cele două coloane devin una singură (stivuite vertical) */
+@media (max-width: 480px) {
+    .form-row { grid-template-columns: 1fr; }
+}
+
+/* Textarea — câmpul de text multi-linie (ex: Descriere) */
+.form-textarea {
+    width: 100%;
+    padding: .65rem .9rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .95rem;
+    font-family: inherit; /* Moștenim fontul paginii — textarea are implicit monospace */
+    color: var(--clr-text);
+    background: var(--clr-bg);
+    resize: vertical;     /* Utilizatorul poate redimensiona doar vertical */
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-textarea:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    background: #fff;
+}
+
+/* Stilizăm și input[type="number"] la fel ca input[type="text"] */
+.form-group input[type="number"] {
+    width: 100%;
+    padding: .65rem .9rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .95rem;
+    color: var(--clr-text);
+    background: var(--clr-bg);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-group input[type="number"]:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    background: #fff;
+}
+
+/* ============================================================
+   Responsive — adaptări pentru ecrane mici
+   ============================================================ */
+@media (max-width: 600px) {
+    /* Pe mobil, bara de filtrare devine verticală */
+    .filters-bar { flex-direction: column; align-items: stretch; }
+    /* Dropdown-urile și input-urile ocupă toată lățimea */
+    .filter-select, .filter-input { width: 100%; }
+    /* Butoanele de filtrare pe toată lățimea */
+    .btn-sm { width: 100%; justify-content: center; }
+    /* Modalul ocupă aproape tot ecranul pe mobil */
+    .modal { max-width: 100%; margin: 1rem; }
+}
