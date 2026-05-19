@@ -1,17 +1,16 @@
 <?php
-/**
- * api/export.php
- * Endpoint pentru resursa: export
- *
- * TODO: de implementat
- */
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../repositories/ExportRepository.php';
+require_once __DIR__ . '/../services/ExportService.php';
+require_once __DIR__ . '/../controllers/ExportController.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = get_param('action') ?? '';
-
-json_error('Endpoint nesimplemented inca.', 501);
+(new ExportController(
+    new ExportService(
+        new ExportRepository(get_db())
+    )
+))->handle();
