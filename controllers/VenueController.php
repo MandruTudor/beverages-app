@@ -4,6 +4,44 @@ class VenueController {
     public function __construct(private VenueService $service) {}
 
     public function handle(): void {
-        json_error('Endpoint neimplementat inca.', 501);
+        $method = http_method();
+        $id     = get_param('id') ? (int) get_param('id') : null;
+
+        match (true) {
+            $method === 'GET'    && $id === null => $this->list(),
+            $method === 'GET'    && $id !== null => $this->get($id),
+            $method === 'POST'                   => $this->create(),
+            $method === 'PATCH'  && $id !== null => $this->update($id),
+            $method === 'DELETE' && $id !== null => $this->delete($id),
+            default                              => json_error('Metoda sau ruta invalida.', 405),
+        };
+    }
+
+    private function list(): void {
+        json_response(['venues' => $this->service->list()]);
+    }
+
+    private function get(int $id): void {
+        json_response(['venue' => $this->service->get($id)]);
+    }
+
+    private function create(): void {
+        $data    = json_body();
+        $missing = missing_field($data, ['name']);
+        if ($missing) {
+            json_error("Campul '$missing' este obligatoriu.");
+        }
+        $id = $this->service->create($data);
+        json_response(['message' => 'Localul adaugat cu succes.', 'id' => $id], 201);
+    }
+
+    private function update(int $id): void {
+        $this->service->update($id, json_body());
+        json_response(['message' => 'Localul actualizat cu succes.']);
+    }
+
+    private function delete(int $id): void {
+        $this->service->delete($id);
+        json_response(['message' => 'Localul sters cu succes.']);
     }
 }
