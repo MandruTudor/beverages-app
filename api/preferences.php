@@ -1,17 +1,16 @@
 <?php
-/**
- * api/preferences.php
- * Endpoint pentru resursa: preferences
- *
- * TODO: de implementat
- */
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../repositories/PreferenceRepository.php';
+require_once __DIR__ . '/../services/PreferenceService.php';
+require_once __DIR__ . '/../controllers/PreferenceController.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = get_param('action') ?? '';
-
-json_error('Endpoint nesimplemented inca.', 501);
+(new PreferenceController(
+    new PreferenceService(
+        new PreferenceRepository(get_db())
+    )
+))->handle();

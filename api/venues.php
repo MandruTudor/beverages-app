@@ -1,17 +1,16 @@
 <?php
-/**
- * api/venues.php
- * Endpoint pentru resursa: venues
- *
- * TODO: de implementat
- */
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../repositories/VenueRepository.php';
+require_once __DIR__ . '/../services/VenueService.php';
+require_once __DIR__ . '/../controllers/VenueController.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-$action = get_param('action') ?? '';
-
-json_error('Endpoint nesimplemented inca.', 501);
+(new VenueController(
+    new VenueService(
+        new VenueRepository(get_db())
+    )
+))->handle();
