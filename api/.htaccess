@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Dacă fișierul există deja fizic (ex: accesezi direct beverages.php), îl lăsăm în pace
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Rescrie /api/beverages → /api/beverages.php
+# QSA (Query String Append) păstrează parametrii: ?id=1, ?action=login etc.
+RewriteRule ^([^/]+)$ $1.php [QSA,L]
