@@ -1,27 +1,29 @@
 <?php
+require_once __DIR__ . '/../dto/GroupCreateDto.php';
+require_once __DIR__ . '/../dto/GroupMemberDto.php';
 
 class GroupController {
     public function __construct(private GroupService $service) {}
 
     public function handle(): void {
         $method = http_method();
-        $id     = get_param('id')     ? (int) get_param('id')     : null;
+        $id     = get_param('id')     ? (int) get_param('id') : null;
         $action = get_param('action') ?? null;
 
         match (true) {
             // Lista grupurilor userului curent
-            $method === 'GET'    && $id === null                            => $this->list(),
+            $method === 'GET'    && $id === null                                 => $this->list(),
             // Detalii grup cu membri
-            $method === 'GET'    && $id !== null                            => $this->get($id),
+            $method === 'GET'    && $id !== null                                 => $this->get($id),
             // Creare grup nou
-            $method === 'POST'   && $id === null                            => $this->create(),
+            $method === 'POST'   && $id === null                                 => $this->create(),
             // Ștergere grup
-            $method === 'DELETE' && $id !== null && $action === null        => $this->delete($id),
+            $method === 'DELETE' && $id !== null && $action === null             => $this->delete($id),
             // Adaugă un membru în grup: POST /groups.php?id=X&action=add_member
-            $method === 'POST'   && $id !== null && $action === 'add_member'    => $this->addMember($id),
+            $method === 'POST'   && $id !== null && $action === 'add_member'     => $this->addMember($id),
             // Elimină un membru din grup: DELETE /groups.php?id=X&action=remove_member
-            $method === 'DELETE' && $id !== null && $action === 'remove_member' => $this->removeMember($id),
-            default                                                         => json_error('Metoda sau ruta invalida.', 405),
+            $method === 'DELETE' && $id !== null && $action === 'remove_member'  => $this->removeMember($id),
+            default                                                              => json_error('Metoda sau ruta invalida.', 405),
         };
     }
 
@@ -34,12 +36,9 @@ class GroupController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data['name']);
+        // GroupCreateDto validează că 'name' există.
+        $dto = new GroupCreateDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Grupul a fost creat cu succes.', 'id' => $id], 201);
     }
 
@@ -49,22 +48,15 @@ class GroupController {
     }
 
     private function addMember(int $groupId): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['user_id']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $this->service->addMember($groupId, (int) $data['user_id']);
+        // GroupMemberDto validează că 'user_id' există și e întreg.
+        $dto = new GroupMemberDto(json_body());
+        $this->service->addMember($groupId, $dto);
         json_response(['message' => 'Membrul a fost adaugat in grup.']);
     }
 
     private function removeMember(int $groupId): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['user_id']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $this->service->removeMember($groupId, (int) $data['user_id']);
+        $dto = new GroupMemberDto(json_body());
+        $this->service->removeMember($groupId, $dto);
         json_response(['message' => 'Membrul a fost eliminat din grup.']);
     }
 }

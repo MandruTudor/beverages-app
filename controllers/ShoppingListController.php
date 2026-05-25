@@ -1,30 +1,33 @@
 <?php
+require_once __DIR__ . '/../dto/ShoppingListCreateDto.php';
+require_once __DIR__ . '/../dto/ShoppingListItemCreateDto.php';
+require_once __DIR__ . '/../dto/ShoppingListItemUpdateDto.php';
 
 class ShoppingListController {
     public function __construct(private ShoppingListService $service) {}
 
     public function handle(): void {
-        $method  = http_method();
-        $id      = get_param('id')      ? (int) get_param('id')      : null;
-        $itemId  = get_param('item_id') ? (int) get_param('item_id') : null;
-        $action  = get_param('action') ?? null;
+        $method = http_method();
+        $id     = get_param('id')      ? (int) get_param('id')      : null;
+        $itemId = get_param('item_id') ? (int) get_param('item_id') : null;
+        $action = get_param('action') ?? null;
 
         match (true) {
             // Lista tuturor listelor userului curent
-            $method === 'GET'    && $id === null && $action === null         => $this->list(),
+            $method === 'GET'    && $id === null && $action === null              => $this->list(),
             // Detalii lista cu items
-            $method === 'GET'    && $id !== null                             => $this->get($id),
+            $method === 'GET'    && $id !== null                                  => $this->get($id),
             // Creare lista nouă
-            $method === 'POST'   && $id === null                             => $this->create(),
+            $method === 'POST'   && $id === null                                  => $this->create(),
             // Ștergere lista
-            $method === 'DELETE' && $id !== null && $action === null         => $this->delete($id),
+            $method === 'DELETE' && $id !== null && $action === null              => $this->delete($id),
             // Adaugă item în lista: POST /shopping_lists.php?id=X&action=add_item
-            $method === 'POST'   && $id !== null && $action === 'add_item'   => $this->addItem($id),
+            $method === 'POST'   && $id !== null && $action === 'add_item'        => $this->addItem($id),
             // Actualizează item: PATCH /shopping_lists.php?action=update_item&item_id=X
             $method === 'PATCH'  && $action === 'update_item' && $itemId !== null => $this->updateItem($itemId),
             // Șterge item: DELETE /shopping_lists.php?action=remove_item&item_id=X
             $method === 'DELETE' && $action === 'remove_item' && $itemId !== null => $this->removeItem($itemId),
-            default                                                          => json_error('Metoda sau ruta invalida.', 405),
+            default                                                               => json_error('Metoda sau ruta invalida.', 405),
         };
     }
 
@@ -37,12 +40,9 @@ class ShoppingListController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data);
+        // ShoppingListCreateDto validează 'name' ca obligatoriu; group_id e opțional.
+        $dto = new ShoppingListCreateDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Lista creata cu succes.', 'id' => $id], 201);
     }
 
@@ -52,17 +52,16 @@ class ShoppingListController {
     }
 
     private function addItem(int $listId): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['beverage_id']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->addItem($listId, $data);
+        // ShoppingListItemCreateDto validează 'beverage_id' ca obligatoriu.
+        $dto = new ShoppingListItemCreateDto(json_body());
+        $id  = $this->service->addItem($listId, $dto);
         json_response(['message' => 'Itemul a fost adaugat in lista.', 'id' => $id], 201);
     }
 
     private function updateItem(int $itemId): void {
-        $this->service->updateItem($itemId, json_body());
+        // ShoppingListItemUpdateDto acceptă quantity și/sau checked — ambele opționale.
+        $dto = new ShoppingListItemUpdateDto(json_body());
+        $this->service->updateItem($itemId, $dto);
         json_response(['message' => 'Itemul a fost actualizat.']);
     }
 

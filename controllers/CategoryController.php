@@ -1,6 +1,10 @@
 <?php
+// DTOs necesare pentru acest controller — incluse înainte de declararea clasei.
+require_once __DIR__ . '/../dto/CategoryCreateDto.php';
+require_once __DIR__ . '/../dto/CategoryUpdateDto.php';
 
 class CategoryController {
+    // Constructor cu injecție de dependință: Service-ul e pasat din afară (din api/categories.php).
     public function __construct(private CategoryService $service) {}
 
     // Rutează cererea HTTP la metoda corectă în funcție de metodă și prezența ?id=
@@ -27,17 +31,18 @@ class CategoryController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data);
+        // Construim DTO-ul din body-ul cererii JSON.
+        // CategoryCreateDto validează intern că 'name' există și nu e gol.
+        // Dacă validarea eșuează, constructorul apelează json_error() și oprește execuția.
+        $dto = new CategoryCreateDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Categoria adaugata cu succes.', 'id' => $id], 201);
     }
 
     private function update(int $id): void {
-        $this->service->update($id, json_body());
+        // CategoryUpdateDto acceptă orice câmpuri — niciun câmp nu e obligatoriu la PATCH.
+        $dto = new CategoryUpdateDto(json_body());
+        $this->service->update($id, $dto);
         json_response(['message' => 'Categoria actualizata cu succes.']);
     }
 

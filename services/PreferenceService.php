@@ -3,28 +3,23 @@
 class PreferenceService {
     public function __construct(private PreferenceRepository $repo) {}
 
-    // Listează toate preferințele (rating + note) ale userului curent
+    // Listează toate preferințele (rating + note) ale userului curent.
     public function list(): array {
         require_auth();
         return $this->repo->findByUser(current_user()['id']);
     }
 
-    // Creează sau actualizează preferința pentru o băutură (upsert)
-    public function upsert(array $data): void {
+    // Acceptă PreferenceDto — beverage_id, rating (validat 1-5 în DTO), notes.
+    // Validarea rating-ului se face acum în DTO, nu în Service — responsabilitate clară.
+    public function upsert(PreferenceDto $dto): void {
         require_auth();
 
-        $rating = (int) $data['rating'];
-
-        // Rating-ul trebuie să fie între 1 și 5 conform schemei bazei de date
-        if ($rating < 1 || $rating > 5) {
-            json_error('Rating-ul trebuie sa fie intre 1 si 5.', 400);
-        }
-
+        // Repository-ul primește valorile individuale tipizate, nu un array anonim.
         $this->repo->upsert(
-            current_user()['id'],
-            (int) $data['beverage_id'],
-            $rating,
-            $data['notes'] ?? null
+            current_user()['id'], // ID-ul userului curent din sesiune
+            $dto->beverageId,     // int — tipizat în DTO
+            $dto->rating,         // int 1-5 — validat în DTO
+            $dto->notes           // ?string — null dacă nu a fost trimis
         );
     }
 
@@ -33,6 +28,7 @@ class PreferenceService {
 
         $userId = current_user()['id'];
 
+        // Verificăm că preferința există înainte să o ștergem.
         if (!$this->repo->findByUserAndBeverage($userId, $beverageId)) {
             json_error('Nu ai o preferinta salvata pentru aceasta bautura.', 404);
         }

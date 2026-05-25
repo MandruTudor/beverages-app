@@ -15,23 +15,23 @@ class VenueService {
         return $venue;
     }
 
-    public function create(array $data): int {
+    // Acceptă VenueCreateDto — name tipizat ca string, location/contact ca ?string.
+    public function create(VenueCreateDto $dto): int {
         require_admin();
-        return $this->repo->create(
-            trim($data['name']),
-            $data['location'] ?? null,
-            $data['contact']  ?? null
-        );
+        // Repository-ul primește valorile individuale tipizate.
+        return $this->repo->create($dto->name, $dto->location, $dto->contact);
     }
 
-    public function update(int $id, array $data): void {
+    // Acceptă VenueUpdateDto — $dto->toArray() returnează doar câmpurile trimise.
+    public function update(int $id, VenueUpdateDto $dto): void {
         require_admin();
 
         if (!$this->repo->findById($id)) {
             json_error('Localul nu a fost gasit.', 404);
         }
 
-        $this->repo->update($id, $data);
+        // Repository-ul actualizează dinamic doar câmpurile prezente în array.
+        $this->repo->update($id, $dto->toArray());
     }
 
     public function delete(int $id): void {

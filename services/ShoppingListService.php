@@ -22,12 +22,13 @@ class ShoppingListService {
         return $list;
     }
 
-    public function create(array $data): int {
+    // Acceptă ShoppingListCreateDto — name tipizat, groupId ca ?int.
+    public function create(ShoppingListCreateDto $dto): int {
         require_auth();
         return $this->repo->create(
-            current_user()['id'],
-            trim($data['name']),
-            isset($data['group_id']) ? (int) $data['group_id'] : null
+            current_user()['id'], // ID-ul proprietarului listei — din sesiune
+            $dto->name,           // string tipizat și trimmed în DTO
+            $dto->groupId         // ?int — null dacă lista e personală
         );
     }
 
@@ -43,7 +44,8 @@ class ShoppingListService {
         $this->repo->delete($id);
     }
 
-    public function addItem(int $listId, array $data): int {
+    // Acceptă ShoppingListItemCreateDto — beverageId și quantity tipizate.
+    public function addItem(int $listId, ShoppingListItemCreateDto $dto): int {
         require_auth();
 
         $list = $this->repo->findById($listId);
@@ -53,14 +55,12 @@ class ShoppingListService {
 
         $this->assertAccess($list);
 
-        return $this->repo->addItem(
-            $listId,
-            (int) $data['beverage_id'],
-            (int) ($data['quantity'] ?? 1)
-        );
+        // Repository-ul primește valorile individuale tipizate.
+        return $this->repo->addItem($listId, $dto->beverageId, $dto->quantity);
     }
 
-    public function updateItem(int $itemId, array $data): void {
+    // Acceptă ShoppingListItemUpdateDto — $dto->toArray() returnează câmpurile trimise.
+    public function updateItem(int $itemId, ShoppingListItemUpdateDto $dto): void {
         require_auth();
 
         $item = $this->repo->findItemById($itemId);
@@ -68,11 +68,12 @@ class ShoppingListService {
             json_error('Itemul nu a fost gasit.', 404);
         }
 
-        // Verificăm că userul are acces la lista din care face parte itemul
+        // Verificăm că userul are acces la lista din care face parte itemul.
         $list = $this->repo->findById($item['list_id']);
         $this->assertAccess($list);
 
-        $this->repo->updateItem($itemId, $data);
+        // Repository-ul primește array-ul dinamic cu câmpurile de actualizat.
+        $this->repo->updateItem($itemId, $dto->toArray());
     }
 
     public function removeItem(int $itemId): void {
@@ -90,21 +91,21 @@ class ShoppingListService {
     }
 
     // Verifică că userul curent are dreptul să acceseze lista:
-    // fie este creatorul listei, fie este membru al grupului listei
+    // fie este creatorul listei, fie este membru al grupului listei.
     private function assertAccess(array $list): void {
         $userId = current_user()['id'];
 
+        // Dacă lista e a userului curent, accesul e permis imediat.
         if ($list['user_id'] === $userId) {
-            return; // Lista personală a userului
+            return;
         }
 
+        // Dacă lista aparține unui grup, verificăm apartenența userului la acel grup.
         if ($list['group_id'] !== null) {
-            // Verificăm apartenența la grup prin query direct
-            // (nu avem GroupRepository injectat, dar putem folosi get_db())
             $stmt = get_db()->prepare('SELECT 1 FROM group_members WHERE group_id = ? AND user_id = ?');
             $stmt->execute([$list['group_id'], $userId]);
             if ($stmt->fetch()) {
-                return; // Userul e membru al grupului listei
+                return; // Userul e membru al grupului — acces permis.
             }
         }
 

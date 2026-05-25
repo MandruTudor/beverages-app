@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../dto/VenueCreateDto.php';
+require_once __DIR__ . '/../dto/VenueUpdateDto.php';
 
 class VenueController {
     public function __construct(private VenueService $service) {}
@@ -26,17 +28,16 @@ class VenueController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data);
+        // VenueCreateDto validează 'name' ca obligatoriu; location și contact sunt opționale.
+        $dto = new VenueCreateDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Localul adaugat cu succes.', 'id' => $id], 201);
     }
 
     private function update(int $id): void {
-        $this->service->update($id, json_body());
+        // VenueUpdateDto acceptă toate câmpurile ca opționale.
+        $dto = new VenueUpdateDto(json_body());
+        $this->service->update($id, $dto);
         json_response(['message' => 'Localul actualizat cu succes.']);
     }
 
