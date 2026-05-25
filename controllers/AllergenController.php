@@ -1,4 +1,6 @@
 <?php
+// NameDto e partajat cu IngredientController — ambele resurse au doar câmpul 'name'.
+require_once __DIR__ . '/../dto/NameDto.php';
 
 class AllergenController {
     public function __construct(private AllergenService $service) {}
@@ -26,22 +28,16 @@ class AllergenController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data);
+        // NameDto validează că 'name' există și nu e gol.
+        $dto = new NameDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Alergenul adaugat cu succes.', 'id' => $id], 201);
     }
 
     private function update(int $id): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $this->service->update($id, $data);
+        // La actualizare, 'name' e și el obligatoriu (allergen-ul are doar acest câmp).
+        $dto = new NameDto(json_body());
+        $this->service->update($id, $dto);
         json_response(['message' => 'Alergenul actualizat cu succes.']);
     }
 

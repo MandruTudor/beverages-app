@@ -3,13 +3,13 @@
 class GroupService {
     public function __construct(private GroupRepository $repo) {}
 
-    // Listează grupurile din care face parte userul curent
+    // Listează grupurile din care face parte userul curent.
     public function list(): array {
         require_auth();
         return $this->repo->findByUser(current_user()['id']);
     }
 
-    // Returnează grupul cu lista membrilor
+    // Returnează grupul cu lista membrilor (doar dacă userul e membru).
     public function get(int $id): array {
         require_auth();
 
@@ -18,7 +18,7 @@ class GroupService {
             json_error('Grupul nu a fost gasit.', 404);
         }
 
-        // Verificăm că userul curent este membru al grupului
+        // Verificăm că userul curent este membru al grupului.
         if (!$this->repo->isMember($id, current_user()['id'])) {
             json_error('Nu ai acces la acest grup.', 403);
         }
@@ -27,9 +27,11 @@ class GroupService {
         return $group;
     }
 
-    public function create(string $name): int {
+    // Acceptă GroupCreateDto — name tipizat și validat.
+    public function create(GroupCreateDto $dto): int {
         require_auth();
-        return $this->repo->create(trim($name), current_user()['id']);
+        // trim() deja aplicat în DTO constructor — Repository primește string curat.
+        return $this->repo->create($dto->name, current_user()['id']);
     }
 
     public function delete(int $id): void {
@@ -40,7 +42,7 @@ class GroupService {
             json_error('Grupul nu a fost gasit.', 404);
         }
 
-        // Numai creatorul grupului sau un admin îl poate șterge
+        // Numai creatorul grupului sau un admin îl poate șterge.
         $user = current_user();
         if ($group['created_by'] !== $user['id'] && $user['role'] !== 'admin') {
             json_error('Doar creatorul grupului poate sterge grupul.', 403);
@@ -49,8 +51,8 @@ class GroupService {
         $this->repo->delete($id);
     }
 
-    // Adaugă un user în grup — doar creatorul grupului sau adminul poate face asta
-    public function addMember(int $groupId, int $userId): void {
+    // Acceptă GroupMemberDto — userId tipizat ca int și validat.
+    public function addMember(int $groupId, GroupMemberDto $dto): void {
         require_auth();
 
         $group = $this->repo->findById($groupId);
@@ -58,20 +60,22 @@ class GroupService {
             json_error('Grupul nu a fost gasit.', 404);
         }
 
+        // Numai creatorul sau adminul poate adăuga membri.
         $user = current_user();
         if ($group['created_by'] !== $user['id'] && $user['role'] !== 'admin') {
             json_error('Doar creatorul grupului poate adauga membri.', 403);
         }
 
-        if ($this->repo->isMember($groupId, $userId)) {
+        // Verificăm că userul nu e deja în grup (ar viola cheia primară compusă).
+        if ($this->repo->isMember($groupId, $dto->userId)) {
             json_error('Utilizatorul este deja membru al grupului.', 409);
         }
 
-        $this->repo->addMember($groupId, $userId);
+        $this->repo->addMember($groupId, $dto->userId);
     }
 
-    // Elimină un user din grup — creatorul sau adminul, dar nu te poți elimina pe tine însuți dacă ești creator
-    public function removeMember(int $groupId, int $userId): void {
+    // Acceptă GroupMemberDto — același DTO pentru eliminare.
+    public function removeMember(int $groupId, GroupMemberDto $dto): void {
         require_auth();
 
         $group = $this->repo->findById($groupId);
@@ -79,16 +83,17 @@ class GroupService {
             json_error('Grupul nu a fost gasit.', 404);
         }
 
+        // Numai creatorul sau adminul poate elimina membri.
         $user = current_user();
         if ($group['created_by'] !== $user['id'] && $user['role'] !== 'admin') {
             json_error('Doar creatorul grupului poate elimina membri.', 403);
         }
 
-        // Creatorul nu se poate elimina pe el însuși (ar rămâne grup fără owner)
-        if ($userId === $group['created_by']) {
+        // Creatorul nu se poate elimina pe el însuși — grupul ar rămâne fără owner.
+        if ($dto->userId === $group['created_by']) {
             json_error('Creatorul nu se poate elimina din propriul grup.', 400);
         }
 
-        $this->repo->removeMember($groupId, $userId);
+        $this->repo->removeMember($groupId, $dto->userId);
     }
 }

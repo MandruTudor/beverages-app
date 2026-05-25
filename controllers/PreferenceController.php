@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../dto/PreferenceDto.php';
 
 class PreferenceController {
     public function __construct(private PreferenceService $service) {}
@@ -9,12 +10,12 @@ class PreferenceController {
 
         match (true) {
             // Lista tuturor preferințelor userului curent
-            $method === 'GET'                                    => $this->list(),
+            $method === 'GET'                            => $this->list(),
             // Creare sau actualizare preferință (upsert)
-            $method === 'POST'                                   => $this->upsert(),
+            $method === 'POST'                           => $this->upsert(),
             // Ștergere preferință pentru o băutură: DELETE ?beverage_id=X
-            $method === 'DELETE' && $beverageId !== null         => $this->delete($beverageId),
-            default                                              => json_error('Metoda sau ruta invalida.', 405),
+            $method === 'DELETE' && $beverageId !== null => $this->delete($beverageId),
+            default                                      => json_error('Metoda sau ruta invalida.', 405),
         };
     }
 
@@ -23,12 +24,10 @@ class PreferenceController {
     }
 
     private function upsert(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['beverage_id', 'rating']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $this->service->upsert($data);
+        // PreferenceDto validează beverage_id, rating (1-5) ca obligatorii.
+        // Validarea rating-ului 1–5 se face și în DTO (nu doar în Service cum era înainte).
+        $dto = new PreferenceDto(json_body());
+        $this->service->upsert($dto);
         json_response(['message' => 'Preferinta salvata cu succes.']);
     }
 

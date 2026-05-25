@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../dto/NameDto.php';
 
 class IngredientController {
     public function __construct(private IngredientService $service) {}
@@ -26,22 +27,14 @@ class IngredientController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data);
+        $dto = new NameDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Ingredientul adaugat cu succes.', 'id' => $id], 201);
     }
 
     private function update(int $id): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $this->service->update($id, $data);
+        $dto = new NameDto(json_body());
+        $this->service->update($id, $dto);
         json_response(['message' => 'Ingredientul actualizat cu succes.']);
     }
 

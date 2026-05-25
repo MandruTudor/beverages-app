@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../dto/BeverageCreateDto.php';
+require_once __DIR__ . '/../dto/BeverageUpdateDto.php';
 
 class BeverageController {
     public function __construct(private BeverageService $service) {}
@@ -18,6 +20,8 @@ class BeverageController {
     }
 
     private function list(): void {
+        // Filtrele rămân ca query params (nu ca body JSON) — citite direct din URL.
+        // array_filter() elimină valorile null (filtrele necompletate nu ajung la Service).
         $filters = array_filter([
             'category_id' => get_param('category_id'),
             'season'      => get_param('season'),
@@ -32,17 +36,16 @@ class BeverageController {
     }
 
     private function create(): void {
-        $data    = json_body();
-        $missing = missing_field($data, ['name']);
-        if ($missing) {
-            json_error("Campul '$missing' este obligatoriu.");
-        }
-        $id = $this->service->create($data);
+        // BeverageCreateDto validează 'name' ca obligatoriu și convertește tipurile.
+        $dto = new BeverageCreateDto(json_body());
+        $id  = $this->service->create($dto);
         json_response(['message' => 'Bautura adaugata cu succes.', 'id' => $id], 201);
     }
 
     private function update(int $id): void {
-        $this->service->update($id, json_body());
+        // BeverageUpdateDto acceptă orice câmpuri — toate opționale pentru PATCH.
+        $dto = new BeverageUpdateDto(json_body());
+        $this->service->update($id, $dto);
         json_response(['message' => 'Bautura actualizata cu succes.']);
     }
 
