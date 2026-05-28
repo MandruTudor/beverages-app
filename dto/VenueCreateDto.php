@@ -3,17 +3,17 @@
 // dto/VenueCreateDto.php
 //
 // DTO pentru CREAREA unui local (venue).
-// Un local are: name (obligatoriu), location și contact (opționale).
+// Un local are: name (obligatoriu), location È™i contact (opÈ›ionale).
 // ============================================================
 
 class VenueCreateDto {
 
-    public readonly string  $name;     // Obligatoriu: ex. "Café Central"
-    public readonly ?string $location; // Opțional: adresă sau descriere locație
-    public readonly ?string $contact;  // Opțional: telefon, email, website
+    public string  $name;     // Obligatoriu: ex. "CafÃ© Central"
+    public ?string $location; // OpÈ›ional: adresÄƒ sau descriere locaÈ›ie
+    public ?string $contact;  // OpÈ›ional: telefon, email, website
 
     public function __construct(array $data) {
-        // Verificăm câmpul obligatoriu.
+        // VerificÄƒm cÃ¢mpul obligatoriu.
         $missing = missing_field($data, ['name']);
         if ($missing) {
             json_error("Campul '$missing' este obligatoriu.", 400);
@@ -24,3 +24,5 @@ class VenueCreateDto {
         $this->contact  = isset($data['contact'])  ? trim($data['contact'])  : null;
     }
 }
+
+

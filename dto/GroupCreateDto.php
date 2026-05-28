@@ -3,13 +3,13 @@
 // dto/GroupCreateDto.php
 //
 // DTO pentru CREAREA unui grup de utilizatori.
-// Un grup are un singur câmp obligatoriu: name.
-// Creatorul e determinat din sesiunea curentă (nu din body-ul cererii).
+// Un grup are un singur cÃ¢mp obligatoriu: name.
+// Creatorul e determinat din sesiunea curentÄƒ (nu din body-ul cererii).
 // ============================================================
 
 class GroupCreateDto {
 
-    public readonly string $name; // Obligatoriu: ex. "Familia Popescu"
+    public string $name; // Obligatoriu: ex. "Familia Popescu"
 
     public function __construct(array $data) {
         $missing = missing_field($data, ['name']);
@@ -20,3 +20,5 @@ class GroupCreateDto {
         $this->name = trim($data['name']);
     }
 }
+
+

@@ -4,121 +4,110 @@
 // Accesibilă doar utilizatorilor autentificați.
 // ============================================================
 
-// Includem funcțiile de sesiune și autentificare.
 require_once __DIR__ . '/includes/auth.php';
 
-// Pornim sesiunea PHP.
+// Pornim sesiunea PHP pentru a accesa datele utilizatorului logat
 session_init();
 
-// Protecție server-side: dacă userul nu e logat, îl trimitem la login.
-// Această verificare este OBLIGATORIE pe fiecare pagină protejată.
-// Nu ne bazăm pe JavaScript pentru securitate — JS poate fi ocolit.
+// Protecție server-side: utilizatori neautentificați → redirecționare la login
 if (!is_logged_in()) {
     header('Location: /beverages-app/login.php');
     exit;
 }
 
-// Preluăm datele utilizatorului curent din sesiune.
-// $user este un array cu cheile: id, username, email, role.
+// Preluăm datele utilizatorului din sesiune
 $user = current_user();
 
-// Extragem prima literă din username pentru avatar (ex: "Ion" → "I").
-// strtoupper() face litera majusculă.
-// substr($string, 0, 1) extrage 1 caracter de la poziția 0 (primul).
+// Prima literă din username pentru avatar circular (ex: "Tudor" → "T")
 $initial = strtoupper(substr($user['username'], 0, 1));
 ?>
 <!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
+    <!-- Viewport responsive: pagina se adaptează la lățimea dispozitivului -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Beverages App</title>
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
 </head>
 <body>
 
-<!-- Bara de navigare superioară fixă (sticky) -->
+<!-- ============================================================
+     Bara de navigare fixă (topbar)
+     ============================================================ -->
 <header class="topbar">
-
-    <!-- Logo + numele aplicației -->
     <div class="topbar-brand">🧃 Beverages App</div>
-
-    <!-- Meniu de navigare principal -->
     <nav>
         <ul class="topbar-nav">
-            <!-- clasa 'active' evidențiază pagina curentă -->
+            <!-- clasa 'active' marchează pagina curentă -->
             <li><a href="/beverages-app/dashboard.php" class="active">Dashboard</a></li>
-            <li><a href="#">Băuturi</a></li>
+            <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
             <li><a href="#">Liste</a></li>
             <li><a href="#">Statistici</a></li>
             <?php if ($user['role'] === 'admin'): ?>
-            <!-- Link-ul Admin e vizibil DOAR pentru utilizatorii cu rol 'admin'.
-                 Blocul PHP if/endif este echivalent cu un if din orice limbaj.
-                 Sintaxa cu : și endif e mai lizibilă în template-uri HTML. -->
             <li><a href="#">Admin</a></li>
             <?php endif; ?>
         </ul>
     </nav>
-
-    <!-- Zona utilizator: avatar + username + buton deconectare -->
     <div class="topbar-user">
-        <!-- Avatar circular cu inițiala utilizatorului.
-             htmlspecialchars() previne XSS dacă username-ul conține < sau >. -->
         <span class="avatar"><?= htmlspecialchars($initial) ?></span>
-        <!-- Afișăm username-ul sanitizat -->
         <span><?= htmlspecialchars($user['username']) ?></span>
-        <!-- Link de deconectare — duce la logout.php care distruge sesiunea -->
         <a href="/beverages-app/logout.php">Ieșire</a>
     </div>
 </header>
 
-<!-- Conținutul principal al paginii -->
-<main style="padding:2rem 1.5rem;max-width:900px;margin:0 auto;">
+<!-- ============================================================
+     Conținut principal
+     ============================================================ -->
+<main class="page-main">
 
-    <!-- Mesaj de bun venit personalizat cu username-ul utilizatorului -->
-    <h2 style="margin-bottom:.5rem;">Bun venit, <?= htmlspecialchars($user['username']) ?>!</h2>
-
-    <!-- Afișăm rolul utilizatorului (user / admin) -->
-    <p style="color:var(--clr-muted);margin-bottom:2rem;">
-        Ești autentificat ca <strong><?= htmlspecialchars($user['role']) ?></strong>.
-        Funcționalitățile complete vor fi disponibile în curând.
-    </p>
-
-    <!-- Grid de carduri cu funcționalitățile principale ale aplicației.
-         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))
-         creează automat câte coloane de minim 200px încap pe lățimea disponibilă. -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
-        <?php
-        // Array de carduri: [emoji, titlu, descriere]
-        // Folosim o structură de date pentru a evita repetarea HTML-ului.
-        $cards = [
-            ['🍵', 'Băuturi',    'Catalogul de băuturi non-alcoolice'],
-            ['🛒', 'Liste',      'Listele tale de cumpărături'],
-            ['⭐', 'Preferințe', 'Rating-urile și notițele tale'],
-            ['📊', 'Statistici', 'Grafice și exporturi de date'],
-        ];
-        // foreach iterează prin fiecare card.
-        // [$icon, $title, $desc] = destructurare array (PHP 7.1+).
-        foreach ($cards as [$icon, $title, $desc]):
-        ?>
-        <!-- Cardul individual — stilizat inline deocamdată, urmează clase CSS -->
-        <div style="
-            background:var(--clr-surface);
-            border:1.5px solid var(--clr-border);
-            border-radius:var(--radius);
-            padding:1.25rem;
-            display:flex;flex-direction:column;gap:.5rem;
-            box-shadow:var(--shadow);
-        ">
-            <!-- Emoji mare ca icoană -->
-            <span style="font-size:2rem;line-height:1;"><?= $icon ?></span>
-            <!-- Titlul categoriei -->
-            <strong><?= $title ?></strong>
-            <!-- Descrierea scurtă -->
-            <span style="font-size:.85rem;color:var(--clr-muted);"><?= $desc ?></span>
+    <!-- Banner de bun venit -->
+    <div class="dash-welcome">
+        <!-- Avatar mare cu inițiala utilizatorului -->
+        <div class="dash-welcome__avatar"><?= htmlspecialchars($initial) ?></div>
+        <div>
+            <!-- Salut personalizat -->
+            <h2 class="dash-welcome__title">Bun venit, <?= htmlspecialchars($user['username']) ?>!</h2>
+            <!-- Rolul utilizatorului: 'user' sau 'admin' -->
+            <p class="dash-welcome__sub">
+                Ești autentificat ca
+                <!-- Badge colorat diferit pentru admin față de user -->
+                <span class="role-badge role-badge--<?= htmlspecialchars($user['role']) ?>">
+                    <?= htmlspecialchars($user['role']) ?>
+                </span>
+            </p>
         </div>
-        <?php endforeach; // Sfârșitul buclei foreach ?>
     </div>
+
+    <!-- Titlul secțiunii de navigare rapidă -->
+    <h3 class="dash-section-title">Navigare rapidă</h3>
+
+    <!-- Grid de carduri — 4 coloane pe desktop, 2 pe tabletă, 1 pe mobil -->
+    <div class="dash-grid">
+        <?php
+        // Fiecare card: [emoji, titlu, descriere, URL destinație]
+        $cards = [
+            ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',  '/beverages-app/beverages.php'],
+            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup', '#'],
+            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',     '#'],
+            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',          '#'],
+        ];
+
+        // foreach iterează prin fiecare card; destructurăm array-ul în variabile
+        foreach ($cards as [$icon, $title, $desc, $href]):
+        ?>
+        <!-- Cardul întreg e un link — fără JS inline, hover-ul e gestionat de CSS -->
+        <a href="<?= htmlspecialchars($href) ?>" class="dash-card">
+            <!-- Iconița emoji în cerc colorat -->
+            <div class="dash-card__icon"><?= $icon ?></div>
+            <!-- Titlul categoriei -->
+            <strong class="dash-card__title"><?= $title ?></strong>
+            <!-- Descrierea scurtă -->
+            <span class="dash-card__desc"><?= $desc ?></span>
+        </a>
+        <?php endforeach; ?>
+    </div>
+
 </main>
 
 </body>

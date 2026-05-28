@@ -2,18 +2,18 @@
 // ============================================================
 // dto/VenueUpdateDto.php
 //
-// DTO pentru ACTUALIZAREA parțială (PATCH) a unui local.
-// Toate câmpurile sunt opționale.
+// DTO pentru ACTUALIZAREA parÈ›ialÄƒ (PATCH) a unui local.
+// Toate cÃ¢mpurile sunt opÈ›ionale.
 // ============================================================
 
 class VenueUpdateDto {
 
-    public readonly ?string $name;
-    public readonly ?string $location;
-    public readonly ?string $contact;
+    public ?string $name;
+    public ?string $location;
+    public ?string $contact;
 
-    // Cheile prezente în cererea originală — pentru semantica PATCH.
-    private readonly array $provided;
+    // Cheile prezente Ã®n cererea originalÄƒ â€” pentru semantica PATCH.
+    private array $provided;
 
     public function __construct(array $data) {
         $this->provided = array_keys($data);
@@ -23,12 +23,12 @@ class VenueUpdateDto {
         $this->contact  = isset($data['contact'])  ? trim($data['contact'])  : null;
     }
 
-    // Verifică dacă câmpul a fost trimis în cerere.
+    // VerificÄƒ dacÄƒ cÃ¢mpul a fost trimis Ã®n cerere.
     public function has(string $field): bool {
         return in_array($field, $this->provided, true);
     }
 
-    // Construiește array-ul de câmpuri pentru UPDATE SQL.
+    // ConstruieÈ™te array-ul de cÃ¢mpuri pentru UPDATE SQL.
     public function toArray(): array {
         $result = [];
         if ($this->has('name'))     $result['name']     = $this->name;
@@ -37,3 +37,5 @@ class VenueUpdateDto {
         return $result;
     }
 }
+
+

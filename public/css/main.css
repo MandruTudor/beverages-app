@@ -416,6 +416,661 @@ a:hover { text-decoration: underline; } /* Subliniere la hover pentru feedback v
 }
 
 /* ============================================================
+   Dashboard
+   ============================================================ */
+
+/* Banner de bun venit — card cu gradient */
+.dash-welcome {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: linear-gradient(135deg, #1e40af 0%, #0369a1 100%);
+    color: #fff;
+    border-radius: calc(var(--radius) * 2);
+    padding: 1.75rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(37,99,235,.25);
+}
+
+/* Avatar mare în banner */
+.dash-welcome__avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Titlul bannerului */
+.dash-welcome__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: .25rem;
+}
+
+/* Subtitlul cu rolul */
+.dash-welcome__sub {
+    font-size: .9rem;
+    opacity: .85;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* Badge pentru rol */
+.role-badge {
+    display: inline-block;
+    padding: .15rem .6rem;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* Admin: auriu */
+.role-badge--admin { background: #fef3c7; color: #92400e; }
+
+/* User: alb semi-transparent */
+.role-badge--user  { background: rgba(255,255,255,.25); color: #fff; }
+
+/* Titlul secțiunii "Navigare rapidă" */
+.dash-section-title {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--clr-muted);
+    margin-bottom: 1rem;
+}
+
+/* Grid-ul de carduri dashboard */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+/* Cardul — link stilizat, hover pur CSS */
+.dash-card {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.dash-card:hover {
+    border-color: var(--clr-primary);
+    box-shadow: 0 6px 24px rgba(37,99,235,.13);
+    transform: translateY(-3px);
+    text-decoration: none;
+}
+
+/* Iconița emoji în pătrat colorat */
+.dash-card__icon {
+    width: 2.8rem;
+    height: 2.8rem;
+    background: #eff6ff;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+/* Titlul cardului */
+.dash-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clr-text);
+}
+
+/* Descrierea */
+.dash-card__desc {
+    font-size: .82rem;
+    color: var(--clr-muted);
+    line-height: 1.5;
+}
+
+/* ============================================================
+   Layout pagini interne (băuturi, statistici etc.)
+   ============================================================ */
+
+/* Container centrat — pagini post-login */
+.page-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+}
+
+/* Rândul titlu + buton */
+.page-header {
+    display: flex;
+    align-items: center;            /* Aliniere verticală centru */
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+/* Titlul paginii */
+.page-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: .15rem;
+    color: var(--clr-text);
+    white-space: nowrap; /* Împiedică ruperea pe două rânduri */
+}
+
+/* Subtitlul gri */
+.page-subtitle {
+    color: var(--clr-muted);
+    font-size: .88rem;
+}
+
+/* ============================================================
+   Bara de filtrare
+   ============================================================ */
+
+/* Container orizontal pentru câmpurile de filtrare */
+.filters-bar {
+    display: flex;
+    gap: .75rem;         /* Spațiu între câmpuri */
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;     /* Pe mobil, câmpurile se duc pe rândul următor */
+}
+
+/* Câmpul de căutare text — aceleași stiluri ca și un input din formular */
+.filter-search {
+    flex: 1;             /* Ocupă tot spațiul disponibil rămas */
+    min-width: 180px;    /* Nu se micșorează sub 180px */
+    padding: .65rem .9rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .95rem;
+    font-family: inherit;
+    background: var(--clr-surface);
+    color: var(--clr-text);
+    outline: none;
+    box-shadow: var(--shadow);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.filter-search:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    background: #fff;
+}
+
+/* Dropdown-urile de filtrare — identice cu filter-search */
+.filter-select {
+    padding: .65rem .9rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .95rem;
+    font-family: inherit;
+    background: var(--clr-surface);
+    color: var(--clr-text);
+    cursor: pointer;
+    outline: none;
+    box-shadow: var(--shadow);
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.filter-select:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    background: #fff;
+}
+
+/* ============================================================
+   Grid de carduri de băuturi
+   ============================================================ */
+
+/* Grid responsive: coloane de minim 240px, câte încap pe lățime */
+.beverages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;  /* Spațiu între carduri */
+}
+
+/* ============================================================
+   Cardul de băutură
+   ============================================================ */
+
+/* Container card cu hover interactiv */
+.beverage-card {
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column; /* Elementele se stivuiesc vertical */
+    gap: .55rem;
+    cursor: pointer;        /* Indică că elementul e clickabil */
+    box-shadow: var(--shadow);
+    /* Animăm border, umbra și poziția la hover */
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+/* Hover: bordură albastră, umbră mai pronunțată, ridicare ușoară */
+.beverage-card:hover {
+    border-color: var(--clr-primary);
+    box-shadow: 0 6px 28px rgba(37,99,235,.13);
+    transform: translateY(-2px); /* Ridicare de 2px — efect de "lift" */
+}
+
+/* Focus keyboard (Tab): outline albastru pentru accesibilitate */
+.beverage-card:focus {
+    outline: 2px solid var(--clr-primary);
+    outline-offset: 2px;
+}
+
+/* Rândul de sus al cardului: badges categorie + sezon */
+.card-header-row {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap; /* Dacă nu încap pe un rând, se duc pe rândul următor */
+}
+
+/* Denumirea băuturii */
+.card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    line-height: 1.3;
+}
+
+/* Descrierea truncată — se taie după 3 rânduri cu elipsis */
+.card-desc {
+    font-size: .85rem;
+    color: var(--clr-muted);
+    line-height: 1.5;
+    /* Webkit multi-line clamp: standard de facto, funcționează în toate browserele moderne */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Rândul de jos al cardului: preț la stânga, regiune la dreapta */
+.card-footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto; /* Împingem rândul la baza cardului, indiferent de înălțimea conținutului */
+    font-size: .85rem;
+}
+
+/* Prețul — mai mare și albastru pentru vizibilitate */
+.card-price {
+    font-weight: 700;
+    color: var(--clr-primary);
+    font-size: .95rem;
+}
+
+/* Regiunea — mai mică și gri */
+.card-region {
+    color: var(--clr-muted);
+    font-size: .8rem;
+}
+
+/* ============================================================
+   Badge-uri (etichete rotunjite)
+   ============================================================ */
+
+/* Stilul comun al tuturor badge-urilor */
+.badge {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 999px; /* 999px = capete perfect rotunde, indiferent de dimensiune */
+    font-size: .75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap; /* Nu se rupe pe mai multe rânduri */
+}
+
+/* Badge albastru deschis pentru categorie */
+.badge-category {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+/* Badge verde deschis pentru sezon */
+.badge-season {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+/* ============================================================
+   Empty state și loading
+   ============================================================ */
+
+/* Container centrat pentru starea "fără rezultate" */
+.empty-state {
+    grid-column: 1 / -1; /* Ocupă toată lățimea grid-ului */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    padding: 4rem 2rem;
+    color: var(--clr-muted);
+    font-size: .95rem;
+    text-align: center;
+}
+
+/* Emoji mare în empty state */
+.empty-state span { font-size: 3rem; line-height: 1; }
+
+/* Textul de loading afișat în grid înainte de prima încărcare */
+.loading-text {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: var(--clr-muted);
+}
+
+/* Text de eroare în modal sau grid */
+.error-text {
+    color: var(--clr-danger);
+    text-align: center;
+    padding: 1rem;
+}
+
+/* ============================================================
+   Modale
+   ============================================================ */
+
+/* Fundal semi-transparent peste întreaga pagină */
+.modal-overlay {
+    display: none;              /* Ascuns implicit */
+    position: fixed;            /* Scos din flow, acoperă tot viewport-ul */
+    inset: 0;                   /* Echivalent cu top:0; right:0; bottom:0; left:0 */
+    background: rgba(0,0,0,.45); /* Semi-transparent negru */
+    z-index: 200;               /* Deasupra topbar-ului (z-index: 100) */
+    align-items: center;        /* Centrare verticală a modal-box */
+    justify-content: center;    /* Centrare orizontală */
+    padding: 1rem;              /* Spațiu minim față de marginile ecranului */
+}
+
+/* Clasa adăugată de JS pentru a afișa modalul */
+.modal-overlay.open { display: flex; }
+
+/* Conținutul alb al modalului */
+.modal-box {
+    background: var(--clr-surface);
+    border-radius: calc(var(--radius) * 1.5); /* Colțuri mai rotunjite decât elementele normale */
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);   /* Umbră pronunțată pentru adâncime */
+    width: 100%;
+    max-width: 560px;   /* Limita lățimii pe ecrane mari */
+    max-height: 85vh;   /* Maximum 85% din înălțimea viewport-ului */
+    overflow-y: auto;   /* Scroll intern dacă conținutul e mai înalt */
+    padding: 1.75rem;
+    position: relative; /* Necesar pentru poziționarea absolută a butonului X */
+}
+
+/* Butonul X de închidere din colțul dreapta-sus al modalului */
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--clr-muted);
+    padding: .3rem .45rem;
+    border-radius: var(--radius);
+    line-height: 1;
+    transition: color var(--transition), background var(--transition);
+}
+
+/* Hover pe X: mai vizibil */
+.modal-close:hover {
+    color: var(--clr-text);
+    background: var(--clr-bg);
+}
+
+/* Titlul modalului de formular */
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    padding-right: 2rem; /* Spațiu pentru butonul X */
+}
+
+/* ============================================================
+   Conținut modal detalii
+   ============================================================ */
+
+/* Titlul mare al băuturii în modal */
+.detail-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: .5rem;
+    padding-right: 2rem; /* Spațiu pentru butonul X */
+}
+
+/* Rândul de badge-uri sub titlu */
+.detail-badges {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    margin-bottom: .75rem;
+}
+
+/* Descrierea completă în modal */
+.detail-desc {
+    color: var(--clr-muted);
+    font-size: .9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+/* Description list cu preț, regiune, perisabilitate */
+.detail-dl {
+    display: grid;
+    grid-template-columns: auto 1fr; /* dt la stânga, dd la dreapta */
+    gap: .3rem .75rem;
+    font-size: .9rem;
+    margin-bottom: 1rem;
+}
+
+/* Etichetele (dt): gri, bold */
+.detail-dl dt { font-weight: 600; color: var(--clr-muted); }
+
+/* Secțiuni cu ingrediente, alergeni, localuri */
+.detail-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--clr-border); /* Linie de separare */
+}
+
+/* Titlul secțiunii — stil "label" mic, uppercase */
+.detail-section h4 {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--clr-muted);
+    margin-bottom: .5rem;
+}
+
+/* Lista de tag-uri (ingrediente, alergeni) */
+.tag-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+
+/* Tag individual */
+.tag {
+    background: var(--clr-bg);
+    border: 1px solid var(--clr-border);
+    border-radius: 999px;
+    padding: .2rem .65rem;
+    font-size: .8rem;
+    color: var(--clr-text);
+}
+
+/* Textul cantității în paranteze, mai mic și gri */
+.tag span { color: var(--clr-muted); font-size: .75rem; }
+
+/* Tag alergen — roșu */
+.tag-danger {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: var(--clr-danger);
+}
+
+/* Lista de localuri */
+.venue-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    font-size: .9rem;
+}
+
+/* Locația localului — mai mică și gri */
+.venue-loc { color: var(--clr-muted); font-size: .85rem; }
+
+/* Zona cu butoanele de admin (Editează / Șterge) din modalul de detalii */
+.detail-admin-actions {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--clr-border);
+    display: flex;
+    gap: .5rem;
+}
+
+/* ============================================================
+   Variante de butoane suplimentare
+   ============================================================ */
+
+/* Buton secundar (fundal gri) */
+.btn-secondary {
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    border: 1.5px solid var(--clr-border);
+}
+
+.btn-secondary:hover:not(:disabled) { background: #e2e8f0; }
+
+/* Buton cu contur (transparent cu bordură albastră) */
+.btn-outline {
+    background: transparent;
+    color: var(--clr-primary);
+    border: 1.5px solid var(--clr-primary);
+}
+
+.btn-outline:hover:not(:disabled) { background: #eff6ff; }
+
+/* Buton roșu pentru acțiuni distructive (ștergere) */
+.btn-danger {
+    background: var(--clr-danger);
+    color: #fff;
+    border: none;
+}
+
+.btn-danger:hover:not(:disabled) { background: #b91c1c; }
+
+/* Modificator de dimensiune mică */
+.btn-sm {
+    padding: .4rem .85rem;
+    font-size: .85rem;
+    width: auto;
+}
+
+/* Lățime automată (nu 100%) — pentru butoane în header, modale etc. */
+.btn-auto { width: auto; }
+
+/* ============================================================
+   Elemente de formular suplimentare (select, textarea în modal)
+   ============================================================ */
+
+/* Clasă comună pentru select și textarea în formulare modale */
+.form-control {
+    width: 100%;
+    padding: .65rem .9rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .95rem;
+    color: var(--clr-text);
+    background: var(--clr-bg);
+    outline: none;
+    font-family: inherit; /* textarea moștenește fontul paginii, nu Courier */
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+/* Focus pe form-control */
+.form-control:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    background: #fff;
+}
+
+/* Textarea: redimensionabilă doar vertical și cu înălțime minimă */
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Rând cu două coloane egale în formular (ex: Categorie | Preț) */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+}
+
+/* Zona butoanelor din formular (Anulează / Salvează) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* Butoanele la dreapta */
+    gap: .5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--clr-border);
+}
+
+/* ============================================================
+   Responsive pentru pagina de băuturi
+   ============================================================ */
+
+@media (max-width: 768px) {
+    /* Pe tabletă: ascundem meniul de navigare (topbar devine prea îngust) */
+    .topbar-nav { display: none; }
+}
+
+@media (max-width: 600px) {
+    /* Pe mobil: un singur card pe rând */
+    .beverages-grid { grid-template-columns: 1fr; }
+    /* Grid dashboard: 2 coloane pe mobil */
+    .dash-grid { grid-template-columns: 1fr 1fr; }
+    /* Bannerul de bun venit: stivuire verticală pe ecrane foarte mici */
+    .dash-welcome { flex-direction: column; text-align: center; padding: 1.5rem; }
+    /* Titlul și butonul se stivuiesc vertical */
+    .page-header { flex-direction: column; align-items: flex-start; }
+    /* Câmpurile pereche din formular devin coloană unică */
+    .form-row { grid-template-columns: 1fr; }
+    /* Modal pe toată lățimea cu puțin spațiu lateral */
+    .modal-box { padding: 1.25rem; }
+}
+
+/* ============================================================
    Bara de navigare superioară (topbar)
    Apare pe paginile post-login: dashboard, băuturi etc.
    ============================================================ */

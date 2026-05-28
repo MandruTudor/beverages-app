@@ -2,60 +2,62 @@
 // ============================================================
 // dto/BeverageCreateDto.php
 //
-// DTO pentru CREAREA unei băuturi noi.
-// Băutura e cel mai complex resource — are câmpuri scalare și relații many-to-many
-// (ingrediente, alergeni, localuri) care se trimit tot prin același POST.
+// DTO pentru CREAREA unei bÄƒuturi noi.
+// BÄƒutura e cel mai complex resource â€” are cÃ¢mpuri scalare È™i relaÈ›ii many-to-many
+// (ingrediente, alergeni, localuri) care se trimit tot prin acelaÈ™i POST.
 // ============================================================
 
 class BeverageCreateDto {
 
-    // --- Câmpuri scalare ale băuturii ---
-    public readonly string  $name;              // Obligatoriu: numele băuturii
-    public readonly ?int    $categoryId;        // Opțional: ID-ul categoriei
-    public readonly ?float  $price;             // Opțional: prețul în lei
-    public readonly ?string $description;       // Opțional: descriere liberă
-    public readonly ?string $imagePath;         // Opțional: calea relativă a imaginii
-    public readonly ?int    $perishabilityDays; // Opțional: zile de perisabilitate
-    public readonly ?string $season;            // Opțional: 'spring'|'summer'|'autumn'|'winter'|'all'
-    public readonly ?string $region;            // Opțional: regiune geografică
+    // --- CÃ¢mpuri scalare ale bÄƒuturii ---
+    public string  $name;              // Obligatoriu: numele bÄƒuturii
+    public ?int    $categoryId;        // OpÈ›ional: ID-ul categoriei
+    public ?float  $price;             // OpÈ›ional: preÈ›ul Ã®n lei
+    public ?string $description;       // OpÈ›ional: descriere liberÄƒ
+    public ?string $imagePath;         // OpÈ›ional: calea relativÄƒ a imaginii
+    public ?int    $perishabilityDays; // OpÈ›ional: zile de perisabilitate
+    public ?string $season;            // OpÈ›ional: 'spring'|'summer'|'autumn'|'winter'|'all'
+    public ?string $region;            // OpÈ›ional: regiune geograficÄƒ
 
-    // --- Relații many-to-many (opționale, array de obiecte) ---
+    // --- RelaÈ›ii many-to-many (opÈ›ionale, array de obiecte) ---
     // Exemplu ingredients: [{"id": 1, "quantity": "200ml"}, {"id": 3}]
     // Exemplu allergens:   [{"id": 2}, {"id": 5}]
     // Exemplu venues:      [{"id": 1}, {"id": 3}]
-    public readonly array $ingredients; // default []
-    public readonly array $allergens;   // default []
-    public readonly array $venues;      // default []
+    public array $ingredients; // default []
+    public array $allergens;   // default []
+    public array $venues;      // default []
 
     public function __construct(array $data) {
-        // Validăm câmpul obligatoriu 'name'.
+        // ValidÄƒm cÃ¢mpul obligatoriu 'name'.
         $missing = missing_field($data, ['name']);
         if ($missing) {
             json_error("Campul '$missing' este obligatoriu.", 400);
         }
 
-        // Câmpuri scalare — conversie la tipul corect sau null dacă lipsesc.
+        // CÃ¢mpuri scalare â€” conversie la tipul corect sau null dacÄƒ lipsesc.
         $this->name              = trim($data['name']);
 
-        // (int) convertește la întreg. category_id trebuie să fie un număr valid de ID.
+        // (int) converteÈ™te la Ã®ntreg. category_id trebuie sÄƒ fie un numÄƒr valid de ID.
         $this->categoryId        = isset($data['category_id'])        ? (int)   $data['category_id']        : null;
 
-        // (float) pentru preț — suportă valori cu zecimale (ex: 12.50).
+        // (float) pentru preÈ› â€” suportÄƒ valori cu zecimale (ex: 12.50).
         $this->price             = isset($data['price'])              ? (float) $data['price']              : null;
         $this->description       = isset($data['description'])        ? trim($data['description'])          : null;
         $this->imagePath         = isset($data['image_path'])         ? trim($data['image_path'])           : null;
 
-        // Perisabilitatea e număr întreg de zile (ex: 7, 30, 365).
+        // Perisabilitatea e numÄƒr Ã®ntreg de zile (ex: 7, 30, 365).
         $this->perishabilityDays = isset($data['perishability_days']) ? (int)   $data['perishability_days'] : null;
 
-        // Sezonul e un enum string — nu trimăm, valoarea vine deja curată din dropdown.
+        // Sezonul e un enum string â€” nu trimÄƒm, valoarea vine deja curatÄƒ din dropdown.
         $this->season            = $data['season']  ?? null;
         $this->region            = isset($data['region'])             ? trim($data['region'])               : null;
 
-        // Relațiile many-to-many — array de obiecte sau array gol dacă lipsesc.
-        // ?? [] = dacă cheia lipsește, folosim array gol (nu se inserează nicio relație).
+        // RelaÈ›iile many-to-many â€” array de obiecte sau array gol dacÄƒ lipsesc.
+        // ?? [] = dacÄƒ cheia lipseÈ™te, folosim array gol (nu se insereazÄƒ nicio relaÈ›ie).
         $this->ingredients = $data['ingredients'] ?? [];
         $this->allergens   = $data['allergens']   ?? [];
         $this->venues      = $data['venues']      ?? [];
     }
 }
+
+

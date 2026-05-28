@@ -2,20 +2,20 @@
 // ============================================================
 // dto/PreferenceDto.php
 //
-// DTO pentru salvarea (upsert) unei preferințe.
-// O preferință = rating + note ale unui user pentru o băutură.
-// Operația e întotdeauna upsert (INSERT OR REPLACE) — același DTO
-// acoperă atât crearea cât și actualizarea.
+// DTO pentru salvarea (upsert) unei preferinÈ›e.
+// O preferinÈ›Äƒ = rating + note ale unui user pentru o bÄƒuturÄƒ.
+// OperaÈ›ia e Ã®ntotdeauna upsert (INSERT OR REPLACE) â€” acelaÈ™i DTO
+// acoperÄƒ atÃ¢t crearea cÃ¢t È™i actualizarea.
 // ============================================================
 
 class PreferenceDto {
 
-    public readonly int     $beverageId; // Obligatoriu: ID-ul băuturii evaluate
-    public readonly int     $rating;     // Obligatoriu: nota 1–5 stele
-    public readonly ?string $notes;      // Opțional: notiță personală liberă
+    public int     $beverageId; // Obligatoriu: ID-ul bÄƒuturii evaluate
+    public int     $rating;     // Obligatoriu: nota 1â€“5 stele
+    public ?string $notes;      // OpÈ›ional: notiÈ›Äƒ personalÄƒ liberÄƒ
 
     public function __construct(array $data) {
-        // Validăm câmpurile obligatorii.
+        // ValidÄƒm cÃ¢mpurile obligatorii.
         $missing = missing_field($data, ['beverage_id', 'rating']);
         if ($missing) {
             json_error("Campul '$missing' este obligatoriu.", 400);
@@ -24,9 +24,9 @@ class PreferenceDto {
         $this->beverageId = (int) $data['beverage_id'];
         $rating           = (int) $data['rating'];
 
-        // Validăm că rating-ul e în intervalul 1–5, conform constrângerii din SQL:
-        // CHECK(rating BETWEEN 1 AND 5) definit în init.sql.
-        // Validăm la nivel de DTO (nu doar DB) pentru mesaj de eroare mai clar.
+        // ValidÄƒm cÄƒ rating-ul e Ã®n intervalul 1â€“5, conform constrÃ¢ngerii din SQL:
+        // CHECK(rating BETWEEN 1 AND 5) definit Ã®n init.sql.
+        // ValidÄƒm la nivel de DTO (nu doar DB) pentru mesaj de eroare mai clar.
         if ($rating < 1 || $rating > 5) {
             json_error('Rating-ul trebuie sa fie intre 1 si 5.', 400);
         }
@@ -35,3 +35,5 @@ class PreferenceDto {
         $this->notes  = $data['notes'] ?? null;
     }
 }
+
+

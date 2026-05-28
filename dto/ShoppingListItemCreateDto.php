@@ -2,14 +2,14 @@
 // ============================================================
 // dto/ShoppingListItemCreateDto.php
 //
-// DTO pentru ADĂUGAREA unui item într-o listă de cumpărături.
-// Un item = o băutură + cantitatea dorită.
+// DTO pentru ADÄ‚UGAREA unui item Ã®ntr-o listÄƒ de cumpÄƒrÄƒturi.
+// Un item = o bÄƒuturÄƒ + cantitatea doritÄƒ.
 // ============================================================
 
 class ShoppingListItemCreateDto {
 
-    public readonly int $beverageId; // Obligatoriu: ID-ul băuturii de adăugat
-    public readonly int $quantity;   // Opțional: cantitatea, default 1
+    public int $beverageId; // Obligatoriu: ID-ul bÄƒuturii de adÄƒugat
+    public int $quantity;   // OpÈ›ional: cantitatea, default 1
 
     public function __construct(array $data) {
         $missing = missing_field($data, ['beverage_id']);
@@ -18,8 +18,10 @@ class ShoppingListItemCreateDto {
         }
 
         $this->beverageId = (int) $data['beverage_id'];
-        // Cantitatea e minimum 1 — folosim max() pentru siguranță.
-        // Dacă nu e trimisă, default 1 (o unitate).
+        // Cantitatea e minimum 1 â€” folosim max() pentru siguranÈ›Äƒ.
+        // DacÄƒ nu e trimisÄƒ, default 1 (o unitate).
         $this->quantity   = isset($data['quantity']) ? max(1, (int) $data['quantity']) : 1;
     }
 }
+
+

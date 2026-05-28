@@ -3,10 +3,6 @@
 -- Rulat O SINGURĂ DATĂ de db.php când fișierul .sqlite nu există.
 -- ============================================================
 
--- Activăm suportul pentru chei externe (dezactivat by default în SQLite).
--- Fără această linie, ON DELETE CASCADE / SET NULL nu ar funcționa.
-PRAGMA foreign_keys = ON;
-
 -- ============================================================
 -- Tabelul USERS — utilizatorii aplicației
 -- ============================================================
