@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../dto/VenueCreateDto.php';
-require_once __DIR__ . '/../dto/VenueUpdateDto.php';
-
 class VenueController {
     public function __construct(private VenueService $service) {}
 

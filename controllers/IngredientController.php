@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/../dto/NameDto.php';
-
 class IngredientController {
     public function __construct(private IngredientService $service) {}
 

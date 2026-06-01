@@ -1,7 +1,5 @@
 <?php
 // NameDto e partajat cu IngredientController — ambele resurse au doar câmpul 'name'.
-require_once __DIR__ . '/../dto/NameDto.php';
-
 class AllergenController {
     public function __construct(private AllergenService $service) {}
 

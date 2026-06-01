@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../dto/BeverageCreateDto.php';
-require_once __DIR__ . '/../dto/BeverageUpdateDto.php';
-
 class BeverageController {
     public function __construct(private BeverageService $service) {}
 

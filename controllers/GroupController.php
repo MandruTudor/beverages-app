@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../dto/GroupCreateDto.php';
-require_once __DIR__ . '/../dto/GroupMemberDto.php';
-
 class GroupController {
     public function __construct(private GroupService $service) {}
 

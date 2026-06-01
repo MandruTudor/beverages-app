@@ -55,7 +55,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/dashboard.php">Dashboard</a></li>
             <!-- clasa 'active' marchează pagina curentă -->
             <li><a href="/beverages-app/beverages.php" class="active">Băuturi</a></li>
-            <li><a href="#">Liste</a></li>
+            <li><a href="/beverages-app/lists.php">Liste</a></li>
             <li><a href="#">Statistici</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <!-- Vizibil doar pentru administratori -->

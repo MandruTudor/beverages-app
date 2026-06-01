@@ -1,8 +1,5 @@
 <?php
 // DTOs necesare pentru acest controller — incluse înainte de declararea clasei.
-require_once __DIR__ . '/../dto/CategoryCreateDto.php';
-require_once __DIR__ . '/../dto/CategoryUpdateDto.php';
-
 class CategoryController {
     // Constructor cu injecție de dependință: Service-ul e pasat din afară (din api/categories.php).
     public function __construct(private CategoryService $service) {}

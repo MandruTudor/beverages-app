@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . '/../dto/PreferenceDto.php';
-
 class PreferenceController {
     public function __construct(private PreferenceService $service) {}
 

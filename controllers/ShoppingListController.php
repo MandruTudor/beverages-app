@@ -1,8 +1,4 @@
 <?php
-require_once __DIR__ . '/../dto/ShoppingListCreateDto.php';
-require_once __DIR__ . '/../dto/ShoppingListItemCreateDto.php';
-require_once __DIR__ . '/../dto/ShoppingListItemUpdateDto.php';
-
 class ShoppingListController {
     public function __construct(private ShoppingListService $service) {}
 

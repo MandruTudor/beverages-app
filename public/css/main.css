@@ -636,6 +636,81 @@ a:hover { text-decoration: underline; } /* Subliniere la hover pentru feedback v
 }
 
 /* ============================================================
+   Pagina Liste de cumpărături
+   ============================================================ */
+
+.lists-layout {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.lists-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.lists-empty,
+.no-beverages {
+    display: none;
+    margin-top: 1rem;
+    color: var(--clr-text);
+}
+
+.selected-list-panel {
+    display: grid;
+    gap: 1rem;
+}
+
+.selected-list-empty {
+    color: var(--clr-text);
+}
+
+.selected-list-detail {
+    display: none;
+    background: var(--clr-surface);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.selected-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .75rem;
+    flex-wrap: wrap;
+}
+
+.selected-list-meta {
+    margin-top: .35rem;
+}
+
+.selected-list-actions {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.selected-list-message {
+    display: none;
+}
+
+.selected-list-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.selected-list-table th,
+.selected-list-table td {
+    padding: .75rem .5rem;
+    border-bottom: 1px solid var(--clr-border);
+}
+
+/* ============================================================
    Grid de carduri de băuturi
    ============================================================ */
 
@@ -1139,4 +1214,330 @@ textarea.form-control {
     justify-content: center;
     font-weight: 700;
     font-size: .85rem;
+}
+
+/* ============================================================
+   Liste de cumpărături
+   ============================================================ */
+
+/* Spațiere între secțiunile paginii */
+.page-section {
+    margin-bottom: 2.5rem;
+}
+
+.page-section h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--clr-text);
+    margin-bottom: 1rem;
+    padding-bottom: .5rem;
+    border-bottom: 1.5px solid var(--clr-border);
+}
+
+/* Formular de creare listă — input + buton pe un rând */
+.form-stack {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.form-stack .form-group {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+/* Layout principal: două coloane (listele mele | lista selectată) */
+.lists-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Grid de carduri pentru listele utilizatorului */
+.lists-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+/* Card individual pentru o listă de cumpărături */
+.list-card {
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    box-shadow: var(--shadow);
+}
+
+/* Card al listei selectate — evidențiat cu albastru */
+.list-card.active {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+
+.list-card:hover { border-color: var(--clr-primary); }
+
+.list-card__name {
+    font-weight: 700;
+    font-size: .95rem;
+    margin-bottom: .2rem;
+    color: var(--clr-text);
+}
+
+.list-card__meta {
+    font-size: .82rem;
+    color: var(--clr-muted);
+    margin-bottom: .75rem;
+}
+
+.list-card__actions {
+    display: flex;
+    gap: .4rem;
+}
+
+/* Panoul drept cu detaliile listei selectate */
+.list-detail {
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Header-ul panoului de detalii */
+.list-detail__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1.5px solid var(--clr-border);
+    background: var(--clr-bg);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.list-detail__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.list-detail__meta {
+    font-size: .82rem;
+    color: var(--clr-muted);
+    margin-top: .1rem;
+}
+
+.list-detail__actions {
+    display: flex;
+    gap: .4rem;
+    flex-shrink: 0;
+}
+
+/* Bara de adăugare a unui item nou */
+.list-add-bar {
+    display: flex;
+    gap: .5rem;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--clr-border);
+    background: #f8fafc;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.list-add-bar select,
+.list-add-bar input {
+    padding: .45rem .75rem;
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    font-size: .88rem;
+    background: var(--clr-surface);
+    color: var(--clr-text);
+    outline: none;
+    transition: border-color var(--transition);
+    font-family: inherit;
+}
+
+.list-add-bar select { flex: 1; min-width: 160px; }
+.list-add-bar input  { width: 70px; }
+
+.list-add-bar select:focus,
+.list-add-bar input:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* Tabelul cu itemele listei */
+.list-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+
+.list-items-table th {
+    text-align: left;
+    padding: .6rem 1.25rem;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--clr-muted);
+    border-bottom: 1.5px solid var(--clr-border);
+    background: var(--clr-bg);
+}
+
+.list-items-table td {
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--clr-border);
+    vertical-align: middle;
+}
+
+.list-items-table tr:last-child td { border-bottom: none; }
+
+/* Rând bifat — text tăiat și estompat */
+.list-items-table tr.checked td { color: var(--clr-muted); }
+.list-items-table tr.checked .item-name { text-decoration: line-through; }
+
+/* Coloana de acțiuni a unui rând */
+.item-actions {
+    display: flex;
+    gap: .3rem;
+    justify-content: flex-end;
+}
+
+/* Stare goală pentru panoul de detalii */
+.list-empty-state {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--clr-muted);
+    font-size: .9rem;
+}
+
+/* Mesaj de feedback (succes/eroare) în panoul de detalii */
+.list-feedback {
+    padding: .6rem 1.25rem;
+    font-size: .85rem;
+    display: none;
+}
+
+.list-feedback.visible { display: block; }
+.list-feedback.success { color: var(--clr-success); background: #f0fdf4; }
+.list-feedback.error   { color: var(--clr-danger);  background: #fef2f2; }
+
+/* ============================================================
+   Responsive liste
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .lists-layout { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   Statistici
+   ============================================================ */
+
+/* Grid de 4 carduri cu totaluri */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Card individual cu un total */
+.stat-card {
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+
+/* Schelet de loading — animat cu puls */
+.stat-card--loading {
+    min-height: 90px;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border: 1.5px solid var(--clr-border);
+}
+
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Iconița în pătrat colorat */
+.stat-card__icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: .2rem;
+}
+
+/* Valoarea numerică mare */
+.stat-card__value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--clr-text);
+    line-height: 1;
+}
+
+/* Eticheta descriptivă */
+.stat-card__label {
+    font-size: .82rem;
+    color: var(--clr-muted);
+    font-weight: 500;
+}
+
+/* Grid pentru cele două grafice — două coloane pe desktop */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Container pentru un grafic */
+.chart-container {
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: var(--shadow);
+}
+
+/* Header-ul graficului: titlu + buton SVG */
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.chart-header h3 {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--clr-text);
+}
+
+/* Responsive statistici */
+@media (max-width: 900px) {
+    .stats-cards  { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid  { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+    .stats-cards  { grid-template-columns: 1fr 1fr; }
 }

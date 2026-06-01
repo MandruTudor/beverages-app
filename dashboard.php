@@ -42,8 +42,8 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <!-- clasa 'active' marchează pagina curentă -->
             <li><a href="/beverages-app/dashboard.php" class="active">Dashboard</a></li>
             <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
-            <li><a href="#">Liste</a></li>
-            <li><a href="#">Statistici</a></li>
+            <li><a href="/beverages-app/lists.php">Liste</a></li>
+            <li><a href="/beverages-app/stats.php">Statistici</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <li><a href="#">Admin</a></li>
             <?php endif; ?>
@@ -88,7 +88,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         // Fiecare card: [emoji, titlu, descriere, URL destinație]
         $cards = [
             ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',  '/beverages-app/beverages.php'],
-            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup', '#'],
+            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup', '/beverages-app/lists.php'],
             ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',     '#'],
             ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',          '#'],
         ];
