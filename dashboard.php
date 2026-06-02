@@ -89,8 +89,8 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         $cards = [
             ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',  '/beverages-app/beverages.php'],
             ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup', '/beverages-app/lists.php'],
-            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',     '#'],
-            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',          '#'],
+            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',     '/beverages-app/preferences.php'],
+            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',          '/beverages-app/stats.php'],
         ];
 
         // foreach iterează prin fiecare card; destructurăm array-ul în variabile

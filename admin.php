@@ -1,0 +1,107 @@
+<?php
+// ============================================================
+// admin.php — Panoul de administrare.
+// Accesibil exclusiv utilizatorilor cu rolul 'admin'.
+// ============================================================
+
+require_once __DIR__ . '/includes/auth.php';
+
+session_init();
+
+if (!is_logged_in()) {
+    header('Location: /beverages-app/login.php');
+    exit;
+}
+
+// Dacă userul nu e admin, îl trimitem la dashboard cu 403
+require_admin();
+
+$user    = current_user();
+$initial = strtoupper(substr($user['username'], 0, 1));
+?>
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Beverages App</title>
+    <link rel="stylesheet" href="/beverages-app/public/css/main.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-brand">🧃 Beverages App</div>
+    <nav>
+        <ul class="topbar-nav">
+            <li><a href="/beverages-app/dashboard.php">Dashboard</a></li>
+            <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
+            <li><a href="/beverages-app/lists.php">Liste</a></li>
+            <li><a href="/beverages-app/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/admin.php" class="active">Admin</a></li>
+        </ul>
+    </nav>
+    <div class="topbar-user">
+        <span class="avatar"><?= htmlspecialchars($initial) ?></span>
+        <span><?= htmlspecialchars($user['username']) ?></span>
+        <a href="/beverages-app/logout.php">Ieșire</a>
+    </div>
+</header>
+
+<main class="page-main">
+
+    <!-- ============================================================
+         Secțiunea: Gestionare utilizatori
+         ============================================================ -->
+    <div class="page-header">
+        <div>
+            <h2>Panou de administrare</h2>
+            <p class="page-subtitle">Gestionează utilizatorii și importă date în catalog.</p>
+        </div>
+    </div>
+
+    <!-- Tabelul cu utilizatorii -->
+    <section class="page-section">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
+            👥 Utilizatori
+        </h3>
+        <!-- Feedback acțiuni (succes/eroare) -->
+        <div id="users-feedback" class="list-feedback" role="alert"></div>
+        <!-- Tabelul este populat de JavaScript -->
+        <div id="users-table-wrap"></div>
+    </section>
+
+    <!-- ============================================================
+         Secțiunea: Import CSV
+         ============================================================ -->
+    <section class="page-section">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
+            📥 Import băuturi din CSV
+        </h3>
+        <p style="color:var(--clr-muted);font-size:.88rem;margin-bottom:1rem">
+            Fișierul CSV trebuie să aibă antetele:
+            <code>name, category_id, price, description, season, region, perishability_days</code>
+        </p>
+
+        <!-- Zona de upload fișier CSV -->
+        <div class="import-zone" id="import-zone">
+            <input type="file" id="csv-file" accept=".csv" style="display:none">
+            <!-- Click pe zonă → deschide selectorul de fișiere -->
+            <div class="import-drop" id="import-drop" tabindex="0" role="button"
+                 aria-label="Selectează fișier CSV">
+                <span style="font-size:2rem">📄</span>
+                <p>Trage fișierul CSV aici sau <strong>click pentru a selecta</strong></p>
+                <p style="color:var(--clr-muted);font-size:.82rem">Doar fișiere .csv</p>
+            </div>
+            <!-- Previzualizarea fișierului selectat -->
+            <div id="import-preview" style="display:none"></div>
+        </div>
+
+        <!-- Feedback import -->
+        <div id="import-feedback" class="list-feedback" style="margin-top:.75rem" role="alert"></div>
+    </section>
+
+</main>
+
+<script src="/beverages-app/public/js/admin.js"></script>
+</body>
+</html>
