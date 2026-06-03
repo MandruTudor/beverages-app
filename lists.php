@@ -35,9 +35,9 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <ul class="topbar-nav">
             <li><a href="/beverages-app/dashboard.php">Dashboard</a></li>
             <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
-            <!-- clasa 'active' marchează pagina curentă -->
             <li><a href="/beverages-app/lists.php" class="active">Liste</a></li>
-            <li><a href="#">Statistici</a></li>
+            <li><a href="/beverages-app/groups.php">Grupuri</a></li>
+            <li><a href="/beverages-app/stats.php">Statistici</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <li><a href="#">Admin</a></li>
             <?php endif; ?>
@@ -63,11 +63,9 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <!-- Formular creare listă nouă -->
     <section class="page-section">
         <h3>Listă nouă</h3>
-        <!-- form-stack: input + buton pe același rând -->
         <form id="create-form" class="form-stack" novalidate>
             <div class="form-group">
                 <label for="list-name">Nume</label>
-                <!-- Input stilizat identic cu restul formularelor din app -->
                 <input
                     type="text"
                     id="list-name"
@@ -77,6 +75,12 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                     autocomplete="off"
                 >
                 <span id="create-error" class="field-error" aria-live="polite"></span>
+            </div>
+            <div class="form-group">
+                <label for="list-group-id">Grup (opțional)</label>
+                <select id="list-group-id" class="form-control">
+                    <option value="">— Personală —</option>
+                </select>
             </div>
             <button type="submit" class="btn btn-primary btn-auto">
                 <span class="spinner"></span>
@@ -139,6 +143,14 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                         aria-label="Cantitate"
                     >
                     <button id="btn-add-item" class="btn btn-primary btn-sm">+ Adaugă</button>
+                </div>
+
+                <!-- Sugestii bazate pe preferinte -->
+                <div id="suggestions-bar" style="margin:.75rem 0;display:none">
+                    <div style="font-size:.82rem;color:var(--clr-muted);margin-bottom:.4rem">
+                        ⭐ Sugerate pentru tine:
+                    </div>
+                    <div id="suggestions-list" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
                 </div>
 
                 <!-- Tabelul cu itemele listei -->

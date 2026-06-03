@@ -35,10 +35,10 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/dashboard.php">Dashboard</a></li>
             <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
             <li><a href="/beverages-app/lists.php">Liste</a></li>
-            <!-- clasa 'active' marchează pagina curentă -->
+            <li><a href="/beverages-app/groups.php">Grupuri</a></li>
             <li><a href="/beverages-app/stats.php" class="active">Statistici</a></li>
             <?php if ($user['role'] === 'admin'): ?>
-            <li><a href="#">Admin</a></li>
+            <li><a href="/beverages-app/admin.php">Admin</a></li>
             <?php endif; ?>
         </ul>
     </nav>

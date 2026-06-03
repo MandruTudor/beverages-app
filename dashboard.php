@@ -43,6 +43,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/dashboard.php" class="active">Dashboard</a></li>
             <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
             <li><a href="/beverages-app/lists.php">Liste</a></li>
+            <li><a href="/beverages-app/groups.php">Grupuri</a></li>
             <li><a href="/beverages-app/stats.php">Statistici</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <li><a href="#">Admin</a></li>
@@ -87,10 +88,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <?php
         // Fiecare card: [emoji, titlu, descriere, URL destinație]
         $cards = [
-            ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',  '/beverages-app/beverages.php'],
-            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup', '/beverages-app/lists.php'],
-            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',     '/beverages-app/preferences.php'],
-            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',          '/beverages-app/stats.php'],
+            ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',       '/beverages-app/beverages.php'],
+            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup',  '/beverages-app/lists.php'],
+            ['👥', 'Grupuri',    'Gestionează grupuri și preferințe comune',          '/beverages-app/groups.php'],
+            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',      '/beverages-app/preferences.php'],
+            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',           '/beverages-app/stats.php'],
         ];
 
         // foreach iterează prin fiecare card; destructurăm array-ul în variabile
@@ -108,7 +110,17 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <?php endforeach; ?>
     </div>
 
+    <!-- Sectiunea de recomandari personalizate -->
+    <h3 class="dash-section-title" style="margin-top:2.5rem">Recomandate pentru tine</h3>
+    <p class="page-subtitle" style="margin-bottom:1rem">
+        Bazate pe băuturile pe care le-ai evaluat cu 4-5 stele.
+    </p>
+    <div id="recommendations-grid" class="dash-grid">
+        <p class="loading-text">Se încarcă recomandările...</p>
+    </div>
+
 </main>
+<script src="/beverages-app/public/js/dashboard.js"></script>
 
 </body>
 </html>

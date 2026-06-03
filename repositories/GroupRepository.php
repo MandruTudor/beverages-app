@@ -74,4 +74,13 @@ class GroupRepository {
         $stmt->execute([$groupId, $userId]);
         return (bool) $stmt->fetch();
     }
+
+    // Caută utilizatori după username (parțial), excludând userul curent
+    public function searchUsers(string $q, int $excludeId): array {
+        $stmt = $this->pdo->prepare(
+            'SELECT id, username FROM users WHERE username LIKE ? AND id != ? LIMIT 10'
+        );
+        $stmt->execute(['%' . $q . '%', $excludeId]);
+        return $stmt->fetchAll();
+    }
 }

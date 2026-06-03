@@ -74,6 +74,14 @@ class GroupService {
         $this->repo->addMember($groupId, $dto->userId);
     }
 
+    // Caută utilizatori după username — pentru UI-ul de adăugare membri
+    public function searchUsers(string $q): array {
+        require_auth();
+        $q = trim($q);
+        if (strlen($q) < 2) return [];
+        return $this->repo->searchUsers($q, current_user()['id']);
+    }
+
     // Acceptă GroupMemberDto — același DTO pentru eliminare.
     public function removeMember(int $groupId, GroupMemberDto $dto): void {
         require_auth();

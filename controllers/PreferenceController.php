@@ -6,7 +6,11 @@ class PreferenceController {
         $method     = http_method();
         $beverageId = get_param('beverage_id') ? (int) get_param('beverage_id') : null;
 
+        $action = get_param('action');
+
         match (true) {
+            // Recomandari personalizate bazate pe preferinte
+            $method === 'GET' && $action === 'recommendations' => $this->recommendations(),
             // Lista tuturor preferințelor userului curent
             $method === 'GET'                            => $this->list(),
             // Creare sau actualizare preferință (upsert)
@@ -15,6 +19,11 @@ class PreferenceController {
             $method === 'DELETE' && $beverageId !== null => $this->delete($beverageId),
             default                                      => json_error('Metoda sau ruta invalida.', 405),
         };
+    }
+
+    private function recommendations(): void {
+        $limit = min((int) (get_param('limit') ?? 6), 12);
+        json_response(['recommendations' => $this->service->recommendations($limit)]);
     }
 
     private function list(): void {

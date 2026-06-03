@@ -23,6 +23,11 @@ class PreferenceService {
         );
     }
 
+    public function recommendations(int $limit = 6): array {
+        require_auth();
+        return $this->repo->getRecommendations(current_user()['id'], $limit);
+    }
+
     public function delete(int $beverageId): void {
         require_auth();
 

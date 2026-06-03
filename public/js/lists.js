@@ -20,6 +20,9 @@ let activeListId = null;
 // Lista completă de băuturi — încărcată o dată, folosită pentru dropdown
 let allBeverages = [];
 
+// Grupurile userului — pentru selectorul de la creare listă
+let userGroups = [];
+
 /* ================================================================
    Utilitare API
    ================================================================ */
@@ -50,8 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initCreateForm();
     initDetailActions();
 
-    // Încărcăm în paralel listele și catalogul de băuturi (mai rapid)
-    await Promise.all([loadLists(), loadBeverages()]);
+    // Încărcăm în paralel listele, băuturile și grupurile
+    await Promise.all([loadLists(), loadBeverages(), loadGroups()]);
 });
 
 /* ================================================================
@@ -88,8 +91,9 @@ function initCreateForm() {
         btn.classList.add('loading');
 
         try {
-            // Trimitem POST la API pentru a crea lista
-            const data = await api('POST', '/beverages-app/api/shopping_lists.php', { name });
+            const groupId = parseInt(document.getElementById('list-group-id').value) || null;
+            const body    = groupId ? { name, group_id: groupId } : { name };
+            const data = await api('POST', '/beverages-app/api/shopping_lists.php', body);
             input.value = ''; // Golim câmpul după creare
             await loadLists(); // Reîncărcăm lista de carduri
             // Deschidem automat lista nou creată
@@ -152,16 +156,17 @@ async function loadLists() {
  */
 function listCardHTML(list) {
     // Numărul de iteme cu text singular/plural
-    const count  = parseInt(list.item_count ?? 0);
+    const count      = parseInt(list.item_count ?? 0);
     const countLabel = count === 1 ? '1 item' : `${count} iteme`;
-
-    // Clasa 'active' e adăugată dacă lista e cea selectată curent
-    const active = list.id == activeListId ? 'active' : '';
+    const active     = list.id == activeListId ? 'active' : '';
+    const groupBadge = list.group_name
+        ? `<span style="font-size:.75rem;color:var(--clr-primary);margin-left:.25rem">👥 ${escHtml(list.group_name)}</span>`
+        : '';
 
     return `
     <div class="list-card ${active}" data-id="${list.id}" role="button" tabindex="0"
          aria-label="Deschide lista ${escHtml(list.name)}">
-        <div class="list-card__name">${escHtml(list.name)}</div>
+        <div class="list-card__name">${escHtml(list.name)}${groupBadge}</div>
         <div class="list-card__meta">${countLabel}</div>
     </div>`;
 }
@@ -193,13 +198,49 @@ async function selectList(id) {
     document.getElementById('no-list-selected').style.display = 'none';
     document.getElementById('list-detail').style.display     = 'block';
 
-    await loadListDetail(id);
+    await Promise.all([loadListDetail(id), loadSuggestions()]);
 }
 
 /**
  * loadListDetail(id)
  * Încarcă detaliile (itemele) listei cu id-ul dat și le randează în tabel.
  */
+async function loadSuggestions() {
+    const bar  = document.getElementById('suggestions-bar');
+    const list = document.getElementById('suggestions-list');
+
+    try {
+        const res  = await fetch('/beverages-app/api/preferences.php?action=recommendations&limit=6');
+        const data = await res.json();
+        const recs = data.recommendations ?? [];
+
+        if (!recs.length) { bar.style.display = 'none'; return; }
+
+        bar.style.display  = '';
+        list.innerHTML = recs.map(b => `
+            <button class="btn btn-outline btn-sm" style="font-size:.8rem"
+                    onclick="addSuggestion(${b.id}, '${escHtml(b.name)}')">
+                + ${escHtml(b.name)}
+            </button>
+        `).join('');
+    } catch {
+        bar.style.display = 'none';
+    }
+}
+
+async function addSuggestion(beverageId, name) {
+    try {
+        await api('POST', `/beverages-app/api/shopping_lists.php?id=${activeListId}&action=add_item`, {
+            beverage_id: beverageId,
+            quantity: 1,
+        });
+        await Promise.all([loadListDetail(activeListId), loadLists()]);
+        showFeedback(`"${name}" a fost adăugat în listă.`);
+    } catch (err) {
+        showFeedback(err.message, 'error');
+    }
+}
+
 async function loadListDetail(id) {
     const tbody    = document.getElementById('items-tbody');
     const titleEl  = document.getElementById('detail-title');
@@ -428,6 +469,17 @@ async function removeItem(itemId) {
  * loadBeverages()
  * Încarcă toate băuturile și populează dropdown-ul din bara de adăugare.
  */
+async function loadGroups() {
+    try {
+        const data = await api('GET', '/beverages-app/api/groups.php');
+        userGroups = data.groups ?? [];
+        const select = document.getElementById('list-group-id');
+        userGroups.forEach(g => select.add(new Option(g.name, g.id)));
+    } catch {
+        // Eșecul la încărcarea grupurilor nu blochează restul paginii
+    }
+}
+
 async function loadBeverages() {
     try {
         const data  = await api('GET', '/beverages-app/api/beverages.php');

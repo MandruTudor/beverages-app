@@ -8,6 +8,8 @@ class GroupController {
         $action = get_param('action') ?? null;
 
         match (true) {
+            // Căutare utilizatori după username (pentru add member)
+            $method === 'GET'    && $action === 'search_users'                   => $this->searchUsers(),
             // Lista grupurilor userului curent
             $method === 'GET'    && $id === null                                 => $this->list(),
             // Detalii grup cu membri
@@ -22,6 +24,10 @@ class GroupController {
             $method === 'DELETE' && $id !== null && $action === 'remove_member'  => $this->removeMember($id),
             default                                                              => json_error('Metoda sau ruta invalida.', 405),
         };
+    }
+
+    private function searchUsers(): void {
+        json_response(['users' => $this->service->searchUsers(get_param('q') ?? '')]);
     }
 
     private function list(): void {

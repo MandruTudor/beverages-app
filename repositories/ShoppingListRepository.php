@@ -7,8 +7,10 @@ class ShoppingListRepository {
     public function findByUser(int $userId): array {
         $stmt = $this->pdo->prepare('
             SELECT sl.*,
-                   (SELECT COUNT(*) FROM shopping_list_items WHERE list_id = sl.id) AS item_count
+                   (SELECT COUNT(*) FROM shopping_list_items WHERE list_id = sl.id) AS item_count,
+                   g.name AS group_name
             FROM shopping_lists sl
+            LEFT JOIN groups g ON g.id = sl.group_id
             WHERE sl.user_id = ?
                OR sl.group_id IN (
                    SELECT group_id FROM group_members WHERE user_id = ?
