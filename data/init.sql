@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS beverages (
     description         TEXT,    -- Descriere liberă
     image_path          TEXT,    -- Calea relativă spre imaginea băuturii (ex: assets/images/ceai.jpg)
     perishability_days  INTEGER, -- Câte zile se poate păstra după deschidere
+    valid_until         DATE,    -- Data expirării produsului (valabilitate, ex: '2025-12-31')
     season              TEXT,    -- Sezonul disponibil: 'spring'|'summer'|'autumn'|'winter'|'all'
     region              TEXT,    -- Regiunea geografică unde e disponibilă (ex: 'Moldova')
     created_by          INTEGER REFERENCES users(id) ON DELETE SET NULL, -- Cine a adăugat băutura
@@ -192,6 +193,10 @@ INSERT OR IGNORE INTO categories (name, description) VALUES
     ('Siropuri', 'Siropuri pentru diluat sau pentru aroma'),
     ('Ape',      'Ape plate, minerale, carbogazoase');
 
+-- Alergeni comuni (fara diacritice pentru compatibilitate maxima)
+INSERT OR IGNORE INTO allergens (name) VALUES
+    ('Gluten'), ('Lactoze'), ('Nuci'), ('Soia'), ('Sulfiti'), ('Arahide'), ('Oua');
+
 -- Ingrediente de baza
 INSERT OR IGNORE INTO ingredients (name) VALUES
     ('Lamaie'), ('Menta'), ('Ghimbir'), ('Miere'), ('Musetel'),
@@ -209,6 +214,15 @@ INSERT OR IGNORE INTO beverages (name, category_id, price, description, perishab
     ('Sirop de zmeura',     4, 15.00, 'Sirop concentrat din zmeura de padure',      180, 'summer', 'Romania', 1),
     ('Apa minerala plata',  5, 4.00,  'Apa minerala naturala plata',                365, 'all',    'Romania', 1),
     ('Apa carbogazoasa',    5, 4.50,  'Apa minerala carbogazoasa',                  365, 'all',    'Romania', 1);
+
+-- Asocieri bauturi - alergeni
+INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id)
+SELECT b.id, a.id FROM beverages b, allergens a
+WHERE (b.name = 'Lapte de vanilie' AND a.name = 'Lactoze')
+   OR (b.name = 'Kefir natural'    AND a.name = 'Lactoze')
+   OR (b.name = 'Ceai de musetel'  AND a.name = 'Sulfiti')
+   OR (b.name = 'Sirop de zmeura'  AND a.name = 'Sulfiti')
+   OR (b.name = 'Ceai de ghimbir'  AND a.name = 'Sulfiti');
 
 -- Asocieri ingrediente - bauturi (exemple)
 INSERT OR IGNORE INTO beverage_ingredients (beverage_id, ingredient_id, quantity) VALUES

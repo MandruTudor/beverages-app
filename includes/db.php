@@ -66,13 +66,41 @@ function get_db(): PDO {
         // rulăm schema inițială din fișierul init.sql.
         // file_exists(INIT_SQL_PATH) previne eroarea dacă fișierul SQL lipsește.
         if (!$db_exists && file_exists(INIT_SQL_PATH)) {
-
-            // Citim tot conținutul fișierului SQL ca string.
             $sql = file_get_contents(INIT_SQL_PATH);
-
-            // Executăm toate instrucțiunile SQL din fișier dintr-o singură dată.
-            // init.sql conține CREATE TABLE și INSERT-uri seed.
             $pdo->exec($sql);
+        }
+
+        // ---- Migrații incrementale (safe pentru baze de date existente) ----
+
+        // Adăugăm valid_until dacă lipsește (baze de date create înainte de această versiune)
+        try {
+            $pdo->exec('ALTER TABLE beverages ADD COLUMN valid_until DATE');
+        } catch (PDOException $e) {
+            // Coloana există deja — ignorăm
+        }
+
+        // Seed alergeni — prepared statements individuale pentru a evita probleme
+        // de encoding cu exec() pe siruri multi-valoare
+        $stmtAllergen = $pdo->prepare('INSERT OR IGNORE INTO allergens (name) VALUES (?)');
+        foreach (['Gluten', 'Lactoze', 'Nuci', 'Soia', 'Sulfiti', 'Arahide', 'Oua'] as $name) {
+            $stmtAllergen->execute([$name]);
+        }
+
+        // Asociem alergeni la bauturi seed — fiecare pereche separat pentru robustete
+        $stmtAssoc = $pdo->prepare('
+            INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id)
+            SELECT b.id, a.id FROM beverages b, allergens a
+            WHERE b.name = ? AND a.name = ?
+        ');
+        $pairs = [
+            ['Lapte de vanilie', 'Lactoze'],
+            ['Kefir natural',    'Lactoze'],
+            ['Ceai de musetel',  'Sulfiti'],
+            ['Sirop de zmeura',  'Sulfiti'],
+            ['Ceai de ghimbir',  'Sulfiti'],
+        ];
+        foreach ($pairs as [$bev, $all]) {
+            $stmtAssoc->execute([$bev, $all]);
         }
 
     } catch (PDOException $e) {

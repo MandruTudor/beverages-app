@@ -22,6 +22,9 @@ let allBeverages = [];
 // Lista de categorii — folosită pentru dropdown-urile de filtrare și formular
 let categories = [];
 
+// Listele de cumpărături ale utilizatorului — pentru adăugare rapidă din modal
+let userLists = [];
+
 // Timer-ul pentru debounce la căutare (evită request-uri la fiecare tastă)
 let searchTimer = null;
 
@@ -61,8 +64,8 @@ async function api(method, url, body = null) {
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Încărcăm categoriile (pentru dropdown-urile de filtrare și formular)
-    await loadCategories();
+    // 1. Încărcăm categoriile, alergenii și listele de cumpărături
+    await Promise.all([loadCategories(), loadAllergens(), loadShoppingLists()]);
     // 2. Încărcăm băuturile și le afișăm în grid
     await loadBeverages();
     // 3. Activăm filtrele (event listeneri pe căutare + dropdown-uri)
@@ -73,6 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initFormSubmit();
     // 6. Activăm închiderea modalelor la click pe fundal sau Escape
     initModalClose();
+    // 7. Activăm preview-ul imaginii la selecție fișier (admin)
+    initImagePreview();
 });
 
 /* ================================================================
@@ -106,6 +111,36 @@ async function loadCategories() {
     });
 }
 
+/**
+ * loadAllergens()
+ * Încarcă lista de alergeni și populează dropdown-ul de filtrare.
+ * Opțiunile sunt „Fără X" — selectând un alergen, utilizatorul exclude
+ * băuturile care îl conțin (util pentru persoane cu restricții alimentare).
+ */
+async function loadAllergens() {
+    const { ok, data } = await api('GET', '/beverages-app/api/allergens.php');
+    if (!ok) return;
+
+    const allergens = data.allergens ?? [];
+    const select    = document.getElementById('filter-allergen');
+    if (!select) return;
+
+    allergens.forEach(a => {
+        select.add(new Option(`Fără ${a.name}`, a.id));
+    });
+}
+
+/**
+ * loadShoppingLists()
+ * Încarcă listele de cumpărături ale utilizatorului.
+ * Folosite în modalul de detalii pentru adăugarea rapidă a băuturii.
+ */
+async function loadShoppingLists() {
+    const { ok, data } = await api('GET', '/beverages-app/api/shopping_lists.php');
+    if (!ok) return;
+    userLists = data.lists ?? [];
+}
+
 /* ================================================================
    Băuturi — listare
    ================================================================ */
@@ -117,14 +152,16 @@ async function loadCategories() {
  */
 async function loadBeverages() {
     // Citim valorile filtrelor din DOM
-    const categoryId = document.getElementById('filter-category').value; // '' sau ID numeric
-    const season     = document.getElementById('filter-season').value;   // '' sau 'winter' etc.
-    const search     = document.getElementById('search-input').value.trim().toLowerCase();
+    const categoryId  = document.getElementById('filter-category').value;
+    const season      = document.getElementById('filter-season').value;
+    const allergenId  = document.getElementById('filter-allergen')?.value ?? '';
+    const search      = document.getElementById('search-input').value.trim().toLowerCase();
 
-    // Construim query string-ul URL-ului (ex: ?category_id=2&season=winter)
+    // Construim query string-ul URL-ului
     const params = new URLSearchParams();
-    if (categoryId) params.set('category_id', categoryId); // Adăugăm doar dacă e selectat ceva
+    if (categoryId) params.set('category_id', categoryId);
     if (season)     params.set('season', season);
+    if (allergenId) params.set('exclude_allergen_id', allergenId); // Excludem băuturile cu alergenul ales
 
     // Facem cererea GET la API
     const { ok, data } = await api('GET', '/beverages-app/api/beverages.php?' + params.toString());
@@ -216,10 +253,16 @@ function beverageCardHTML(b) {
         role="button"
         aria-label="Vezi detalii pentru ${escHtml(b.name)}"
     >
-        <!-- Rândul de sus: badges pentru categorie și sezon -->
+        ${b.image_path ? `
+        <div class="card-image">
+            <img src="${escHtml(b.image_path)}" alt="${escHtml(b.name)}" loading="lazy">
+        </div>` : ''}
+
+        <!-- Rândul de sus: badges pentru categorie, sezon și alergeni -->
         <div class="card-header-row">
             <span class="badge badge-category">${escHtml(b.category_name ?? 'Fără categorie')}</span>
             ${b.season ? `<span class="badge badge-season">${escHtml(seasonLabel[b.season] ?? b.season)}</span>` : ''}
+            ${parseInt(b.allergen_count) > 0 ? '<span class="badge badge-allergen" title="Conține alergeni">⚠ Alergeni</span>' : ''}
         </div>
 
         <!-- Denumirea băuturii -->
@@ -255,12 +298,18 @@ async function openDetail(id) {
     modal.classList.add('open');
     body.innerHTML = '<p class="loading-text">Se încarcă detaliile...</p>';
 
-    // Cerem detaliile complete (cu ingrediente, alergeni, localuri) de la API
-    const { ok, data } = await api('GET', `/beverages-app/api/beverages.php?id=${id}`);
-    if (!ok) {
+    // Cerem în paralel detaliile băuturii și listele de cumpărături (mereu proaspete)
+    const [bevRes, listRes] = await Promise.all([
+        api('GET', `/beverages-app/api/beverages.php?id=${id}`),
+        api('GET', '/beverages-app/api/shopping_lists.php'),
+    ]);
+    if (!bevRes.ok) {
         body.innerHTML = '<p class="error-text">Eroare la încărcarea detaliilor.</p>';
         return;
     }
+    // Actualizăm listele globale cu datele proaspete
+    userLists = listRes.ok ? (listRes.data.lists ?? []) : userLists;
+    const { ok, data } = bevRes;
 
     const b = data.beverage;
 
@@ -281,6 +330,11 @@ async function openDetail(id) {
             ${b.season ? `<span class="badge badge-season">${escHtml(seasonLabel[b.season] ?? b.season)}</span>` : ''}
         </div>
 
+        ${b.image_path ? `
+        <div class="detail-image">
+            <img src="${escHtml(b.image_path)}" alt="${escHtml(b.name)}">
+        </div>` : ''}
+
         <!-- Descrierea completă (fără truncare, spre deosebire de card) -->
         ${b.description ? `<p class="detail-desc">${escHtml(b.description)}</p>` : ''}
 
@@ -292,6 +346,8 @@ async function openDetail(id) {
             <dd>${escHtml(b.region ?? '—')}</dd>
             <dt>Perisabilitate</dt>
             <dd>${b.perishability_days ? b.perishability_days + ' zile' : '—'}</dd>
+            <dt>Valabil până la</dt>
+            <dd>${b.valid_until ? new Date(b.valid_until).toLocaleDateString('ro-RO') : '—'}</dd>
         </dl>
 
         <!-- Secțiunea Ingrediente — afișată doar dacă există -->
@@ -324,6 +380,29 @@ async function openDetail(id) {
                 ).join('')}
             </ul>
         </div>` : ''}
+
+        <!-- Adaugă în listă de cumpărături -->
+        <div class="detail-section">
+            <h4>Adaugă în listă de cumpărături</h4>
+            ${userLists.length ? `
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+                <select id="detail-list-select" class="form-control" style="flex:1;min-width:150px">
+                    <option value="">— Alege lista —</option>
+                    ${userLists.map(l => `<option value="${l.id}">${escHtml(l.name)}</option>`).join('')}
+                </select>
+                <input type="number" id="detail-qty" value="1" min="1" max="99"
+                       class="form-control" style="width:70px" aria-label="Cantitate">
+                <button class="btn btn-primary btn-sm"
+                        onclick="addToShoppingList(${b.id}, '${escHtml(b.name)}')">
+                    + Adaugă
+                </button>
+            </div>
+            <p id="detail-list-feedback" style="font-size:.82rem;margin-top:.35rem;min-height:1.2em"></p>
+            ` : `<p style="font-size:.85rem;color:var(--clr-muted)">
+                Nu ai liste de cumpărături.
+                <a href="/beverages-app/lists.php">Creează una</a>.
+            </p>`}
+        </div>
 
         <!-- Butoane admin: Editează și Șterge — vizibile doar pentru admin -->
         ${isAdmin ? `
@@ -362,6 +441,11 @@ async function openForm(id = null) {
     // Ascundem alerta de eroare din formularul anterior
     alert.classList.remove('visible');
     alert.textContent = '';
+    // Ascundem preview-ul imaginii (resetăm la starea goală)
+    const previewWrap  = document.getElementById('image-preview-wrap');
+    const previewImg   = document.getElementById('image-preview');
+    const currentLabel = document.getElementById('image-current');
+    if (previewWrap) { previewWrap.style.display = 'none'; previewImg.src = ''; currentLabel.textContent = ''; }
 
     if (id) {
         // Mod EDITARE: actualizăm titlul și pre-completăm câmpurile
@@ -382,6 +466,13 @@ async function openForm(id = null) {
         document.getElementById('form-season').value        = b.season      ?? '';
         document.getElementById('form-region').value        = b.region      ?? '';
         document.getElementById('form-perishability').value = b.perishability_days ?? '';
+        document.getElementById('form-valid-until').value   = b.valid_until         ?? '';
+        // Dacă băutura are imagine, o afișăm ca preview (rămâne dacă nu se selectează una nouă)
+        if (previewWrap && b.image_path) {
+            previewImg.src          = b.image_path;
+            currentLabel.textContent = 'Imaginea curentă — selectează un fișier nou pentru a o înlocui';
+            previewWrap.style.display = 'block';
+        }
     } else {
         // Mod ADĂUGARE: titlul implicit și formular gol
         title.textContent = 'Adaugă băutură';
@@ -406,34 +497,53 @@ function initFormSubmit() {
         // Citim ID-ul ascuns: prezent la editare, gol la adăugare
         const id = document.getElementById('form-id').value;
 
-        // Construim obiectul cu datele din formular
-        const body = {
-            name:              document.getElementById('form-name').value.trim()         || null,
-            category_id:       document.getElementById('form-category').value            || null,
-            price:             document.getElementById('form-price').value               || null,
-            description:       document.getElementById('form-description').value.trim()  || null,
-            season:            document.getElementById('form-season').value              || null,
-            region:            document.getElementById('form-region').value.trim()       || null,
-            perishability_days: document.getElementById('form-perishability').value      || null,
-        };
-
         // Validare minimă client-side: numele e obligatoriu
-        if (!body.name) {
+        const nameVal = document.getElementById('form-name').value.trim();
+        if (!nameVal) {
             const nameInput = document.getElementById('form-name');
             nameInput.classList.add('error');
             nameInput.focus();
             return;
         }
 
-        // Dacă id există → editare (PATCH la /api/beverages.php?id=X)
-        // Dacă nu → adăugare (POST la /api/beverages.php)
-        const url    = id ? `/beverages-app/api/beverages.php?id=${id}` : '/beverages-app/api/beverages.php';
-        const method = id ? 'PATCH' : 'POST';
-
         // Activăm starea de loading pe butonul de submit
         const btn = e.target.querySelector('button[type=submit]');
         btn.disabled = true;
         btn.classList.add('loading');
+
+        // Dacă s-a selectat o imagine nouă, o uploadăm mai întâi
+        let imagePath = null;
+        const imageFile = document.getElementById('form-image')?.files[0];
+        if (imageFile) {
+            try {
+                imagePath = await uploadImage(imageFile);
+            } catch (err) {
+                alert.textContent = err.message;
+                alert.classList.add('visible');
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                return;
+            }
+        }
+
+        // Construim obiectul cu datele din formular
+        const body = {
+            name:               nameVal,
+            category_id:        document.getElementById('form-category').value            || null,
+            price:              document.getElementById('form-price').value               || null,
+            description:        document.getElementById('form-description').value.trim()  || null,
+            season:             document.getElementById('form-season').value              || null,
+            region:             document.getElementById('form-region').value.trim()       || null,
+            perishability_days: document.getElementById('form-perishability').value       || null,
+            valid_until:        document.getElementById('form-valid-until').value          || null,
+        };
+        // Includem image_path NUMAI dacă s-a uploadat o imagine nouă (PATCH: nu suprascrie cu null)
+        if (imagePath !== null) body.image_path = imagePath;
+
+        // Dacă id există → editare (PATCH la /api/beverages.php?id=X)
+        // Dacă nu → adăugare (POST la /api/beverages.php)
+        const url    = id ? `/beverages-app/api/beverages.php?id=${id}` : '/beverages-app/api/beverages.php';
+        const method = id ? 'PATCH' : 'POST';
 
         const { ok, data } = await api(method, url, body);
 
@@ -494,6 +604,8 @@ function initFilters() {
     document.getElementById('filter-category').addEventListener('change', loadBeverages);
     // Dropdown sezon: reload imediat la schimbare
     document.getElementById('filter-season').addEventListener('change', loadBeverages);
+    // Dropdown alergeni: reload imediat la schimbare (exclude băuturile cu alergenul ales)
+    document.getElementById('filter-allergen')?.addEventListener('change', loadBeverages);
 
     // Căutare text: debounce de 300ms — așteptăm să termine de scris
     document.getElementById('search-input').addEventListener('input', () => {
@@ -569,6 +681,85 @@ function showGridError() {
             <span>⚠️</span>
             <p>Eroare la încărcarea băuturilor. Verifică conexiunea și încearcă din nou.</p>
         </div>`;
+}
+
+/* ================================================================
+   Adăugare rapidă în lista de cumpărături
+   ================================================================ */
+
+/**
+ * addToShoppingList(beverageId, beverageName)
+ * Adaugă băutura curentă în lista selectată din modalul de detalii.
+ */
+async function addToShoppingList(beverageId, beverageName) {
+    const select   = document.getElementById('detail-list-select');
+    const qtyInput = document.getElementById('detail-qty');
+    const feedback = document.getElementById('detail-list-feedback');
+
+    const listId  = parseInt(select?.value);
+    const quantity = parseInt(qtyInput?.value) || 1;
+
+    if (!listId) {
+        feedback.textContent = 'Selectează o listă mai întâi.';
+        feedback.style.color = 'var(--clr-danger)';
+        return;
+    }
+
+    const { ok, data } = await api('POST',
+        `/beverages-app/api/shopping_lists.php?id=${listId}&action=add_item`,
+        { beverage_id: beverageId, quantity }
+    );
+
+    if (ok) {
+        feedback.textContent = `"${beverageName}" adăugat în listă!`;
+        feedback.style.color = 'var(--clr-success)';
+    } else {
+        feedback.textContent = data.error ?? 'Eroare la adăugare.';
+        feedback.style.color = 'var(--clr-danger)';
+    }
+}
+
+/* ================================================================
+   Upload imagine
+   ================================================================ */
+
+/**
+ * uploadImage(file)
+ * Trimite imaginea la /api/upload.php via multipart/form-data.
+ * Returnează calea imaginii (string) sau aruncă Error la eșec.
+ * NOTĂ: Nu folosim api() deoarece acesta setează Content-Type: application/json;
+ *       pentru multipart, browserul trebuie să seteze Content-Type cu boundary automat.
+ */
+async function uploadImage(file) {
+    const form = new FormData();
+    form.append('image', file);
+    const res  = await fetch('/beverages-app/api/upload.php', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? 'Eroare la upload imagine.');
+    return data.image_path;
+}
+
+/**
+ * initImagePreview()
+ * Afișează un preview live al imaginii selectate din input[type=file].
+ * Funcționează prin URL.createObjectURL — fișierul nu este trimis la server decât la submit.
+ */
+function initImagePreview() {
+    const input = document.getElementById('form-image');
+    if (!input) return; // Câmpul există doar pentru admin
+
+    const previewWrap  = document.getElementById('image-preview-wrap');
+    const previewImg   = document.getElementById('image-preview');
+    const currentLabel = document.getElementById('image-current');
+
+    input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (!file) return;
+        // createObjectURL creează un URL local temporar — nu trimite nimic la server
+        previewImg.src           = URL.createObjectURL(file);
+        currentLabel.textContent = file.name;
+        previewWrap.style.display = 'block';
+    });
 }
 
 /* ================================================================

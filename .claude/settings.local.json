@@ -13,7 +13,8 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(git commit --amend -m 'pagina bauturi + CRUD categorii + CSS componente noi *)"
+      "Bash(git commit --amend -m 'pagina bauturi + CRUD categorii + CSS componente noi *)",
+      "PowerShell(D:\\\\xampp\\\\php\\\\php.exe -l \"D:\\\\proiect_WEB\\\\beverages-app\\\\includes\\\\db.php\")"
     ]
   }
 }

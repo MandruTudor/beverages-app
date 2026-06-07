@@ -35,6 +35,7 @@ class BeverageService {
             'description'        => $dto->description,
             'image_path'         => $dto->imagePath,
             'perishability_days' => $dto->perishabilityDays,
+            'valid_until'        => $dto->validUntil,
             'season'             => $dto->season,
             'region'             => $dto->region,
             // ID-ul adminului care creează băutura — din sesiunea curentă, nu din body.

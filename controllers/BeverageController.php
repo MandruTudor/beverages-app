@@ -20,9 +20,10 @@ class BeverageController {
         // Filtrele rămân ca query params (nu ca body JSON) — citite direct din URL.
         // array_filter() elimină valorile null (filtrele necompletate nu ajung la Service).
         $filters = array_filter([
-            'category_id' => get_param('category_id'),
-            'season'      => get_param('season'),
-            'region'      => get_param('region'),
+            'category_id'         => get_param('category_id'),
+            'season'              => get_param('season'),
+            'region'              => get_param('region'),
+            'exclude_allergen_id' => get_param('exclude_allergen_id'),
         ], fn($v) => $v !== null);
 
         json_response(['beverages' => $this->service->list($filters)]);

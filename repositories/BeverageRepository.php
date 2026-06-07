@@ -19,8 +19,16 @@ class BeverageRepository {
             $where[]  = 'b.region = ?';
             $params[] = $filters['region'];
         }
+        if (isset($filters['exclude_allergen_id'])) {
+            // Excludem băuturile care conțin alergenul selectat
+            $where[]  = 'b.id NOT IN (SELECT beverage_id FROM beverage_allergens WHERE allergen_id = ?)';
+            $params[] = (int) $filters['exclude_allergen_id'];
+        }
 
-        $sql = 'SELECT b.*, c.name AS category_name FROM beverages b LEFT JOIN categories c ON c.id = b.category_id';
+        // allergen_count permite cardurilor să afișeze un badge de avertizare fără request suplimentar
+        $sql = 'SELECT b.*, c.name AS category_name,
+                (SELECT COUNT(*) FROM beverage_allergens ba WHERE ba.beverage_id = b.id) AS allergen_count
+                FROM beverages b LEFT JOIN categories c ON c.id = b.category_id';
         if ($where) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
@@ -44,8 +52,8 @@ class BeverageRepository {
 
     public function create(array $data): int {
         $stmt = $this->pdo->prepare('
-            INSERT INTO beverages (name, category_id, price, description, image_path, perishability_days, season, region, created_by)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO beverages (name, category_id, price, description, image_path, perishability_days, valid_until, season, region, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ');
         $stmt->execute([
             trim($data['name']),
@@ -54,6 +62,7 @@ class BeverageRepository {
             $data['description']        ?? null,
             $data['image_path']         ?? null,
             $data['perishability_days'] ?? null,
+            $data['valid_until']        ?? null,
             $data['season']             ?? null,
             $data['region']             ?? null,
             $data['created_by']         ?? null,
@@ -65,7 +74,7 @@ class BeverageRepository {
         $fields = [];
         $params = [];
 
-        foreach (['name', 'category_id', 'price', 'description', 'image_path', 'perishability_days', 'season', 'region'] as $col) {
+        foreach (['name', 'category_id', 'price', 'description', 'image_path', 'perishability_days', 'valid_until', 'season', 'region'] as $col) {
             if (array_key_exists($col, $data)) {
                 $fields[] = "$col = ?";
                 $params[] = $col === 'name' ? trim($data[$col]) : $data[$col];

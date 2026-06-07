@@ -37,6 +37,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/lists.php">Liste</a></li>
             <li><a href="/beverages-app/groups.php">Grupuri</a></li>
             <li><a href="/beverages-app/stats.php" class="active">Statistici</a></li>
+            <li><a href="/beverages-app/preferences.php">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <li><a href="/beverages-app/admin.php">Admin</a></li>
             <?php endif; ?>
@@ -57,10 +58,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <h2>Statistici</h2>
             <p class="page-subtitle">Distribuția și clasamentul băuturilor din catalog.</p>
         </div>
-        <!-- Butoane de export — CSV și JSON -->
+        <!-- Butoane export -->
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-            <button class="btn btn-outline btn-auto" id="btn-export-csv">⬇ Export CSV</button>
-            <button class="btn btn-outline btn-auto" id="btn-export-json">⬇ Export JSON</button>
+            <button class="btn btn-outline btn-auto" id="btn-export-csv">⬇ Băuturi CSV</button>
+            <button class="btn btn-outline btn-auto" id="btn-export-json">⬇ Băuturi JSON</button>
+            <button class="btn btn-outline btn-auto" id="btn-export-stats-csv">⬇ Statistici CSV</button>
         </div>
     </div>
 
@@ -96,14 +98,38 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Distribuție pe sezoane</h3>
-                <!-- Buton download SVG pentru graficul de sezoane -->
                 <button class="btn btn-outline btn-sm" id="btn-svg-season">⬇ SVG</button>
             </div>
-            <!-- SVG-ul este generat și inserat de JavaScript -->
             <div id="chart-season"></div>
         </div>
 
+        <!-- Graficul 3: Băuturi per regiune -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Băuturi per regiune</h3>
+                <button class="btn btn-outline btn-sm" id="btn-svg-region">⬇ SVG</button>
+            </div>
+            <div id="chart-region"></div>
+        </div>
+
+        <!-- Graficul 4: Frecvența alergenilor -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3>Frecvența alergenilor</h3>
+                <button class="btn btn-outline btn-sm" id="btn-svg-allergen">⬇ SVG</button>
+            </div>
+            <div id="chart-allergen"></div>
+        </div>
+
     </div>
+
+    <!-- Statistici de preț -->
+    <section class="page-section">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
+            💰 Statistici de preț
+        </h3>
+        <div id="price-stats-container"></div>
+    </section>
 
     <!-- ============================================================
          Clasamentul celor mai bine evaluate băuturi

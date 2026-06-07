@@ -15,9 +15,10 @@ class BeverageCreateDto {
     public ?float  $price;             // OpÈ›ional: preÈ›ul Ã®n lei
     public ?string $description;       // OpÈ›ional: descriere liberÄƒ
     public ?string $imagePath;         // OpÈ›ional: calea relativÄƒ a imaginii
-    public ?int    $perishabilityDays; // OpÈ›ional: zile de perisabilitate
-    public ?string $season;            // OpÈ›ional: 'spring'|'summer'|'autumn'|'winter'|'all'
-    public ?string $region;            // OpÈ›ional: regiune geograficÄƒ
+    public ?int    $perishabilityDays; // Optional: zile de perisabilitate
+    public ?string $validUntil;        // Optional: data expirarii (YYYY-MM-DD)
+    public ?string $season;            // Optional: 'spring'|'summer'|'autumn'|'winter'|'all'
+    public ?string $region;            // Optional: regiune geografica
 
     // --- RelaÈ›ii many-to-many (opÈ›ionale, array de obiecte) ---
     // Exemplu ingredients: [{"id": 1, "quantity": "200ml"}, {"id": 3}]
@@ -46,10 +47,9 @@ class BeverageCreateDto {
         $this->imagePath         = isset($data['image_path'])         ? trim($data['image_path'])           : null;
 
         // Perisabilitatea e numÄƒr Ã®ntreg de zile (ex: 7, 30, 365).
-        $this->perishabilityDays = isset($data['perishability_days']) ? (int)   $data['perishability_days'] : null;
-
-        // Sezonul e un enum string â€” nu trimÄƒm, valoarea vine deja curatÄƒ din dropdown.
-        $this->season            = $data['season']  ?? null;
+        $this->perishabilityDays = isset($data['perishability_days']) ? (int) $data['perishability_days'] : null;
+        $this->validUntil        = isset($data['valid_until'])        ? trim($data['valid_until'])         : null;
+        $this->season            = $data['season'] ?? null;
         $this->region            = isset($data['region'])             ? trim($data['region'])               : null;
 
         // RelaÈ›iile many-to-many â€” array de obiecte sau array gol dacÄƒ lipsesc.

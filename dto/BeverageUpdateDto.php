@@ -20,6 +20,7 @@ class BeverageUpdateDto {
     public ?string $description;
     public ?string $imagePath;
     public ?int    $perishabilityDays;
+    public ?string $validUntil;
     public ?string $season;
     public ?string $region;
 
@@ -41,8 +42,9 @@ class BeverageUpdateDto {
         $this->price             = isset($data['price'])             ? (float) $data['price']             : null;
         $this->description       = isset($data['description'])       ? trim($data['description'])         : null;
         $this->imagePath         = isset($data['image_path'])        ? trim($data['image_path'])          : null;
-        $this->perishabilityDays = isset($data['perishability_days'])? (int)   $data['perishability_days']: null;
-        $this->season            = $data['season']  ?? null;
+        $this->perishabilityDays = isset($data['perishability_days']) ? (int) $data['perishability_days'] : null;
+        $this->validUntil        = isset($data['valid_until'])        ? trim($data['valid_until'])         : null;
+        $this->season            = $data['season'] ?? null;
         $this->region            = isset($data['region'])            ? trim($data['region'])              : null;
 
         // RelaÈ›ii: null dacÄƒ LIPSESC din cerere; array (chiar gol) dacÄƒ SUNT Ã®n cerere.
@@ -70,6 +72,7 @@ class BeverageUpdateDto {
             'description'        => $this->description,
             'image_path'         => $this->imagePath,
             'perishability_days' => $this->perishabilityDays,
+            'valid_until'        => $this->validUntil,
             'season'             => $this->season,
             'region'             => $this->region,
         ];

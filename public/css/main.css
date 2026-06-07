@@ -1362,8 +1362,9 @@ textarea.form-control {
     font-family: inherit;
 }
 
-.list-add-bar select { flex: 1; min-width: 160px; }
-.list-add-bar input  { width: 70px; }
+.list-add-bar select { flex: 1; min-width: 200px; }
+.list-add-bar input[type="number"] { width: 70px; }
+.list-add-bar input[type="text"]   { flex: 1; min-width: 220px; }
 
 .list-add-bar select:focus,
 .list-add-bar input:focus {
@@ -1651,4 +1652,125 @@ textarea.form-control {
     border-color: var(--clr-primary);
     background: #eff6ff;
     color: var(--clr-primary);
+}
+
+/* ============================================================
+   Autocomplete căutare băuturi (lista de cumpărături)
+   ============================================================ */
+
+.beverage-search-results {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    background: var(--clr-surface);
+    border: 1.5px solid var(--clr-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    list-style: none;
+    z-index: 300;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.beverage-search-results:empty { display: none; }
+
+.beverage-search-results li {
+    padding: .55rem .9rem;
+    font-size: .9rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+    border-bottom: 1px solid var(--clr-border);
+}
+
+.beverage-search-results li:last-child { border-bottom: none; }
+
+.beverage-search-results li:hover,
+.beverage-search-results li.highlighted {
+    background: var(--clr-bg);
+    color: var(--clr-primary);
+}
+
+.beverage-search-results li span {
+    font-size: .8rem;
+    color: var(--clr-muted);
+    white-space: nowrap;
+}
+
+/* ============================================================
+   Imaginea băuturii — în card, modal detalii și formular
+   ============================================================ */
+
+/* Card cu imagine: overflow hidden pentru a decupa imaginea la colțurile rotunjite */
+.beverage-card { overflow: hidden; }
+
+/* Container imagine la topul cardului — margini negative pentru a ajunge până la margini */
+.card-image {
+    margin: -1.2rem -1.2rem .75rem;
+    height: 140px;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Acoperă zona fără distorsionare; decupează dacă e nevoie */
+    display: block;
+}
+
+/* Imagine în modalul de detalii */
+.detail-image {
+    margin: .5rem 0 1rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    max-height: 240px;
+}
+
+.detail-image img {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    display: block;
+}
+
+/* Preview imagine în formularul de adăugare/editare */
+.form-image-preview {
+    margin-top: .5rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1.5px solid var(--clr-border);
+}
+
+.form-image-preview img {
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.form-image-preview p {
+    font-size: .78rem;
+    color: var(--clr-muted);
+    padding: .3rem .65rem;
+    background: var(--clr-bg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Input file stilizat similar cu celelalte form-control */
+input[type="file"].form-control {
+    padding: .45rem .9rem;
+    cursor: pointer;
+    background: #fff;
+}
+
+/* ============================================================
+   Badge alergen (portocaliu) — pe carduri și în filtru
+   ============================================================ */
+.badge-allergen {
+    background: #fff7ed;
+    color: #c2410c;
 }

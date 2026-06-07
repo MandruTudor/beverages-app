@@ -52,4 +52,37 @@ class StatsRepository {
             ORDER BY count DESC
         ')->fetchAll();
     }
+
+    // Distribuția băuturilor pe regiuni geografice
+    public function getByRegion(): array {
+        return $this->pdo->query('
+            SELECT COALESCE(NULLIF(TRIM(region), \'\'), \'Nespecificată\') AS region, COUNT(*) AS count
+            FROM beverages
+            GROUP BY COALESCE(NULLIF(TRIM(region), \'\'), \'Nespecificată\')
+            ORDER BY count DESC
+        ')->fetchAll();
+    }
+
+    // Frecvența alergenilor în catalog
+    public function getByAllergen(): array {
+        return $this->pdo->query('
+            SELECT a.name AS allergen, COUNT(DISTINCT ba.beverage_id) AS count
+            FROM allergens a
+            LEFT JOIN beverage_allergens ba ON ba.allergen_id = a.id
+            GROUP BY a.id, a.name
+            ORDER BY count DESC
+        ')->fetchAll();
+    }
+
+    // Statistici de preț: minim, maxim, medie
+    public function getPriceStats(): array {
+        $row = $this->pdo->query('
+            SELECT ROUND(MIN(price), 2) AS min_price,
+                   ROUND(MAX(price), 2) AS max_price,
+                   ROUND(AVG(price), 2) AS avg_price,
+                   COUNT(price)         AS count_with_price
+            FROM beverages WHERE price IS NOT NULL
+        ')->fetch();
+        return $row ?: ['min_price' => null, 'max_price' => null, 'avg_price' => null, 'count_with_price' => 0];
+    }
 }

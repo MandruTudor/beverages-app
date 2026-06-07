@@ -7,9 +7,12 @@ class StatsService {
     public function summary(): array {
         require_auth();
         return [
-            'totals'      => $this->repo->getTotals(),
-            'by_category' => $this->repo->getByCategory(),
-            'by_season'   => $this->repo->getBySeason(),
+            'totals'       => $this->repo->getTotals(),
+            'by_category'  => $this->repo->getByCategory(),
+            'by_season'    => $this->repo->getBySeason(),
+            'by_region'    => $this->repo->getByRegion(),
+            'by_allergen'  => $this->repo->getByAllergen(),
+            'price_stats'  => $this->repo->getPriceStats(),
         ];
     }
 

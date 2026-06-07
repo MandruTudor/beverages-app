@@ -36,6 +36,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/lists.php">Liste</a></li>
             <li><a href="/beverages-app/groups.php">Grupuri</a></li>
             <li><a href="/beverages-app/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/preferences.php" class="active">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <li><a href="/beverages-app/admin.php">Admin</a></li>
             <?php endif; ?>

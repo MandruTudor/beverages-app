@@ -57,6 +57,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/lists.php">Liste</a></li>
             <li><a href="/beverages-app/groups.php">Grupuri</a></li>
             <li><a href="/beverages-app/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/preferences.php">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
             <li><a href="/beverages-app/admin.php">Admin</a></li>
             <?php endif; ?>
@@ -118,6 +119,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <option value="spring">Primăvară</option>
             <option value="summer">Vară</option>
             <option value="autumn">Toamnă</option>
+        </select>
+        <!-- Dropdown alergeni — opțiunile sunt populate dinamic de JS din /api/allergens.php
+             Selecția unui alergen EXCLUDE băuturile care îl conțin (filtrare pentru restricții) -->
+        <select id="filter-allergen" class="filter-select" aria-label="Excludeți alergenul">
+            <option value="">Fără restricții alergeni</option>
         </select>
     </div>
 
@@ -195,6 +201,17 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                 <textarea id="form-description" class="form-control" rows="3" placeholder="Descriere scurtă a băuturii..."></textarea>
             </div>
 
+            <!-- Imagine — input file, max 2MB, formate acceptate: JPEG/PNG/WebP/GIF -->
+            <div class="form-group">
+                <label for="form-image">Imagine (max 2MB)</label>
+                <input type="file" id="form-image" accept="image/jpeg,image/png,image/webp,image/gif" class="form-control">
+                <!-- Preview-ul apare după selectarea fișierului sau la editare dacă băutura are imagine -->
+                <div id="image-preview-wrap" class="form-image-preview" style="display:none">
+                    <img id="image-preview" src="" alt="Preview imagine">
+                    <p id="image-current"></p>
+                </div>
+            </div>
+
             <!-- Rând cu Sezon și Regiune -->
             <div class="form-row">
                 <div class="form-group">
@@ -215,10 +232,16 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                 </div>
             </div>
 
-            <!-- Perisabilitate în zile -->
-            <div class="form-group">
-                <label for="form-perishability">Perisabilitate (zile)</label>
-                <input type="number" id="form-perishability" min="0" class="form-control" placeholder="ex: 7">
+            <!-- Rând cu Perisabilitate și Valabilitate -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="form-perishability">Perisabilitate (zile)</label>
+                    <input type="number" id="form-perishability" min="0" class="form-control" placeholder="ex: 7">
+                </div>
+                <div class="form-group">
+                    <label for="form-valid-until">Valabil până la</label>
+                    <input type="date" id="form-valid-until" class="form-control">
+                </div>
             </div>
 
             <!-- Butoane Anulează / Salvează -->

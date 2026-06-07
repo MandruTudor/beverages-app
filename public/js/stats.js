@@ -59,30 +59,46 @@ async function loadStats() {
         // Randăm cardurile cu totaluri
         renderStatCards(summary.totals);
 
-        // Randăm graficul de categorii
+        // Grafic 1: băuturi per categorie
         renderBarChart(
             document.getElementById('chart-category'),
             summary.by_category.map(r => ({ label: r.category, value: parseInt(r.count) })),
-            '#2563eb' // albastrul primar al aplicației
+            '#2563eb'
         );
 
-        // Randăm graficul de sezoane
-        // Mapăm codurile sezon → etichete românești
+        // Grafic 2: distribuție pe sezoane
         const seasonLabel = { all: 'Tot anul', winter: 'Iarnă', spring: 'Primăvară', summer: 'Vară', autumn: 'Toamnă', necunoscut: 'Necunoscut' };
         renderBarChart(
             document.getElementById('chart-season'),
             summary.by_season.map(r => ({ label: seasonLabel[r.season] ?? r.season, value: parseInt(r.count) })),
-            '#0ea5e9' // albastru accent
+            '#0ea5e9'
         );
 
-        // Randăm clasamentul top rated
+        // Grafic 3: băuturi per regiune
+        renderBarChart(
+            document.getElementById('chart-region'),
+            (summary.by_region ?? []).map(r => ({ label: r.region, value: parseInt(r.count) })),
+            '#16a34a'
+        );
+
+        // Grafic 4: frecvența alergenilor
+        renderBarChart(
+            document.getElementById('chart-allergen'),
+            (summary.by_allergen ?? []).filter(r => parseInt(r.count) > 0).map(r => ({ label: r.allergen, value: parseInt(r.count) })),
+            '#dc2626'
+        );
+
+        // Statistici de preț
+        renderPriceStats(summary.price_stats ?? {});
+
+        // Clasament top rated
         renderTopRated(topData.top_rated ?? []);
 
     } catch (err) {
-        // La eroare, afișăm mesaj în fiecare container
-        document.getElementById('chart-category').innerHTML  = `<p class="error-text">${err.message}</p>`;
-        document.getElementById('chart-season').innerHTML    = `<p class="error-text">${err.message}</p>`;
-        document.getElementById('top-rated-container').innerHTML = `<p class="error-text">${err.message}</p>`;
+        ['chart-category','chart-season','chart-region','chart-allergen','top-rated-container'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = `<p class="error-text">${err.message}</p>`;
+        });
     }
 }
 
@@ -130,7 +146,7 @@ function renderStatCards(totals) {
  * @param {string}      barColor  - Culoarea barelor (ex: '#2563eb')
  */
 function renderBarChart(container, data, barColor = '#2563eb') {
-    // Dacă nu există date, afișăm un mesaj
+    if (!container) return; // Container absent din DOM — ignorăm silențios
     if (!data.length) {
         container.innerHTML = '<p class="loading-text">Nu există date de afișat.</p>';
         return;
@@ -224,6 +240,34 @@ function renderBarChart(container, data, barColor = '#2563eb') {
 }
 
 /* ================================================================
+   Statistici de preț
+   ================================================================ */
+
+function renderPriceStats(ps) {
+    const el = document.getElementById('price-stats-container');
+    if (!el) return;
+    if (!ps.avg_price) {
+        el.innerHTML = '<p class="loading-text">Nu există prețuri înregistrate.</p>';
+        return;
+    }
+    el.innerHTML = `
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+            <div class="stat-card" style="flex:1;min-width:140px">
+                <div class="stat-card__label">Preț minim</div>
+                <div class="stat-card__value" style="font-size:1.4rem;color:#16a34a">${parseFloat(ps.min_price).toFixed(2)} lei</div>
+            </div>
+            <div class="stat-card" style="flex:1;min-width:140px">
+                <div class="stat-card__label">Preț mediu</div>
+                <div class="stat-card__value" style="font-size:1.4rem;color:#2563eb">${parseFloat(ps.avg_price).toFixed(2)} lei</div>
+            </div>
+            <div class="stat-card" style="flex:1;min-width:140px">
+                <div class="stat-card__label">Preț maxim</div>
+                <div class="stat-card__value" style="font-size:1.4rem;color:#dc2626">${parseFloat(ps.max_price).toFixed(2)} lei</div>
+            </div>
+        </div>`;
+}
+
+/* ================================================================
    Clasament top rated
    ================================================================ */
 
@@ -305,21 +349,14 @@ async function loadBeveragesForExport() {
  * Atașează listeneri pe butoanele de export CSV, JSON și SVG.
  */
 function initExportButtons() {
-    // Export CSV: generăm fișierul din datele de băuturi deja încărcate
     document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-
-    // Export JSON: apelăm direct endpoint-ul de export al aplicației
     document.getElementById('btn-export-json').addEventListener('click', exportJSON);
+    document.getElementById('btn-export-stats-csv').addEventListener('click', exportStatsCSV);
 
-    // Download SVG grafic categorii
-    document.getElementById('btn-svg-category').addEventListener('click', () => {
-        downloadSVG('chart-category', 'statistici-categorii.svg');
-    });
-
-    // Download SVG grafic sezoane
-    document.getElementById('btn-svg-season').addEventListener('click', () => {
-        downloadSVG('chart-season', 'statistici-sezoane.svg');
-    });
+    document.getElementById('btn-svg-category').addEventListener('click', () => downloadSVG('chart-category',  'statistici-categorii.svg'));
+    document.getElementById('btn-svg-season').addEventListener('click',   () => downloadSVG('chart-season',    'statistici-sezoane.svg'));
+    document.getElementById('btn-svg-region').addEventListener('click',   () => downloadSVG('chart-region',    'statistici-regiuni.svg'));
+    document.getElementById('btn-svg-allergen').addEventListener('click', () => downloadSVG('chart-allergen',  'statistici-alergeni.svg'));
 }
 
 /**
@@ -333,19 +370,18 @@ function exportCSV() {
     }
 
     // Definim antetele coloanelor CSV
-    const headers = ['ID', 'Nume', 'Categorie', 'Pret (lei)', 'Descriere', 'Sezon', 'Regiune', 'Perisabilitate (zile)'];
+    const headers = ['ID', 'Nume', 'Categorie', 'Pret (lei)', 'Descriere', 'Sezon', 'Regiune', 'Perisabilitate (zile)', 'Valabil pana la'];
 
-    // Transformăm fiecare băutură într-un rând CSV
     const rows = exportBeverages.map(b => [
         b.id,
         b.name,
         b.category_name ?? '',
         b.price ?? '',
-        // Înlocuim virgulele din descriere pentru a nu rupe formatul CSV
         (b.description ?? '').replace(/,/g, ';'),
         b.season ?? '',
         b.region ?? '',
         b.perishability_days ?? '',
+        b.valid_until ?? '',
     ]);
 
     // Combinăm antetul cu rândurile, separând câmpurile cu virgulă
@@ -363,6 +399,70 @@ function exportCSV() {
     // Adăugăm BOM-ul UTF-8 pentru ca Excel să recunoască corect caracterele românești
     const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
     downloadBlob(blob, 'bauturi-export.csv');
+}
+
+/**
+ * exportStatsCSV()
+ * Generează un CSV cu toate datele statistice: categorii, sezoane, regiuni,
+ * alergeni, prețuri și top rated — grupate în secțiuni separate.
+ */
+async function exportStatsCSV() {
+    try {
+        const [summary, topData] = await Promise.all([
+            api('/beverages-app/api/stats.php?action=summary'),
+            api('/beverages-app/api/stats.php?action=top_rated&limit=20'),
+        ]);
+
+        const lines = [];
+        const row   = cols => cols.map(c => {
+            const s = String(c ?? '');
+            return s.includes(',') || s.includes('"') || s.includes('\n')
+                ? `"${s.replace(/"/g, '""')}"` : s;
+        }).join(',');
+
+        // Secțiunea: per categorie
+        lines.push('Secțiune,Categorie,Număr băuturi');
+        (summary.by_category ?? []).forEach(r => lines.push(row(['Per categorie', r.category, r.count])));
+        lines.push('');
+
+        // Secțiunea: per sezon
+        lines.push('Secțiune,Sezon,Număr băuturi');
+        const sl = { all: 'Tot anul', winter: 'Iarnă', spring: 'Primăvară', summer: 'Vară', autumn: 'Toamnă', necunoscut: 'Necunoscut' };
+        (summary.by_season ?? []).forEach(r => lines.push(row(['Per sezon', sl[r.season] ?? r.season, r.count])));
+        lines.push('');
+
+        // Secțiunea: per regiune
+        lines.push('Secțiune,Regiune,Număr băuturi');
+        (summary.by_region ?? []).forEach(r => lines.push(row(['Per regiune', r.region, r.count])));
+        lines.push('');
+
+        // Secțiunea: alergeni
+        lines.push('Secțiune,Alergen,Număr băuturi afectate');
+        (summary.by_allergen ?? []).forEach(r => lines.push(row(['Alergeni', r.allergen, r.count])));
+        lines.push('');
+
+        // Secțiunea: prețuri
+        const ps = summary.price_stats ?? {};
+        lines.push('Secțiune,Indicator,Valoare (lei)');
+        if (ps.avg_price) {
+            lines.push(row(['Prețuri', 'Minim', ps.min_price]));
+            lines.push(row(['Prețuri', 'Mediu', ps.avg_price]));
+            lines.push(row(['Prețuri', 'Maxim', ps.max_price]));
+        }
+        lines.push('');
+
+        // Secțiunea: top rated
+        lines.push('Secțiune,Loc,Băutură,Rating mediu,Evaluări,Preț (lei)');
+        (topData.top_rated ?? []).forEach((item, i) => lines.push(
+            row(['Top evaluat', i + 1, item.name, item.avg_rating, item.rating_count, item.price ?? ''])
+        ));
+
+        const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        downloadBlob(blob, 'statistici-export.csv');
+
+    } catch (err) {
+        alert('Eroare la exportul statisticilor: ' + err.message);
+    }
 }
 
 /**

@@ -23,6 +23,9 @@ let allBeverages = [];
 // Grupurile userului — pentru selectorul de la creare listă
 let userGroups = [];
 
+// Itemele listei active — păstrate pentru re-sortare fără request nou
+let activeItems = [];
+
 /* ================================================================
    Utilitare API
    ================================================================ */
@@ -52,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Atașăm event listeneri pe formular și butoanele fixe
     initCreateForm();
     initDetailActions();
+    initSortControl();
 
     // Încărcăm în paralel listele, băuturile și grupurile
     await Promise.all([loadLists(), loadBeverages(), loadGroups()]);
@@ -257,25 +261,69 @@ async function loadListDetail(id) {
         titleEl.textContent = list.name;
         metaEl.textContent  = `${list.items.length} item${list.items.length === 1 ? '' : 'e'}`;
 
-        // Randăm itemele
-        if (!list.items.length) {
-            // Tabel gol
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="list-empty-state">
-                        Lista e goală. Adaugă băuturi folosind bara de mai sus.
-                    </td>
-                </tr>`;
-        } else {
-            // Generăm câte un rând pentru fiecare item
-            tbody.innerHTML = list.items.map(item => itemRowHTML(item)).join('');
-            // Atașăm listeneri pe butoanele din rânduri
-            attachItemListeners();
-        }
+        // Salvăm itemele în state global pentru re-sortare fără request suplimentar
+        activeItems = list.items;
+        renderItems();
 
     } catch (err) {
         tbody.innerHTML = `<tr><td colspan="5" style="color:var(--clr-danger);padding:1rem 1.25rem">${err.message}</td></tr>`;
     }
+}
+
+/**
+ * renderItems()
+ * Sortează activeItems după criteriul selectat și randează tabelul.
+ * Apelat după încărcare și la schimbarea sortării.
+ */
+function renderItems() {
+    const tbody = document.getElementById('items-tbody');
+    if (!tbody) return;
+
+    const sorted = sortItems([...activeItems]);
+
+    if (!sorted.length) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="list-empty-state">
+                    Lista e goală. Adaugă băuturi folosind bara de mai sus.
+                </td>
+            </tr>`;
+    } else {
+        tbody.innerHTML = sorted.map(item => itemRowHTML(item)).join('');
+        attachItemListeners();
+    }
+}
+
+/**
+ * sortItems(items)
+ * Returnează o copie sortată a array-ului de iteme după criteriul din #sort-items.
+ */
+function sortItems(items) {
+    const mode = document.getElementById('sort-items')?.value ?? 'default';
+    switch (mode) {
+        case 'name':
+            return items.sort((a, b) => a.beverage_name.localeCompare(b.beverage_name, 'ro'));
+        case 'name-desc':
+            return items.sort((a, b) => b.beverage_name.localeCompare(a.beverage_name, 'ro'));
+        case 'price':
+            return items.sort((a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0));
+        case 'price-desc':
+            return items.sort((a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0));
+        case 'unchecked':
+            return items.sort((a, b) => parseInt(a.checked) - parseInt(b.checked));
+        case 'checked':
+            return items.sort((a, b) => parseInt(b.checked) - parseInt(a.checked));
+        default:
+            return items; // Ordinea originală (din API)
+    }
+}
+
+/**
+ * initSortControl()
+ * Atașează listener pe selectul de sortare — re-randează imediat la schimbare.
+ */
+function initSortControl() {
+    document.getElementById('sort-items')?.addEventListener('change', renderItems);
 }
 
 /**
@@ -390,16 +438,15 @@ function initDetailActions() {
  * Citește băutura și cantitatea selectate în bara de adăugare și trimite la API.
  */
 async function addItemFromBar() {
-    const select   = document.getElementById('add-beverage-select');
+    const hiddenId = document.getElementById('add-beverage-id');
     const qtyInput = document.getElementById('add-quantity');
     const btn      = document.getElementById('btn-add-item');
 
-    const beverageId = parseInt(select.value);
+    const beverageId = parseInt(hiddenId?.value);
     const quantity   = parseInt(qtyInput.value) || 1;
 
-    // Validare: trebuie să fie selectată o băutură
     if (!beverageId) {
-        showFeedback('Alege o băutură din dropdown.', 'error');
+        showFeedback('Caută și selectează o băutură din lista de sugestii.', 'error');
         return;
     }
 
@@ -411,8 +458,11 @@ async function addItemFromBar() {
             beverage_id: beverageId,
             quantity,
         });
-        // Resetăm cantitatea la 1 pentru adăugarea următoare
+        // Resetăm câmpurile după adăugare
         qtyInput.value = 1;
+        const searchInput = document.getElementById('add-beverage-search');
+        if (searchInput) searchInput.value = '';
+        if (hiddenId)    hiddenId.value    = '';
         // Reîncărcăm detaliile listei și sidebar-ul (pentru actualizarea numărului de iteme)
         await Promise.all([loadListDetail(activeListId), loadLists()]);
         showFeedback('Băutura a fost adăugată.', 'success');
@@ -482,19 +532,96 @@ async function loadGroups() {
 
 async function loadBeverages() {
     try {
-        const data  = await api('GET', '/beverages-app/api/beverages.php');
+        const data   = await api('GET', '/beverages-app/api/beverages.php');
         allBeverages = data.beverages ?? [];
-
-        const select = document.getElementById('add-beverage-select');
-        // Adăugăm câte o opțiune pentru fiecare băutură
-        allBeverages.forEach(b => {
-            const price = b.price ? ` — ${parseFloat(b.price).toFixed(2)} lei` : '';
-            // Option text: "Ceai de musetel — 8.00 lei"
-            select.add(new Option(`${b.name}${price}`, b.id));
-        });
+        initBeverageSearch();
     } catch {
         // Eșecul la încărcarea băuturilor nu blochează restul paginii
     }
+}
+
+/**
+ * initBeverageSearch()
+ * Activează autocomplete-ul pe câmpul de căutare băuturi.
+ * Afișează maxim 8 rezultate filtrate după nume.
+ */
+function initBeverageSearch() {
+    const searchInput = document.getElementById('add-beverage-search');
+    const hiddenId    = document.getElementById('add-beverage-id');
+    const resultsList = document.getElementById('beverage-results');
+    if (!searchInput) return;
+
+    let highlightIndex = -1; // Indexul elementului evidențiat cu săgețile
+
+    // Evidențiază un item din listă (elimină de pe celelalte)
+    function highlight(index) {
+        const items = resultsList.querySelectorAll('li');
+        items.forEach((li, i) => li.classList.toggle('highlighted', i === index));
+        highlightIndex = index;
+    }
+
+    // Selectează un <li> și îl pune în câmp
+    function selectItem(li) {
+        hiddenId.value    = li.dataset.id;
+        searchInput.value = li.dataset.name;
+        resultsList.innerHTML = '';
+        highlightIndex = -1;
+    }
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        hiddenId.value = '';
+        highlightIndex = -1;
+
+        if (!query) { resultsList.innerHTML = ''; return; }
+
+        const filtered = allBeverages
+            .filter(b => b.name.toLowerCase().includes(query))
+            .slice(0, 8);
+
+        if (!filtered.length) { resultsList.innerHTML = ''; return; }
+
+        resultsList.innerHTML = filtered.map(b => {
+            const price = b.price ? ` <span>${parseFloat(b.price).toFixed(2)} lei</span>` : '';
+            return `<li role="option" data-id="${b.id}" data-name="${escHtml(b.name)}">
+                ${escHtml(b.name)}${price}
+            </li>`;
+        }).join('');
+
+        resultsList.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', () => selectItem(li));
+        });
+    });
+
+    // Navigare cu tastatura: săgeți + Enter + Escape
+    searchInput.addEventListener('keydown', e => {
+        const items = resultsList.querySelectorAll('li');
+        if (!items.length) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            highlight(Math.min(highlightIndex + 1, items.length - 1));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlight(Math.max(highlightIndex - 1, 0));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightIndex >= 0 && items[highlightIndex]) {
+                selectItem(items[highlightIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            resultsList.innerHTML = '';
+            highlightIndex = -1;
+        }
+    });
+
+    // Închidem lista la click în afara componentei
+    document.addEventListener('click', e => {
+        if (!searchInput.contains(e.target) && !resultsList.contains(e.target)) {
+            resultsList.innerHTML = '';
+            highlightIndex = -1;
+        }
+    });
 }
 
 /* ================================================================

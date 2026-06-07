@@ -38,8 +38,9 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <li><a href="/beverages-app/lists.php" class="active">Liste</a></li>
             <li><a href="/beverages-app/groups.php">Grupuri</a></li>
             <li><a href="/beverages-app/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/preferences.php">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
-            <li><a href="#">Admin</a></li>
+            <li><a href="/beverages-app/admin.php">Admin</a></li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -129,11 +130,22 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 
                 <!-- Bara de adăugare a unui item nou din catalog -->
                 <div class="list-add-bar">
-                    <!-- Dropdown cu toate băuturile din catalog — populat de JS -->
-                    <select id="add-beverage-select" aria-label="Selectează băutură">
-                        <option value="">— Alege băutură —</option>
-                    </select>
-                    <!-- Câmpul pentru cantitate -->
+                    <!-- Căutare băutură cu autocomplete -->
+                    <div style="position:relative;flex:1;min-width:180px">
+                        <input
+                            type="text"
+                            id="add-beverage-search"
+                            class="form-control"
+                            placeholder="🔍 Caută băutură..."
+                            autocomplete="off"
+                            aria-label="Caută băutură"
+                            aria-autocomplete="list"
+                        >
+                        <!-- ID-ul băuturii selectate — trimis la API -->
+                        <input type="hidden" id="add-beverage-id">
+                        <!-- Lista de rezultate — apare sub câmp la tastare -->
+                        <ul id="beverage-results" class="beverage-search-results" role="listbox"></ul>
+                    </div>
                     <input
                         type="number"
                         id="add-quantity"
@@ -151,6 +163,20 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                         ⭐ Sugerate pentru tine:
                     </div>
                     <div id="suggestions-list" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
+                </div>
+
+                <!-- Sortare iteme -->
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
+                    <label for="sort-items" style="font-size:.85rem;color:var(--clr-muted);white-space:nowrap">Sortare:</label>
+                    <select id="sort-items" class="filter-select" style="width:auto;padding:.35rem .7rem;font-size:.85rem">
+                        <option value="default">Ordinea adăugării</option>
+                        <option value="name">Alfabetic (A→Z)</option>
+                        <option value="name-desc">Alfabetic (Z→A)</option>
+                        <option value="price">Preț crescător</option>
+                        <option value="price-desc">Preț descrescător</option>
+                        <option value="unchecked">Nebifate primele</option>
+                        <option value="checked">Bifate primele</option>
+                    </select>
                 </div>
 
                 <!-- Tabelul cu itemele listei -->
