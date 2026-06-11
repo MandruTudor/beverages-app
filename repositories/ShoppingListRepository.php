@@ -50,6 +50,19 @@ class ShoppingListRepository {
     }
 
     public function addItem(int $listId, int $beverageId, int $quantity): int {
+        // Dacă băutura e deja în listă, adunăm cantitatea în loc să creăm un rând duplicat
+        $check = $this->pdo->prepare('SELECT id FROM shopping_list_items WHERE list_id = ? AND beverage_id = ?');
+        $check->execute([$listId, $beverageId]);
+        $existing = $check->fetch();
+
+        if ($existing) {
+            // Băutura există deja — creștem cantitatea cu valoarea adăugată
+            $this->pdo->prepare('UPDATE shopping_list_items SET quantity = quantity + ? WHERE id = ?')
+                      ->execute([$quantity, (int) $existing['id']]);
+            return (int) $existing['id'];
+        }
+
+        // Băutură nouă în listă — inserăm
         $stmt = $this->pdo->prepare('INSERT INTO shopping_list_items (list_id, beverage_id, quantity) VALUES (?, ?, ?)');
         $stmt->execute([$listId, $beverageId, $quantity]);
         return (int) $this->pdo->lastInsertId();

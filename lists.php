@@ -185,7 +185,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                         <tr>
                             <th>Băutură</th>
                             <th>Cant.</th>
-                            <th>Preț</th>
+                            <th>Preț total</th>
                             <th style="text-align:center">Bifat</th>
                             <th></th><!-- Coloana pentru butoanele de acțiune -->
                         </tr>

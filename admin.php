@@ -81,7 +81,9 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </h3>
         <p style="color:var(--clr-muted);font-size:.88rem;margin-bottom:1rem">
             Fișierul CSV trebuie să aibă antetele:
-            <code>name, category_id, price, description, season, region, perishability_days</code>
+            <code>name, category_id, price, description, season, region, perishability_days, allergens, dietary_regimes</code>.
+            Coloanele <code>allergens</code> și <code>dietary_regimes</code> sunt opționale și acceptă ID-uri separate prin <code>|</code>
+            (ex: <code>1|3</code>).
         </p>
 
         <!-- Zona de upload fișier CSV -->
@@ -113,7 +115,8 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             Fișierul JSON trebuie să fie un <strong>array de obiecte</strong> cu câmpurile:
             <code>name</code> (obligatoriu),
             <code>category_id, price, description, season, region, perishability_days, valid_until</code> (opționale).
-            Opțional: <code>allergens</code> (array de <code>{"id": N}</code>) și
+            Opțional: <code>allergens</code> (array de <code>{"id": N}</code>),
+            <code>dietary_regimes</code> (array de <code>{"id": N}</code>) și
             <code>ingredients</code> (array de <code>{"id": N, "quantity": "..."}</code>).
         </p>
 

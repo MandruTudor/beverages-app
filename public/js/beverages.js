@@ -121,7 +121,7 @@ function beverageCardHTML(b) {
             <span class="badge badge-category">${escHtml(b.category_name ?? 'Fără categorie')}</span>
             ${b.season ? `<span class="badge badge-season">${escHtml(seasonLabel[b.season] ?? b.season)}</span>` : ''}
             ${parseInt(b.allergen_count) > 0 ? '<span class="badge badge-allergen" title="Conține alergeni">⚠ Alergeni</span>' : ''}
-            ${parseInt(b.regime_count)   > 0 ? `<span class="badge badge-regime" title="Regimuri speciale">🌿 ${b.regime_count} regim${parseInt(b.regime_count) !== 1 ? 'uri' : ''}</span>` : ''}
+            ${parseInt(b.regime_count) > 0 ? `<span class="badge badge-regime" title="${escHtml(b.regime_names ?? 'Regimuri speciale')}">🌿 ${b.regime_count} regim${parseInt(b.regime_count) !== 1 ? 'uri' : ''}</span>` : ''}
         </div>
         <h3 class="card-title">${escHtml(b.name)}</h3>
         ${b.description ? `<p class="card-desc">${escHtml(b.description)}</p>` : ''}
@@ -204,7 +204,7 @@ async function openDetail(id) {
         ${isAdmin ? `
         <div class="detail-admin-actions">
             <button class="btn btn-outline btn-sm" onclick="openForm(${b.id})">✏️ Editează</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteBeverage(${b.id}, ${JSON.stringify(b.name)})">🗑 Șterge</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteBeverage(${b.id}, ${escHtml(JSON.stringify(b.name))})">🗑 Șterge</button>
         </div>` : ''}
     `;
 }

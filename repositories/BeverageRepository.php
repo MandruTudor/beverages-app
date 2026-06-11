@@ -28,10 +28,14 @@ class BeverageRepository {
             $params[] = (int) $filters['dietary_regime_id'];
         }
 
-        // allergen_count și regime_count permit cardurilor să afișeze badge-uri fără request suplimentar
+        // allergen_count, regime_count și regime_names permit cardurilor să afișeze badge-uri
+        // cu tooltip (mouseover arată ce regimuri sunt) fără request API suplimentar
         $sql = 'SELECT b.*, c.name AS category_name,
                 (SELECT COUNT(*) FROM beverage_allergens ba WHERE ba.beverage_id = b.id) AS allergen_count,
-                (SELECT COUNT(*) FROM beverage_dietary_regimes bdr WHERE bdr.beverage_id = b.id) AS regime_count
+                (SELECT COUNT(*) FROM beverage_dietary_regimes bdr WHERE bdr.beverage_id = b.id) AS regime_count,
+                (SELECT GROUP_CONCAT(dr.name, \', \') FROM beverage_dietary_regimes bdr
+                 JOIN dietary_regimes dr ON dr.id = bdr.regime_id
+                 WHERE bdr.beverage_id = b.id ORDER BY dr.name) AS regime_names
                 FROM beverages b LEFT JOIN categories c ON c.id = b.category_id';
         if ($where) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
@@ -55,13 +59,21 @@ class BeverageRepository {
     }
 
     public function create(array $data): int {
+        // Dacă category_id nu există în tabelă, îl ignorăm (null) pentru a evita FK violation
+        $categoryId = $data['category_id'] ?? null;
+        if ($categoryId !== null) {
+            $chk = $this->pdo->prepare('SELECT 1 FROM categories WHERE id = ?');
+            $chk->execute([$categoryId]);
+            if (!$chk->fetch()) $categoryId = null;
+        }
+
         $stmt = $this->pdo->prepare('
             INSERT INTO beverages (name, category_id, price, description, image_path, perishability_days, valid_until, season, region, created_by)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ');
         $stmt->execute([
             trim($data['name']),
-            $data['category_id']        ?? null,
+            $categoryId,
             $data['price']              ?? null,
             $data['description']        ?? null,
             $data['image_path']         ?? null,
@@ -131,15 +143,16 @@ class BeverageRepository {
 
     public function syncIngredients(int $beverage_id, array $items): void {
         $this->pdo->prepare('DELETE FROM beverage_ingredients WHERE beverage_id = ?')->execute([$beverage_id]);
-        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_ingredients (beverage_id, ingredient_id, quantity) VALUES (?, ?, ?)');
+        // Subquery: inserează doar dacă ingredient_id există (INSERT OR IGNORE nu ignoră FK violations în SQLite)
+        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_ingredients (beverage_id, ingredient_id, quantity) SELECT ?, id, ? FROM ingredients WHERE id = ?');
         foreach ($items as $item) {
-            $stmt->execute([$beverage_id, (int) $item['id'], $item['quantity'] ?? null]);
+            $stmt->execute([$beverage_id, $item['quantity'] ?? null, (int) $item['id']]);
         }
     }
 
     public function syncAllergens(int $beverage_id, array $items): void {
         $this->pdo->prepare('DELETE FROM beverage_allergens WHERE beverage_id = ?')->execute([$beverage_id]);
-        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id) VALUES (?, ?)');
+        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id) SELECT ?, id FROM allergens WHERE id = ?');
         foreach ($items as $item) {
             $stmt->execute([$beverage_id, (int) $item['id']]);
         }
@@ -147,7 +160,7 @@ class BeverageRepository {
 
     public function syncVenues(int $beverage_id, array $items): void {
         $this->pdo->prepare('DELETE FROM beverage_venues WHERE beverage_id = ?')->execute([$beverage_id]);
-        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_venues (beverage_id, venue_id) VALUES (?, ?)');
+        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_venues (beverage_id, venue_id) SELECT ?, id FROM venues WHERE id = ?');
         foreach ($items as $item) {
             $stmt->execute([$beverage_id, (int) $item['id']]);
         }
@@ -167,7 +180,7 @@ class BeverageRepository {
 
     public function syncDietaryRegimes(int $beverage_id, array $items): void {
         $this->pdo->prepare('DELETE FROM beverage_dietary_regimes WHERE beverage_id = ?')->execute([$beverage_id]);
-        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_dietary_regimes (beverage_id, regime_id) VALUES (?, ?)');
+        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_dietary_regimes (beverage_id, regime_id) SELECT ?, id FROM dietary_regimes WHERE id = ?');
         foreach ($items as $item) {
             $stmt->execute([$beverage_id, (int) $item['id']]);
         }

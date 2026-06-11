@@ -188,12 +188,14 @@ function initSortControl() {
 function itemRowHTML(item) {
     const checkedClass = item.checked == 1 ? 'checked' : '';
     const checkIcon    = item.checked == 1 ? '↩ Debifează' : '✔ Bifează';
-    const price        = item.price ? parseFloat(item.price).toFixed(2) + ' lei' : '—';
+    // Afișăm prețul total = cantitate × preț unitar (nu prețul per bucată)
+    const qty   = parseInt(item.quantity) || 1;
+    const total = item.price ? (parseFloat(item.price) * qty).toFixed(2) + ' lei' : '—';
     return `
     <tr class="${checkedClass}" data-item-id="${item.id}">
         <td><span class="item-name">${escHtml(item.beverage_name)}</span></td>
-        <td>${escHtml(String(item.quantity ?? 1))}</td>
-        <td>${price}</td>
+        <td>${escHtml(String(qty))}</td>
+        <td>${total}</td>
         <td style="text-align:center">
             ${item.checked == 1
                 ? '<span style="color:var(--clr-success);font-weight:700">✔</span>'

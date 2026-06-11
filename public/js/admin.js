@@ -194,6 +194,11 @@ async function importRows(header, rows) {
         if (obj.price)              obj.price              = parseFloat(obj.price)  || null;
         if (obj.category_id)        obj.category_id        = parseInt(obj.category_id) || null;
         if (obj.perishability_days) obj.perishability_days = parseInt(obj.perishability_days) || null;
+
+        // Parsează ID-urile separate prin '|' în array-uri de obiecte {id: N}
+        obj.allergens       = obj.allergens       ? obj.allergens.split('|').map(id => parseInt(id.trim())).filter(Boolean).map(id => ({ id }))       : [];
+        obj.dietary_regimes = obj.dietary_regimes ? obj.dietary_regimes.split('|').map(id => parseInt(id.trim())).filter(Boolean).map(id => ({ id })) : [];
+
         try { await api('POST', '/beverages-app/api/beverages.php', obj); success++; }
         catch { errors++; }
     }

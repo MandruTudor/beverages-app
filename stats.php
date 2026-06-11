@@ -25,7 +25,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <title>Statistici — Beverages App</title>
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
 </head>
-<body>
+<!--
+    data-role transmite rolul utilizatorului spre JavaScript.
+    Admini văd toate statisticile + export; userii văd doar clasamentul de ratinguri.
+-->
+<body data-role="<?= htmlspecialchars($user['role']) ?>">
 
 <!-- Bara de navigare fixă -->
 <header class="topbar">
@@ -52,13 +56,18 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 
 <main class="page-main">
 
+<?php if ($user['role'] === 'admin'): ?>
+    <!-- ============================================================
+         Secțiuni vizibile DOAR pentru admini
+         ============================================================ -->
+
     <!-- Titlul paginii + butoane de export -->
     <div class="page-header">
         <div>
             <h2>Statistici</h2>
             <p class="page-subtitle">Distribuția și clasamentul băuturilor din catalog.</p>
         </div>
-        <!-- Butoane export -->
+        <!-- Butoane export: CSV pentru toți, JSON doar pentru admini (conține toate datele) -->
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
             <button class="btn btn-outline btn-auto" id="btn-export-csv">⬇ Băuturi CSV</button>
             <button class="btn btn-outline btn-auto" id="btn-export-json">⬇ Băuturi JSON</button>
@@ -66,35 +75,25 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
-    <!-- ============================================================
-         Carduri cu totaluri generale
-         Populate de JavaScript după apelul API /stats.php
-         ============================================================ -->
+    <!-- Carduri cu totaluri generale — populate de JS după apelul API -->
     <div class="stats-cards" id="stats-cards">
-        <!-- Schelet loading — înlocuit de JS după încărcare -->
         <div class="stat-card stat-card--loading"></div>
         <div class="stat-card stat-card--loading"></div>
         <div class="stat-card stat-card--loading"></div>
         <div class="stat-card stat-card--loading"></div>
     </div>
 
-    <!-- ============================================================
-         Grafice SVG — două coloane pe desktop
-         ============================================================ -->
+    <!-- Grafice SVG — două coloane pe desktop -->
     <div class="charts-grid">
 
-        <!-- Graficul 1: Băuturi per categorie -->
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Băuturi per categorie</h3>
-                <!-- Buton download SVG pentru graficul de categorii -->
                 <button class="btn btn-outline btn-sm" id="btn-svg-category">⬇ SVG</button>
             </div>
-            <!-- SVG-ul este generat și inserat de JavaScript -->
             <div id="chart-category"></div>
         </div>
 
-        <!-- Graficul 2: Distribuție pe sezoane -->
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Distribuție pe sezoane</h3>
@@ -103,7 +102,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <div id="chart-season"></div>
         </div>
 
-        <!-- Graficul 3: Băuturi per regiune -->
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Băuturi per regiune</h3>
@@ -112,7 +110,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <div id="chart-region"></div>
         </div>
 
-        <!-- Graficul 4: Frecvența alergenilor -->
         <div class="chart-container">
             <div class="chart-header">
                 <h3>Frecvența alergenilor</h3>
@@ -131,14 +128,24 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <div id="price-stats-container"></div>
     </section>
 
+<?php else: ?>
+    <!-- Titlu simplificat pentru useri — fără export -->
+    <div class="page-header">
+        <div>
+            <h2>Statistici</h2>
+            <p class="page-subtitle">Clasamentul băuturilor evaluate de utilizatori.</p>
+        </div>
+    </div>
+<?php endif; ?>
+
     <!-- ============================================================
          Clasamentul celor mai bine evaluate băuturi
+         Vizibil pentru TOȚI utilizatorii autentificați
          ============================================================ -->
     <section class="page-section">
         <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
             🏆 Clasament băuturi populare
         </h3>
-        <!-- Tabelul este populat de JavaScript -->
         <div id="top-rated-container"></div>
     </section>
 

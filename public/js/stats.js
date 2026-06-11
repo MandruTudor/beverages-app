@@ -5,11 +5,36 @@ async function api(url) {
     return data;
 }
 
+// Citim rolul din atributul data-role al tagului <body> (setat de PHP)
+const isAdmin = document.body.dataset.role === 'admin';
+
 document.addEventListener('DOMContentLoaded', async () => {
-    await Promise.all([loadStats(), loadBeveragesForExport()]);
+    // Toți userii autentificați pot descărca CSV cu băuturile
+    await loadBeveragesForExport();
+
+    if (isAdmin) {
+        // Admini: statistici complete + toate butoanele de export (inclusiv JSON)
+        await loadStats();
+    } else {
+        // Useri: doar clasamentul de ratinguri
+        await loadTopRatedOnly();
+    }
+
     initExportButtons();
 });
 
+// Versiunea pentru useri: apelează doar top_rated, nu încarcă graficele
+async function loadTopRatedOnly() {
+    try {
+        const topData = await api('/beverages-app/api/stats.php?action=top_rated&limit=10');
+        renderTopRated(topData.top_rated ?? []);
+    } catch (err) {
+        const el = document.getElementById('top-rated-container');
+        if (el) el.innerHTML = `<p class="error-text">${err.message}</p>`;
+    }
+}
+
+// Versiunea pentru admini: încarcă summary complet + top_rated
 async function loadStats() {
     try {
         const [summary, topData] = await Promise.all([
@@ -154,13 +179,14 @@ async function loadBeveragesForExport() {
 }
 
 function initExportButtons() {
-    document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-    document.getElementById('btn-export-json').addEventListener('click', exportJSON);
-    document.getElementById('btn-export-stats-csv').addEventListener('click', exportStatsCSV);
-    document.getElementById('btn-svg-category').addEventListener('click', () => downloadSVG('chart-category',  'statistici-categorii.svg'));
-    document.getElementById('btn-svg-season').addEventListener('click',   () => downloadSVG('chart-season',    'statistici-sezoane.svg'));
-    document.getElementById('btn-svg-region').addEventListener('click',   () => downloadSVG('chart-region',    'statistici-regiuni.svg'));
-    document.getElementById('btn-svg-allergen').addEventListener('click', () => downloadSVG('chart-allergen',  'statistici-alergeni.svg'));
+    // Folosim querySelector cu guard — butoanele există doar pentru admini în HTML
+    document.getElementById('btn-export-csv')?.addEventListener('click', exportCSV);
+    document.getElementById('btn-export-json')?.addEventListener('click', exportJSON);
+    document.getElementById('btn-export-stats-csv')?.addEventListener('click', exportStatsCSV);
+    document.getElementById('btn-svg-category')?.addEventListener('click', () => downloadSVG('chart-category',  'statistici-categorii.svg'));
+    document.getElementById('btn-svg-season')?.addEventListener('click',   () => downloadSVG('chart-season',    'statistici-sezoane.svg'));
+    document.getElementById('btn-svg-region')?.addEventListener('click',   () => downloadSVG('chart-region',    'statistici-regiuni.svg'));
+    document.getElementById('btn-svg-allergen')?.addEventListener('click', () => downloadSVG('chart-allergen',  'statistici-alergeni.svg'));
 }
 
 function exportCSV() {
@@ -231,8 +257,17 @@ async function exportStatsCSV() {
     }
 }
 
-function exportJSON() {
-    window.open('/beverages-app/api/export.php', '_blank');
+async function exportJSON() {
+    try {
+        const data = await api('/beverages-app/api/export.php');
+        // JSON.stringify cu indent 2 pentru un fișier lizibil
+        downloadBlob(
+            new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8;' }),
+            'bauturi-export.json'
+        );
+    } catch (err) {
+        alert('Eroare la exportul JSON: ' + err.message);
+    }
 }
 
 function downloadSVG(containerId, filename) {

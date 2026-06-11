@@ -7,8 +7,17 @@ class ShoppingListItemUpdateDto {
 
     public function __construct(array $data) {
         $this->provided = array_keys($data);
-        $this->quantity = isset($data['quantity']) ? max(1, (int) $data['quantity']) : null;
-        $this->checked  = isset($data['checked'])  ? ($data['checked'] ? 1 : 0)     : null;
+
+        // Validăm cantitatea la update: 0 și negative sunt interzise
+        if (isset($data['quantity'])) {
+            $qty = (int) $data['quantity'];
+            if ($qty <= 0) json_error('Cantitatea trebuie sa fie mai mare decat 0.', 400);
+            $this->quantity = $qty;
+        } else {
+            $this->quantity = null;
+        }
+
+        $this->checked = isset($data['checked']) ? ($data['checked'] ? 1 : 0) : null;
     }
 
     public function has(string $field): bool {
