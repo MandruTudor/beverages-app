@@ -21,20 +21,17 @@ class UserRepository {
         return (int) $this->pdo->lastInsertId();
     }
 
-    // Returnează toți utilizatorii (fără parole) — folosit în panoul de admin
     public function findAll(): array {
         return $this->pdo->query(
             'SELECT id, username, email, role, created_at FROM users ORDER BY created_at DESC'
         )->fetchAll();
     }
 
-    // Schimbă rolul unui utilizator: 'user' sau 'admin'
     public function setRole(int $id, string $role): void {
         $stmt = $this->pdo->prepare('UPDATE users SET role = ? WHERE id = ?');
         $stmt->execute([$role, $id]);
     }
 
-    // Șterge un utilizator după ID
     public function delete(int $id): void {
         $this->pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$id]);
     }

@@ -3,7 +3,6 @@
 class ExportRepository {
     public function __construct(private PDO $pdo) {}
 
-    // Exportă toate băuturile cu toate relațiile lor (ingrediente, alergeni, localuri)
     public function getAllBeverages(): array {
         $beverages = $this->pdo->query('
             SELECT b.*, c.name AS category_name
@@ -12,7 +11,6 @@ class ExportRepository {
             ORDER BY b.name
         ')->fetchAll();
 
-        // Pentru fiecare băutură adăugăm relațiile many-to-many
         foreach ($beverages as &$bev) {
             $stmt = $this->pdo->prepare('
                 SELECT i.name, bi.quantity

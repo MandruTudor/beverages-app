@@ -3,7 +3,6 @@
 class DietaryRegimeRepository {
     public function __construct(private PDO $pdo) {}
 
-    // Returnează toate regimurile, sortate alfabetic
     public function findAll(): array {
         return $this->pdo->query('SELECT * FROM dietary_regimes ORDER BY name')
                          ->fetchAll();
@@ -27,7 +26,6 @@ class DietaryRegimeRepository {
     }
 
     public function delete(int $id): void {
-        // beverage_dietary_regimes se șterge prin ON DELETE CASCADE
         $this->pdo->prepare('DELETE FROM dietary_regimes WHERE id = ?')
                   ->execute([$id]);
     }

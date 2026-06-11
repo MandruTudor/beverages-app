@@ -20,12 +20,10 @@ class BeverageRepository {
             $params[] = $filters['region'];
         }
         if (isset($filters['exclude_allergen_id'])) {
-            // Excludem băuturile care conțin alergenul selectat
             $where[]  = 'b.id NOT IN (SELECT beverage_id FROM beverage_allergens WHERE allergen_id = ?)';
             $params[] = (int) $filters['exclude_allergen_id'];
         }
         if (isset($filters['dietary_regime_id'])) {
-            // Includem DOAR băuturile compatibile cu regimul alimentar selectat
             $where[]  = 'b.id IN (SELECT beverage_id FROM beverage_dietary_regimes WHERE regime_id = ?)';
             $params[] = (int) $filters['dietary_regime_id'];
         }

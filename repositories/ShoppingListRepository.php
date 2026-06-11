@@ -3,7 +3,6 @@
 class ShoppingListRepository {
     public function __construct(private PDO $pdo) {}
 
-    // Returnează listele personale ale unui user (group_id = NULL) și listele grupurilor din care face parte
     public function findByUser(int $userId): array {
         $stmt = $this->pdo->prepare('
             SELECT sl.*,
@@ -27,7 +26,6 @@ class ShoppingListRepository {
         return $stmt->fetch() ?: null;
     }
 
-    // Returnează itemele unei liste cu detalii despre băutură
     public function getItems(int $listId): array {
         $stmt = $this->pdo->prepare('
             SELECT sli.id, sli.quantity, sli.checked,
@@ -48,7 +46,6 @@ class ShoppingListRepository {
     }
 
     public function delete(int $id): void {
-        // ON DELETE CASCADE: shopping_list_items se șterg automat
         $this->pdo->prepare('DELETE FROM shopping_lists WHERE id = ?')->execute([$id]);
     }
 
@@ -64,7 +61,6 @@ class ShoppingListRepository {
         return $stmt->fetch() ?: null;
     }
 
-    // Actualizează cantitatea și/sau statusul bifat al unui item
     public function updateItem(int $itemId, array $data): void {
         $fields = [];
         $params = [];
@@ -73,8 +69,8 @@ class ShoppingListRepository {
             $params[] = (int) $data['quantity'];
         }
         if (array_key_exists('checked', $data)) {
-            // checked e stocat ca 0/1 în SQLite (nu există tip boolean nativ)
             $fields[] = 'checked = ?';
+            // checked is stored as 0/1 — SQLite has no native boolean type
             $params[] = $data['checked'] ? 1 : 0;
         }
         if ($fields) {

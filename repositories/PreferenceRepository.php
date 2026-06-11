@@ -3,7 +3,6 @@
 class PreferenceRepository {
     public function __construct(private PDO $pdo) {}
 
-    // Returnează toate preferințele unui user cu detalii despre băutură
     public function findByUser(int $userId): array {
         $stmt = $this->pdo->prepare('
             SELECT up.*, b.name AS beverage_name, b.price
@@ -16,15 +15,12 @@ class PreferenceRepository {
         return $stmt->fetchAll();
     }
 
-    // Caută preferința unui user pentru o anumită băutură
     public function findByUserAndBeverage(int $userId, int $beverageId): ?array {
         $stmt = $this->pdo->prepare('SELECT * FROM user_preferences WHERE user_id = ? AND beverage_id = ?');
         $stmt->execute([$userId, $beverageId]);
         return $stmt->fetch() ?: null;
     }
 
-    // INSERT OR REPLACE: dacă există deja o preferință pentru (user, beverage), o suprascrie
-    // Aceasta e o operație "upsert" — creare sau actualizare în același pas
     public function upsert(int $userId, int $beverageId, int $rating, ?string $notes): void {
         $stmt = $this->pdo->prepare('
             INSERT INTO user_preferences (user_id, beverage_id, rating, notes)
@@ -39,9 +35,7 @@ class PreferenceRepository {
         $stmt->execute([$userId, $beverageId]);
     }
 
-    // Returneaza bauturi neevaluate de user, scorare dupa potrivire cu preferintele sale (rating >= 4):
-    //   +3 daca e aceeasi categorie ca o bautura apreciata
-    //   +1 per ingredient comun cu bauturile apreciate
+    // Scoring: +3 for matching a liked category, +1 per shared ingredient with liked beverages (rating >= 4)
     public function getRecommendations(int $userId, int $limit = 6): array {
         $stmt = $this->pdo->prepare('
             SELECT b.id, b.name, b.price, b.description, b.season, b.region,

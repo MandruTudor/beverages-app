@@ -3,7 +3,6 @@
 class StatsRepository {
     public function __construct(private PDO $pdo) {}
 
-    // Totaluri generale: număr băuturi, useri, categorii, preferințe
     public function getTotals(): array {
         return [
             'beverages'   => (int) $this->pdo->query('SELECT COUNT(*) FROM beverages')->fetchColumn(),
@@ -14,8 +13,6 @@ class StatsRepository {
         ];
     }
 
-    // Băuturile cele mai bine evaluate (media rating-urilor)
-    // HAVING COUNT(*) >= 1 asigură că apar doar băuturile cu cel puțin un rating
     public function getTopRated(int $limit = 5): array {
         $stmt = $this->pdo->prepare('
             SELECT b.id, b.name, b.price,
@@ -32,7 +29,6 @@ class StatsRepository {
         return $stmt->fetchAll();
     }
 
-    // Numărul de băuturi per categorie
     public function getByCategory(): array {
         return $this->pdo->query('
             SELECT c.name AS category, COUNT(b.id) AS count
@@ -43,7 +39,6 @@ class StatsRepository {
         ')->fetchAll();
     }
 
-    // Distribuția băuturilor pe sezoane
     public function getBySeason(): array {
         return $this->pdo->query('
             SELECT COALESCE(season, \'necunoscut\') AS season, COUNT(*) AS count
@@ -53,7 +48,6 @@ class StatsRepository {
         ')->fetchAll();
     }
 
-    // Distribuția băuturilor pe regiuni geografice
     public function getByRegion(): array {
         return $this->pdo->query('
             SELECT COALESCE(NULLIF(TRIM(region), \'\'), \'Nespecificată\') AS region, COUNT(*) AS count
@@ -63,7 +57,6 @@ class StatsRepository {
         ')->fetchAll();
     }
 
-    // Frecvența alergenilor în catalog
     public function getByAllergen(): array {
         return $this->pdo->query('
             SELECT a.name AS allergen, COUNT(DISTINCT ba.beverage_id) AS count
@@ -74,7 +67,6 @@ class StatsRepository {
         ')->fetchAll();
     }
 
-    // Statistici de preț: minim, maxim, medie
     public function getPriceStats(): array {
         $row = $this->pdo->query('
             SELECT ROUND(MIN(price), 2) AS min_price,

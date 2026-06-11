@@ -19,7 +19,6 @@ class VenueRepository {
         return (int) $this->pdo->lastInsertId();
     }
 
-    // Actualizează dinamic doar câmpurile trimise
     public function update(int $id, array $data): void {
         $fields = [];
         $params = [];

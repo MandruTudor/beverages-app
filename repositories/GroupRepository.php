@@ -3,7 +3,6 @@
 class GroupRepository {
     public function __construct(private PDO $pdo) {}
 
-    // Returnează toate grupurile din care face parte un user (ca membru)
     public function findByUser(int $userId): array {
         $stmt = $this->pdo->prepare('
             SELECT g.*, u.username AS owner_name
@@ -28,7 +27,6 @@ class GroupRepository {
         return $stmt->fetch() ?: null;
     }
 
-    // Returnează lista membrilor unui grup cu username-urile lor
     public function getMembers(int $groupId): array {
         $stmt = $this->pdo->prepare('
             SELECT u.id, u.username, u.email
@@ -40,25 +38,20 @@ class GroupRepository {
         return $stmt->fetchAll();
     }
 
-    // Creează grup și adaugă creatorul ca prim membru, returnează ID-ul grupului
     public function create(string $name, int $createdBy): int {
         $stmt = $this->pdo->prepare('INSERT INTO groups (name, created_by) VALUES (?, ?)');
         $stmt->execute([$name, $createdBy]);
         $groupId = (int) $this->pdo->lastInsertId();
-
-        // Creatorul devine automat membru al grupului
-        $this->addMember($groupId, $createdBy);
-
+        $this->addMember($groupId, $createdBy); // creator auto-joins the group
         return $groupId;
     }
 
     public function delete(int $id): void {
-        // ON DELETE CASCADE în schema SQL: group_members se șterg automat
         $this->pdo->prepare('DELETE FROM groups WHERE id = ?')->execute([$id]);
     }
 
     public function addMember(int $groupId, int $userId): void {
-        // INSERT OR IGNORE: dacă userul e deja membru, nu aruncăm eroare
+        // INSERT OR IGNORE silently skips if the user is already a member
         $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)');
         $stmt->execute([$groupId, $userId]);
     }
@@ -68,14 +61,12 @@ class GroupRepository {
         $stmt->execute([$groupId, $userId]);
     }
 
-    // Verifică dacă un user este deja în grup
     public function isMember(int $groupId, int $userId): bool {
         $stmt = $this->pdo->prepare('SELECT 1 FROM group_members WHERE group_id = ? AND user_id = ?');
         $stmt->execute([$groupId, $userId]);
         return (bool) $stmt->fetch();
     }
 
-    // Caută utilizatori după username (parțial), excludând userul curent
     public function searchUsers(string $q, int $excludeId): array {
         $stmt = $this->pdo->prepare(
             'SELECT id, username FROM users WHERE username LIKE ? AND id != ? LIMIT 10'
