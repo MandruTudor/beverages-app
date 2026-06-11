@@ -24,9 +24,10 @@ class BeverageCreateDto {
     // Exemplu ingredients: [{"id": 1, "quantity": "200ml"}, {"id": 3}]
     // Exemplu allergens:   [{"id": 2}, {"id": 5}]
     // Exemplu venues:      [{"id": 1}, {"id": 3}]
-    public array $ingredients; // default []
-    public array $allergens;   // default []
-    public array $venues;      // default []
+    public array $ingredients;    // default []
+    public array $allergens;      // default []
+    public array $venues;         // default []
+    public array $dietaryRegimes; // default [] — regimuri alimentare speciale
 
     public function __construct(array $data) {
         // ValidÄƒm cÃ¢mpul obligatoriu 'name'.
@@ -54,9 +55,10 @@ class BeverageCreateDto {
 
         // RelaÈ›iile many-to-many â€” array de obiecte sau array gol dacÄƒ lipsesc.
         // ?? [] = dacÄƒ cheia lipseÈ™te, folosim array gol (nu se insereazÄƒ nicio relaÈ›ie).
-        $this->ingredients = $data['ingredients'] ?? [];
-        $this->allergens   = $data['allergens']   ?? [];
-        $this->venues      = $data['venues']      ?? [];
+        $this->ingredients    = $data['ingredients']     ?? [];
+        $this->allergens      = $data['allergens']       ?? [];
+        $this->venues         = $data['venues']          ?? [];
+        $this->dietaryRegimes = $data['dietary_regimes'] ?? [];
     }
 }
 

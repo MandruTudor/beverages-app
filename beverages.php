@@ -125,6 +125,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <select id="filter-allergen" class="filter-select" aria-label="Excludeți alergenul">
             <option value="">Fără restricții alergeni</option>
         </select>
+        <!-- Dropdown regim alimentar — populate dinamic din /api/dietary_regimes.php
+             Selecția unui regim INCLUDE DOAR băuturile compatibile cu acesta -->
+        <select id="filter-regime" class="filter-select" aria-label="Filtrați după regim alimentar">
+            <option value="">Orice regim</option>
+        </select>
     </div>
 
     <!-- Grid-ul de carduri de băuturi
@@ -241,6 +246,15 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                 <div class="form-group">
                     <label for="form-valid-until">Valabil până la</label>
                     <input type="date" id="form-valid-until" class="form-control">
+                </div>
+            </div>
+
+            <!-- Regimuri alimentare speciale — checkboxuri generate dinamic de JS -->
+            <div class="form-group">
+                <label>Regimuri alimentare</label>
+                <!-- JS populează această zonă cu checkboxuri pentru fiecare regim din DB -->
+                <div id="form-regimes" class="regime-checkboxes">
+                    <!-- populate de beverages.js după loadDietaryRegimes() -->
                 </div>
             </div>
 

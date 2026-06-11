@@ -24,6 +24,7 @@ class BeverageController {
             'season'              => get_param('season'),
             'region'              => get_param('region'),
             'exclude_allergen_id' => get_param('exclude_allergen_id'),
+            'dietary_regime_id'   => get_param('dietary_regime_id'),
         ], fn($v) => $v !== null);
 
         json_response(['beverages' => $this->service->list($filters)]);

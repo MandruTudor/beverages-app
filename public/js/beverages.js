@@ -22,6 +22,9 @@ let allBeverages = [];
 // Lista de categorii — folosită pentru dropdown-urile de filtrare și formular
 let categories = [];
 
+// Lista de regimuri alimentare — pentru filtru și checkboxurile din formular
+let dietaryRegimes = [];
+
 // Listele de cumpărături ale utilizatorului — pentru adăugare rapidă din modal
 let userLists = [];
 
@@ -64,8 +67,8 @@ async function api(method, url, body = null) {
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Încărcăm categoriile, alergenii și listele de cumpărături
-    await Promise.all([loadCategories(), loadAllergens(), loadShoppingLists()]);
+    // 1. Încărcăm categoriile, alergenii, regimurile și listele de cumpărături
+    await Promise.all([loadCategories(), loadAllergens(), loadDietaryRegimes(), loadShoppingLists()]);
     // 2. Încărcăm băuturile și le afișăm în grid
     await loadBeverages();
     // 3. Activăm filtrele (event listeneri pe căutare + dropdown-uri)
@@ -131,6 +134,44 @@ async function loadAllergens() {
 }
 
 /**
+ * loadDietaryRegimes()
+ * Încarcă lista de regimuri alimentare și populează filtrul + checkboxurile din formular.
+ */
+async function loadDietaryRegimes() {
+    const { ok, data } = await api('GET', '/beverages-app/api/dietary_regimes.php');
+    if (!ok) return;
+
+    dietaryRegimes = data.dietary_regimes ?? [];
+
+    // Dropdown filtrare
+    const filterSelect = document.getElementById('filter-regime');
+    if (filterSelect) {
+        dietaryRegimes.forEach(r => filterSelect.add(new Option(r.name, r.id)));
+    }
+
+    // Checkboxuri în formularul admin
+    buildRegimeCheckboxes([]);
+}
+
+/**
+ * buildRegimeCheckboxes(selectedIds)
+ * Construiește lista de checkboxuri din formularul de adăugare/editare.
+ * selectedIds — array de id-uri bifate (gol la adăugare, completat la editare).
+ */
+function buildRegimeCheckboxes(selectedIds) {
+    const wrap = document.getElementById('form-regimes');
+    if (!wrap) return;
+
+    wrap.innerHTML = dietaryRegimes.map(r => `
+        <label>
+            <input type="checkbox" name="regime" value="${r.id}"
+                   ${selectedIds.includes(r.id) ? 'checked' : ''}>
+            ${escHtml(r.name)}
+        </label>
+    `).join('');
+}
+
+/**
  * loadShoppingLists()
  * Încarcă listele de cumpărături ale utilizatorului.
  * Folosite în modalul de detalii pentru adăugarea rapidă a băuturii.
@@ -155,13 +196,15 @@ async function loadBeverages() {
     const categoryId  = document.getElementById('filter-category').value;
     const season      = document.getElementById('filter-season').value;
     const allergenId  = document.getElementById('filter-allergen')?.value ?? '';
+    const regimeId    = document.getElementById('filter-regime')?.value   ?? '';
     const search      = document.getElementById('search-input').value.trim().toLowerCase();
 
     // Construim query string-ul URL-ului
     const params = new URLSearchParams();
     if (categoryId) params.set('category_id', categoryId);
     if (season)     params.set('season', season);
-    if (allergenId) params.set('exclude_allergen_id', allergenId); // Excludem băuturile cu alergenul ales
+    if (allergenId) params.set('exclude_allergen_id', allergenId);
+    if (regimeId)   params.set('dietary_regime_id', regimeId); // Includem DOAR băuturile cu regimul ales
 
     // Facem cererea GET la API
     const { ok, data } = await api('GET', '/beverages-app/api/beverages.php?' + params.toString());
@@ -263,6 +306,7 @@ function beverageCardHTML(b) {
             <span class="badge badge-category">${escHtml(b.category_name ?? 'Fără categorie')}</span>
             ${b.season ? `<span class="badge badge-season">${escHtml(seasonLabel[b.season] ?? b.season)}</span>` : ''}
             ${parseInt(b.allergen_count) > 0 ? '<span class="badge badge-allergen" title="Conține alergeni">⚠ Alergeni</span>' : ''}
+            ${parseInt(b.regime_count) > 0 ? `<span class="badge badge-regime" title="Regimuri speciale">🌿 ${b.regime_count} regim${parseInt(b.regime_count) !== 1 ? 'uri' : ''}</span>` : ''}
         </div>
 
         <!-- Denumirea băuturii -->
@@ -370,6 +414,15 @@ async function openDetail(id) {
             </ul>
         </div>` : ''}
 
+        <!-- Secțiunea Regimuri alimentare — afișată dacă băutura e compatibilă cu regimuri speciale -->
+        ${b.dietary_regimes?.length ? `
+        <div class="detail-section">
+            <h4>Regimuri alimentare</h4>
+            <ul class="tag-list">
+                ${b.dietary_regimes.map(r => `<li class="tag badge-regime">🌿 ${escHtml(r.name)}</li>`).join('')}
+            </ul>
+        </div>` : ''}
+
         <!-- Secțiunea Localuri — afișată doar dacă există -->
         ${b.venues?.length ? `
         <div class="detail-section">
@@ -446,6 +499,8 @@ async function openForm(id = null) {
     const previewImg   = document.getElementById('image-preview');
     const currentLabel = document.getElementById('image-current');
     if (previewWrap) { previewWrap.style.display = 'none'; previewImg.src = ''; currentLabel.textContent = ''; }
+    // Resetăm checkboxurile de regimuri (niciuna bifată la adăugare)
+    buildRegimeCheckboxes([]);
 
     if (id) {
         // Mod EDITARE: actualizăm titlul și pre-completăm câmpurile
@@ -473,6 +528,8 @@ async function openForm(id = null) {
             currentLabel.textContent = 'Imaginea curentă — selectează un fișier nou pentru a o înlocui';
             previewWrap.style.display = 'block';
         }
+        // Bifăm checkboxurile pentru regimurile băuturii
+        buildRegimeCheckboxes((b.dietary_regimes ?? []).map(r => r.id));
     } else {
         // Mod ADĂUGARE: titlul implicit și formular gol
         title.textContent = 'Adaugă băutură';
@@ -526,6 +583,10 @@ function initFormSubmit() {
             }
         }
 
+        // Colectăm regimurile bifate din checkboxuri
+        const selectedRegimes = [...document.querySelectorAll('#form-regimes input[type=checkbox]:checked')]
+            .map(cb => ({ id: parseInt(cb.value) }));
+
         // Construim obiectul cu datele din formular
         const body = {
             name:               nameVal,
@@ -536,6 +597,7 @@ function initFormSubmit() {
             region:             document.getElementById('form-region').value.trim()       || null,
             perishability_days: document.getElementById('form-perishability').value       || null,
             valid_until:        document.getElementById('form-valid-until').value          || null,
+            dietary_regimes:    selectedRegimes,
         };
         // Includem image_path NUMAI dacă s-a uploadat o imagine nouă (PATCH: nu suprascrie cu null)
         if (imagePath !== null) body.image_path = imagePath;
@@ -606,6 +668,8 @@ function initFilters() {
     document.getElementById('filter-season').addEventListener('change', loadBeverages);
     // Dropdown alergeni: reload imediat la schimbare (exclude băuturile cu alergenul ales)
     document.getElementById('filter-allergen')?.addEventListener('change', loadBeverages);
+    // Dropdown regimuri: reload imediat la schimbare (include doar băuturile cu regimul ales)
+    document.getElementById('filter-regime')?.addEventListener('change', loadBeverages);
 
     // Căutare text: debounce de 300ms — așteptăm să termine de scris
     document.getElementById('search-input').addEventListener('input', () => {

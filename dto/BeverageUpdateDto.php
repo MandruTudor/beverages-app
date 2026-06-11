@@ -29,6 +29,7 @@ class BeverageUpdateDto {
     public ?array $ingredients;
     public ?array $allergens;
     public ?array $venues;
+    public ?array $dietaryRegimes; // null = netrimis; [] = șterge toate regimurile
 
     // Cheile prezente Ã®n cererea HTTP originalÄƒ â€” fundamentale pentru semantica PATCH.
     private array $provided;
@@ -49,9 +50,10 @@ class BeverageUpdateDto {
 
         // RelaÈ›ii: null dacÄƒ LIPSESC din cerere; array (chiar gol) dacÄƒ SUNT Ã®n cerere.
         // Folosim array_key_exists (nu isset) ca sÄƒ detectÄƒm È™i valoarea [] (array gol explicit).
-        $this->ingredients = array_key_exists('ingredients', $data) ? $data['ingredients'] : null;
-        $this->allergens   = array_key_exists('allergens',   $data) ? $data['allergens']   : null;
-        $this->venues      = array_key_exists('venues',      $data) ? $data['venues']      : null;
+        $this->ingredients    = array_key_exists('ingredients',     $data) ? $data['ingredients']     : null;
+        $this->allergens      = array_key_exists('allergens',       $data) ? $data['allergens']       : null;
+        $this->venues         = array_key_exists('venues',          $data) ? $data['venues']          : null;
+        $this->dietaryRegimes = array_key_exists('dietary_regimes', $data) ? $data['dietary_regimes'] : null;
     }
 
     // VerificÄƒ dacÄƒ un cÃ¢mp a fost trimis Ã®n cerere (chiar dacÄƒ valoarea e null).

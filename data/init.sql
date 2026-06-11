@@ -119,6 +119,23 @@ CREATE TABLE IF NOT EXISTS beverage_venues (
 );
 
 -- ============================================================
+-- Tabelul DIETARY_REGIMES — regimuri alimentare speciale
+-- Ex: Vegan, Fara Gluten, Keto etc.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS dietary_regimes (
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE -- Ex: 'Vegan', 'Fara Gluten'
+);
+
+-- Legătura MANY-TO-MANY băuturi ↔ regimuri
+-- O băutură poate fi compatibilă cu mai multe regimuri speciale
+CREATE TABLE IF NOT EXISTS beverage_dietary_regimes (
+    beverage_id INTEGER NOT NULL REFERENCES beverages(id) ON DELETE CASCADE,
+    regime_id   INTEGER NOT NULL REFERENCES dietary_regimes(id) ON DELETE CASCADE,
+    PRIMARY KEY (beverage_id, regime_id)
+);
+
+-- ============================================================
 -- Tabelul SHOPPING_LISTS — liste de cumpărături
 -- Poate fi personală (group_id = NULL) sau de grup (group_id setat)
 -- ============================================================
@@ -183,6 +200,17 @@ VALUES (
     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- hash pentru 'password'
     'admin'
 );
+
+-- Regimuri alimentare speciale predefinite
+INSERT OR IGNORE INTO dietary_regimes (name) VALUES
+    ('Vegan'),
+    ('Vegetarian'),
+    ('Fara Gluten'),
+    ('Fara Zahar'),
+    ('Fara Lactoza'),
+    ('Keto'),
+    ('Bio'),
+    ('Fara Cofeina');
 
 -- Categoriile inițiale de băuturi
 -- Acestea apar în dropdown-ul de la adăugarea/editarea băuturilor

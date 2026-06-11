@@ -15,9 +15,10 @@ class BeverageService {
         }
 
         // Adăugăm relațiile many-to-many ca sub-array-uri în răspuns.
-        $beverage['ingredients'] = $this->repo->getIngredients($id);
-        $beverage['allergens']   = $this->repo->getAllergens($id);
-        $beverage['venues']      = $this->repo->getVenues($id);
+        $beverage['ingredients']     = $this->repo->getIngredients($id);
+        $beverage['allergens']       = $this->repo->getAllergens($id);
+        $beverage['venues']          = $this->repo->getVenues($id);
+        $beverage['dietary_regimes'] = $this->repo->getDietaryRegimes($id);
 
         return $beverage;
     }
@@ -49,6 +50,7 @@ class BeverageService {
         $this->repo->syncIngredients($id, $dto->ingredients);
         $this->repo->syncAllergens($id, $dto->allergens);
         $this->repo->syncVenues($id, $dto->venues);
+        $this->repo->syncDietaryRegimes($id, $dto->dietaryRegimes);
 
         return $id;
     }
@@ -68,9 +70,10 @@ class BeverageService {
         // Sincronizăm relațiile NUMAI dacă au fost trimise explicit în cerere.
         // $dto->has('ingredients') = true chiar dacă valoarea e [] (șterge toate relațiile).
         // $dto->ingredients este null dacă NU au fost trimise = nu atingem relațiile.
-        if ($dto->has('ingredients')) $this->repo->syncIngredients($id, $dto->ingredients ?? []);
-        if ($dto->has('allergens'))   $this->repo->syncAllergens($id, $dto->allergens   ?? []);
-        if ($dto->has('venues'))      $this->repo->syncVenues($id, $dto->venues         ?? []);
+        if ($dto->has('ingredients'))      $this->repo->syncIngredients($id, $dto->ingredients     ?? []);
+        if ($dto->has('allergens'))        $this->repo->syncAllergens($id, $dto->allergens         ?? []);
+        if ($dto->has('venues'))           $this->repo->syncVenues($id, $dto->venues               ?? []);
+        if ($dto->has('dietary_regimes'))  $this->repo->syncDietaryRegimes($id, $dto->dietaryRegimes ?? []);
     }
 
     public function delete(int $id): void {

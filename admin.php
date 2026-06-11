@@ -102,6 +102,77 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <div id="import-feedback" class="list-feedback" style="margin-top:.75rem" role="alert"></div>
     </section>
 
+    <!-- ============================================================
+         Secțiunea: Import JSON
+         ============================================================ -->
+    <section class="page-section">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
+            📋 Import băuturi din JSON
+        </h3>
+        <p style="color:var(--clr-muted);font-size:.88rem;margin-bottom:1rem">
+            Fișierul JSON trebuie să fie un <strong>array de obiecte</strong> cu câmpurile:
+            <code>name</code> (obligatoriu),
+            <code>category_id, price, description, season, region, perishability_days, valid_until</code> (opționale).
+            Opțional: <code>allergens</code> (array de <code>{"id": N}</code>) și
+            <code>ingredients</code> (array de <code>{"id": N, "quantity": "..."}</code>).
+        </p>
+
+        <!-- Zona de upload fișier JSON -->
+        <div class="import-zone" id="import-json-zone">
+            <input type="file" id="json-file" accept=".json" style="display:none">
+            <div class="import-drop" id="import-json-drop" tabindex="0" role="button"
+                 aria-label="Selectează fișier JSON">
+                <span style="font-size:2rem">{ }</span>
+                <p>Trage fișierul JSON aici sau <strong>click pentru a selecta</strong></p>
+                <p style="color:var(--clr-muted);font-size:.82rem">Doar fișiere .json</p>
+            </div>
+            <!-- Previzualizarea primelor obiecte din JSON -->
+            <div id="import-json-preview" style="display:none"></div>
+        </div>
+
+        <!-- Feedback import JSON -->
+        <div id="import-json-feedback" class="list-feedback" style="margin-top:.75rem" role="alert"></div>
+    </section>
+
+    <!-- ============================================================
+         Secțiunea: Open Food Facts
+         ============================================================ -->
+    <section class="page-section">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
+            🌍 Import din Open Food Facts
+        </h3>
+        <p style="color:var(--clr-muted);font-size:.88rem;margin-bottom:1rem">
+            Caută băuturi în baza de date publică
+            <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a>
+            și importă-le direct în catalog. Categoria și alergenii sunt detectați automat.
+        </p>
+
+        <!-- Căutare după cuvânt cheie sau cod de bare -->
+        <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+            <input type="text" id="off-search-input" class="form-input"
+                   placeholder="Caută după nume (ex: ceai, limonadă)…"
+                   style="flex:1;min-width:200px" maxlength="100">
+            <button class="btn btn-primary btn-auto" id="off-search-btn">
+                <span class="spinner"></span>
+                <span class="btn-text">Caută</span>
+            </button>
+        </div>
+        <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+            <input type="text" id="off-barcode-input" class="form-input"
+                   placeholder="Sau introdu cod de bare (ex: 3017620422003)"
+                   style="flex:1;min-width:200px" maxlength="14"
+                   pattern="\d{8,14}" inputmode="numeric">
+            <button class="btn btn-outline btn-auto" id="off-barcode-btn">
+                <span class="spinner"></span>
+                <span class="btn-text">Caută cod</span>
+            </button>
+        </div>
+
+        <!-- Feedback și rezultate -->
+        <div id="off-feedback" class="list-feedback" role="alert"></div>
+        <div id="off-results" style="margin-top:1rem"></div>
+    </section>
+
 </main>
 
 <script src="/beverages-app/public/js/admin.js"></script>

@@ -79,6 +79,27 @@ function get_db(): PDO {
             // Coloana există deja — ignorăm
         }
 
+        // Migrație: tabela dietary_regimes (baze de date create înainte de această versiune)
+        $pdo->exec('
+            CREATE TABLE IF NOT EXISTS dietary_regimes (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            )
+        ');
+        $pdo->exec('
+            CREATE TABLE IF NOT EXISTS beverage_dietary_regimes (
+                beverage_id INTEGER NOT NULL REFERENCES beverages(id) ON DELETE CASCADE,
+                regime_id   INTEGER NOT NULL REFERENCES dietary_regimes(id) ON DELETE CASCADE,
+                PRIMARY KEY (beverage_id, regime_id)
+            )
+        ');
+
+        // Seed regimuri alimentare
+        $stmtRegime = $pdo->prepare('INSERT OR IGNORE INTO dietary_regimes (name) VALUES (?)');
+        foreach (['Vegan','Vegetarian','Fara Gluten','Fara Zahar','Fara Lactoza','Keto','Bio','Fara Cofeina'] as $r) {
+            $stmtRegime->execute([$r]);
+        }
+
         // Seed alergeni — prepared statements individuale pentru a evita probleme
         // de encoding cu exec() pe siruri multi-valoare
         $stmtAllergen = $pdo->prepare('INSERT OR IGNORE INTO allergens (name) VALUES (?)');

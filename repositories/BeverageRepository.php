@@ -24,10 +24,16 @@ class BeverageRepository {
             $where[]  = 'b.id NOT IN (SELECT beverage_id FROM beverage_allergens WHERE allergen_id = ?)';
             $params[] = (int) $filters['exclude_allergen_id'];
         }
+        if (isset($filters['dietary_regime_id'])) {
+            // Includem DOAR băuturile compatibile cu regimul alimentar selectat
+            $where[]  = 'b.id IN (SELECT beverage_id FROM beverage_dietary_regimes WHERE regime_id = ?)';
+            $params[] = (int) $filters['dietary_regime_id'];
+        }
 
-        // allergen_count permite cardurilor să afișeze un badge de avertizare fără request suplimentar
+        // allergen_count și regime_count permit cardurilor să afișeze badge-uri fără request suplimentar
         $sql = 'SELECT b.*, c.name AS category_name,
-                (SELECT COUNT(*) FROM beverage_allergens ba WHERE ba.beverage_id = b.id) AS allergen_count
+                (SELECT COUNT(*) FROM beverage_allergens ba WHERE ba.beverage_id = b.id) AS allergen_count,
+                (SELECT COUNT(*) FROM beverage_dietary_regimes bdr WHERE bdr.beverage_id = b.id) AS regime_count
                 FROM beverages b LEFT JOIN categories c ON c.id = b.category_id';
         if ($where) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
@@ -144,6 +150,26 @@ class BeverageRepository {
     public function syncVenues(int $beverage_id, array $items): void {
         $this->pdo->prepare('DELETE FROM beverage_venues WHERE beverage_id = ?')->execute([$beverage_id]);
         $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_venues (beverage_id, venue_id) VALUES (?, ?)');
+        foreach ($items as $item) {
+            $stmt->execute([$beverage_id, (int) $item['id']]);
+        }
+    }
+
+    public function getDietaryRegimes(int $beverage_id): array {
+        $stmt = $this->pdo->prepare('
+            SELECT dr.id, dr.name
+            FROM beverage_dietary_regimes bdr
+            JOIN dietary_regimes dr ON dr.id = bdr.regime_id
+            WHERE bdr.beverage_id = ?
+            ORDER BY dr.name
+        ');
+        $stmt->execute([$beverage_id]);
+        return $stmt->fetchAll();
+    }
+
+    public function syncDietaryRegimes(int $beverage_id, array $items): void {
+        $this->pdo->prepare('DELETE FROM beverage_dietary_regimes WHERE beverage_id = ?')->execute([$beverage_id]);
+        $stmt = $this->pdo->prepare('INSERT OR IGNORE INTO beverage_dietary_regimes (beverage_id, regime_id) VALUES (?, ?)');
         foreach ($items as $item) {
             $stmt->execute([$beverage_id, (int) $item['id']]);
         }
