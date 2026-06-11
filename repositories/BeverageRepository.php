@@ -166,6 +166,12 @@ class BeverageRepository {
         }
     }
 
+    public function getDistinctRegions(): array {
+        return $this->pdo->query(
+            "SELECT DISTINCT region FROM beverages WHERE region IS NOT NULL AND region != '' ORDER BY region"
+        )->fetchAll(PDO::FETCH_COLUMN);
+    }
+
     public function getDietaryRegimes(int $beverage_id): array {
         $stmt = $this->pdo->prepare('
             SELECT dr.id, dr.name

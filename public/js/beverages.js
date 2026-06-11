@@ -1,11 +1,18 @@
-let allBeverages  = [];
-let categories    = [];
+let allBeverages   = [];
+let categories     = [];
 let dietaryRegimes = [];
-let userLists     = [];
-let searchTimer   = null;
+let userLists      = [];
+let myPreferences  = {};
+let searchTimer    = null;
+let currentFiltered     = [];
+let currentPage         = 1;
+let detailCurrentRating = 0;
+const ITEMS_PER_PAGE = 9;
 
 async function api(method, url, body = null) {
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const opts  = { method, headers: { 'Content-Type': 'application/json' } };
+    const token = localStorage.getItem('jwt_token');
+    if (token) opts.headers['Authorization'] = 'Bearer ' + token;
     if (body !== null) opts.body = JSON.stringify(body);
     const res  = await fetch(url, opts);
     const data = await res.json();
@@ -13,7 +20,7 @@ async function api(method, url, body = null) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await Promise.all([loadCategories(), loadAllergens(), loadDietaryRegimes(), loadShoppingLists()]);
+    await Promise.all([loadCategories(), loadAllergens(), loadDietaryRegimes(), loadRegions(), loadShoppingLists(), loadMyPreferences()]);
     await loadBeverages();
     initFilters();
     initAddButton();
@@ -63,10 +70,25 @@ function buildRegimeCheckboxes(selectedIds) {
     `).join('');
 }
 
+async function loadRegions() {
+    const { ok, data } = await api('GET', '/beverages-app/api/beverages.php?action=regions');
+    if (!ok) return;
+    const select = document.getElementById('filter-region');
+    if (!select) return;
+    (data.regions ?? []).forEach(r => select.add(new Option(r, r)));
+}
+
 async function loadShoppingLists() {
     const { ok, data } = await api('GET', '/beverages-app/api/shopping_lists.php');
     if (!ok) return;
     userLists = data.lists ?? [];
+}
+
+async function loadMyPreferences() {
+    const { ok, data } = await api('GET', '/beverages-app/api/preferences.php');
+    if (!ok) return;
+    myPreferences = {};
+    (data.preferences ?? []).forEach(p => { myPreferences[p.beverage_id] = p; });
 }
 
 async function loadBeverages() {
@@ -74,6 +96,7 @@ async function loadBeverages() {
     const season     = document.getElementById('filter-season').value;
     const allergenId = document.getElementById('filter-allergen')?.value ?? '';
     const regimeId   = document.getElementById('filter-regime')?.value   ?? '';
+    const region     = document.getElementById('filter-region')?.value   ?? '';
     const search     = document.getElementById('search-input').value.trim().toLowerCase();
 
     const params = new URLSearchParams();
@@ -81,33 +104,103 @@ async function loadBeverages() {
     if (season)     params.set('season', season);
     if (allergenId) params.set('exclude_allergen_id', allergenId);
     if (regimeId)   params.set('dietary_regime_id', regimeId);
+    if (region)     params.set('region', region);
 
     const { ok, data } = await api('GET', '/beverages-app/api/beverages.php?' + params.toString());
     if (!ok) { showGridError(); return; }
 
     allBeverages = data.beverages ?? [];
-    const filtered = search
+    currentPage  = 1;
+    applySearchAndRender();
+}
+
+function applySearchAndRender() {
+    const search = document.getElementById('search-input').value.trim().toLowerCase();
+    currentFiltered = search
         ? allBeverages.filter(b =>
             b.name.toLowerCase().includes(search) ||
             (b.description ?? '').toLowerCase().includes(search))
         : allBeverages;
-
-    renderBeverages(filtered);
+    renderBeverages();
 }
 
-function renderBeverages(list) {
+function renderBeverages() {
     const grid = document.getElementById('beverages-grid');
-    if (!list.length) {
+    if (!currentFiltered.length) {
         grid.innerHTML = `<div class="empty-state"><span>🧃</span><p>Nicio băutură găsită pentru filtrele selectate.</p></div>`;
+        renderPagination();
         return;
     }
-    grid.innerHTML = list.map(b => beverageCardHTML(b)).join('');
+
+    const totalPages = Math.ceil(currentFiltered.length / ITEMS_PER_PAGE);
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    const start     = (currentPage - 1) * ITEMS_PER_PAGE;
+    const pageItems = currentFiltered.slice(start, start + ITEMS_PER_PAGE);
+
+    grid.innerHTML = pageItems.map(b => beverageCardHTML(b)).join('');
     grid.querySelectorAll('.beverage-card').forEach(card => {
         card.addEventListener('click', () => openDetail(parseInt(card.dataset.id)));
         card.addEventListener('keydown', e => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(parseInt(card.dataset.id)); }
         });
     });
+
+    renderPagination();
+}
+
+function renderPagination() {
+    const container = document.getElementById('pagination');
+    if (!container) return;
+
+    const total      = currentFiltered.length;
+    const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+
+    if (totalPages <= 1) {
+        container.innerHTML = total > 0
+            ? `<p class="pagination-info">${total} băutur${total === 1 ? 'ă' : 'i'}</p>`
+            : '';
+        return;
+    }
+
+    const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+    const end   = Math.min(currentPage * ITEMS_PER_PAGE, total);
+
+    let html = `<div class="pagination">`;
+    html += `<button class="btn btn-outline btn-sm" onclick="goToPage(${currentPage - 1})"
+             ${currentPage === 1 ? 'disabled' : ''} aria-label="Pagina anterioară">‹</button>`;
+
+    for (const p of getPageNumbers(currentPage, totalPages)) {
+        if (p === '...') {
+            html += `<span class="pagination-ellipsis">…</span>`;
+        } else {
+            html += `<button class="btn btn-sm ${p === currentPage ? 'btn-primary' : 'btn-outline'}"
+                     onclick="goToPage(${p})" aria-label="Pagina ${p}"
+                     ${p === currentPage ? 'aria-current="page"' : ''}>${p}</button>`;
+        }
+    }
+
+    html += `<button class="btn btn-outline btn-sm" onclick="goToPage(${currentPage + 1})"
+             ${currentPage === totalPages ? 'disabled' : ''} aria-label="Pagina următoare">›</button>`;
+    html += `</div>`;
+    html += `<p class="pagination-info">${start}–${end} din ${total} băuturi</p>`;
+
+    container.innerHTML = html;
+}
+
+function getPageNumbers(current, total) {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
+    if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+    return [1, '...', current - 1, current, current + 1, '...', total];
+}
+
+function goToPage(page) {
+    const totalPages = Math.ceil(currentFiltered.length / ITEMS_PER_PAGE);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderBeverages();
+    document.getElementById('beverages-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function beverageCardHTML(b) {
@@ -148,6 +241,7 @@ async function openDetail(id) {
     const b = bevRes.data.beverage;
     const isAdmin = document.body.dataset.role === 'admin';
     const seasonLabel = { all: 'Tot anul', winter: 'Iarnă', spring: 'Primăvară', summer: 'Vară', autumn: 'Toamnă' };
+    const currentPref = myPreferences[id] ?? null;
 
     body.innerHTML = `
         <h2 class="detail-title" id="detail-title-el">${escHtml(b.name)}</h2>
@@ -201,12 +295,24 @@ async function openDetail(id) {
                 Nu ai liste de cumpărături. <a href="/beverages-app/lists.php">Creează una</a>.
             </p>`}
         </div>
+        <div class="detail-section" id="detail-rating-section">
+            <h4>Evaluarea ta</h4>
+            <div class="star-picker" id="detail-star-picker" role="radiogroup" aria-label="Rating 1-5 stele"></div>
+            <input type="hidden" id="detail-pref-rating" value="0">
+            <textarea id="detail-pref-notes" class="form-control" rows="2"
+                      placeholder="Notițe personale (opțional)..." style="margin-top:.75rem">${escHtml(currentPref?.notes ?? '')}</textarea>
+            <div id="detail-rating-actions" style="display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap"></div>
+            <p id="detail-rating-feedback" style="font-size:.82rem;margin-top:.4rem;min-height:1.2em"></p>
+        </div>
         ${isAdmin ? `
         <div class="detail-admin-actions">
             <button class="btn btn-outline btn-sm" onclick="openForm(${b.id})">✏️ Editează</button>
             <button class="btn btn-danger btn-sm" onclick="deleteBeverage(${b.id}, ${escHtml(JSON.stringify(b.name))})">🗑 Șterge</button>
         </div>` : ''}
     `;
+
+    initDetailStarPicker(currentPref ? parseInt(currentPref.rating) : 0);
+    updateDetailRatingButtons(b.id, !!currentPref);
 }
 
 async function openForm(id = null) {
@@ -336,9 +442,10 @@ function initFilters() {
     document.getElementById('filter-season').addEventListener('change', loadBeverages);
     document.getElementById('filter-allergen')?.addEventListener('change', loadBeverages);
     document.getElementById('filter-regime')?.addEventListener('change', loadBeverages);
+    document.getElementById('filter-region')?.addEventListener('change', loadBeverages);
     document.getElementById('search-input').addEventListener('input', () => {
         clearTimeout(searchTimer);
-        searchTimer = setTimeout(loadBeverages, 300);
+        searchTimer = setTimeout(() => { currentPage = 1; applySearchAndRender(); }, 300);
     });
 }
 
@@ -422,6 +529,91 @@ function initImagePreview() {
         currentLabel.textContent = file.name;
         previewWrap.style.display = 'block';
     });
+}
+
+function initDetailStarPicker(selected) {
+    detailCurrentRating = selected;
+    const picker = document.getElementById('detail-star-picker');
+    if (!picker) return;
+    picker.innerHTML = Array.from({ length: 5 }, (_, i) => {
+        const val = i + 1;
+        return `<button type="button" class="star-btn ${val <= selected ? 'active' : ''}"
+                        data-value="${val}" aria-label="${val} stele">${val <= selected ? '★' : '☆'}</button>`;
+    }).join('');
+    picker.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => highlightDetailStars(parseInt(btn.dataset.value)));
+        btn.addEventListener('mouseleave', () => highlightDetailStars(detailCurrentRating));
+        btn.addEventListener('click', () => {
+            detailCurrentRating = parseInt(btn.dataset.value);
+            document.getElementById('detail-pref-rating').value = detailCurrentRating;
+            initDetailStarPicker(detailCurrentRating);
+        });
+    });
+}
+
+function highlightDetailStars(upTo) {
+    document.querySelectorAll('#detail-star-picker .star-btn').forEach(btn => {
+        const active = parseInt(btn.dataset.value) <= upTo;
+        btn.classList.toggle('active', active);
+        btn.textContent = active ? '★' : '☆';
+    });
+}
+
+function updateDetailRatingButtons(beverageId, hasRating) {
+    const el = document.getElementById('detail-rating-actions');
+    if (!el) return;
+    el.innerHTML = `
+        <button class="btn btn-primary btn-sm" onclick="saveDetailRating(${beverageId})">
+            ⭐ ${hasRating ? 'Actualizează' : 'Salvează'} evaluarea
+        </button>
+        ${hasRating ? `<button class="btn btn-danger btn-sm" onclick="deleteDetailRating(${beverageId})">🗑 Șterge</button>` : ''}
+    `;
+}
+
+async function saveDetailRating(beverageId) {
+    const rating   = parseInt(document.getElementById('detail-pref-rating').value);
+    const notes    = document.getElementById('detail-pref-notes').value.trim() || null;
+    const feedback = document.getElementById('detail-rating-feedback');
+
+    if (!rating) {
+        feedback.textContent = 'Selectează un rating între 1 și 5 stele.';
+        feedback.style.color = 'var(--clr-danger)';
+        return;
+    }
+
+    const { ok, data } = await api('POST', '/beverages-app/api/preferences.php', {
+        beverage_id: beverageId, rating, notes,
+    });
+
+    if (ok) {
+        myPreferences[beverageId] = { beverage_id: beverageId, rating, notes };
+        updateDetailRatingButtons(beverageId, true);
+        feedback.textContent = 'Evaluare salvată!';
+        feedback.style.color = 'var(--clr-success)';
+    } else {
+        feedback.textContent = data.error ?? 'Eroare la salvare.';
+        feedback.style.color = 'var(--clr-danger)';
+    }
+}
+
+async function deleteDetailRating(beverageId) {
+    if (!confirm('Ștergi evaluarea pentru această băutură?')) return;
+    const feedback = document.getElementById('detail-rating-feedback');
+
+    const { ok, data } = await api('DELETE', `/beverages-app/api/preferences.php?beverage_id=${beverageId}`);
+
+    if (ok) {
+        delete myPreferences[beverageId];
+        detailCurrentRating = 0;
+        initDetailStarPicker(0);
+        document.getElementById('detail-pref-notes').value = '';
+        updateDetailRatingButtons(beverageId, false);
+        feedback.textContent = 'Evaluare ștearsă.';
+        feedback.style.color = 'var(--clr-muted)';
+    } else {
+        feedback.textContent = data.error ?? 'Eroare la ștergere.';
+        feedback.style.color = 'var(--clr-danger)';
+    }
 }
 
 function escHtml(str) {

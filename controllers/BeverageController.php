@@ -7,6 +7,7 @@ class BeverageController {
         $id     = get_param('id') ? (int) get_param('id') : null;
 
         match (true) {
+            $method === 'GET'    && $id === null && get_param('action') === 'regions' => $this->regions(),
             $method === 'GET'    && $id === null => $this->list(),
             $method === 'GET'    && $id !== null => $this->get($id),
             $method === 'POST'                   => $this->create(),
@@ -14,6 +15,10 @@ class BeverageController {
             $method === 'DELETE' && $id !== null => $this->delete($id),
             default                              => json_error('Metoda sau ruta invalida.', 405),
         };
+    }
+
+    private function regions(): void {
+        json_response(['regions' => $this->service->getRegions()]);
     }
 
     private function list(): void {

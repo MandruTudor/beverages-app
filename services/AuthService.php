@@ -35,8 +35,16 @@ class AuthService {
 
         login_user($user);
 
+        $token = jwt_generate([
+            'user_id'  => $user['id'],
+            'username' => $user['username'],
+            'email'    => $user['email'],
+            'role'     => $user['role'],
+        ]);
+
         return [
             'message' => 'Autentificare reusita.',
+            'token'   => $token,
             'user'    => [
                 'id'       => $user['id'],
                 'username' => $user['username'],

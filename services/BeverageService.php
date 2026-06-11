@@ -7,6 +7,10 @@ class BeverageService {
         return $this->repo->findAll($filters);
     }
 
+    public function getRegions(): array {
+        return $this->repo->getDistinctRegions();
+    }
+
     public function get(int $id): array {
         $beverage = $this->repo->findById($id);
         if (!$beverage) json_error('Bautura nu a fost gasita.', 404);

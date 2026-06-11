@@ -24,6 +24,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Preferințe — Beverages App</title>
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
+    <link rel="alternate" type="application/rss+xml" title="Top Băuturi — Beverages App" href="/beverages-app/api/rss.php">
 </head>
 <body>
 
@@ -53,13 +54,13 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 
     <div class="page-header">
         <div>
-            <h2>Preferințele mele</h2>
-            <p class="page-subtitle">Evaluează băuturile și adaugă notițe personale.</p>
+            <h2>Recenziile mele</h2>
+            <p class="page-subtitle">Băuturile evaluate de tine. Deschide orice băutură pentru a modifica sau adăuga o recenzie.</p>
         </div>
         <!-- Filtru: toate băuturile vs. doar cele evaluate -->
         <div style="display:flex;gap:.5rem">
-            <button class="btn btn-outline btn-sm pref-filter active" data-filter="all">Toate</button>
-            <button class="btn btn-outline btn-sm pref-filter" data-filter="rated">Evaluate</button>
+            <button class="btn btn-outline btn-sm pref-filter" data-filter="all">Toate</button>
+            <button class="btn btn-outline btn-sm pref-filter active" data-filter="rated">Evaluate</button>
             <button class="btn btn-outline btn-sm pref-filter" data-filter="unrated">Neevaluate</button>
         </div>
     </div>

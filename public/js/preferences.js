@@ -1,10 +1,12 @@
 let allBeverages  = [];
 let myPreferences = {}; // beverage_id → {rating, notes}
-let activeFilter  = 'all';
+let activeFilter  = 'rated';
 let currentRating = 0;
 
 async function api(method, url, body = null) {
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const opts  = { method, headers: { 'Content-Type': 'application/json' } };
+    const token = localStorage.getItem('jwt_token');
+    if (token) opts.headers['Authorization'] = 'Bearer ' + token;
     if (body !== null) opts.body = JSON.stringify(body);
     const res  = await fetch(url, opts);
     const data = await res.json();

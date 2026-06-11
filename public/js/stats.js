@@ -1,5 +1,8 @@
 async function api(url) {
-    const res  = await fetch(url);
+    const headers = {};
+    const token   = localStorage.getItem('jwt_token');
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    const res  = await fetch(url, { headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? 'Eroare server.');
     return data;
@@ -148,9 +151,13 @@ function renderTopRated(items) {
     const medals = ['🥇', '🥈', '🥉'];
     container.innerHTML = `
     <table class="list-items-table">
-        <thead><tr><th>#</th><th>Băutură</th><th>Preț</th><th>Rating mediu</th><th>Evaluări</th></tr></thead>
+        <thead><tr><th>#</th><th>Băutură</th><th>Preț</th><th>Scor</th><th>Evaluări</th></tr></thead>
         <tbody>
-            ${items.map((item, i) => `
+            ${items.map((item, i) => {
+                const score  = parseFloat(item.score      ?? item.avg_rating).toFixed(2);
+                const avgRaw = parseFloat(item.avg_rating).toFixed(1);
+                const barPct = (parseFloat(item.score ?? item.avg_rating) / 5 * 100).toFixed(0);
+                return `
             <tr>
                 <td style="font-size:1.1rem">${medals[i] ?? (i + 1)}</td>
                 <td style="font-weight:600">${escHtml(item.name)}</td>
@@ -158,13 +165,14 @@ function renderTopRated(items) {
                 <td>
                     <div style="display:flex;align-items:center;gap:.5rem">
                         <div style="width:80px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden">
-                            <div style="width:${(item.avg_rating/5*100).toFixed(0)}%;height:100%;background:#f59e0b;border-radius:3px"></div>
+                            <div style="width:${barPct}%;height:100%;background:#f59e0b;border-radius:3px"></div>
                         </div>
-                        <span style="font-weight:700;color:#f59e0b">${parseFloat(item.avg_rating).toFixed(1)}</span>
+                        <span style="font-weight:700;color:#f59e0b" title="Medie reală: ${avgRaw}/5">${score}</span>
                     </div>
                 </td>
                 <td style="color:var(--clr-muted)">${item.rating_count} evaluări</td>
-            </tr>`).join('')}
+            </tr>`;
+            }).join('')}
         </tbody>
     </table>`;
 }

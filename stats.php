@@ -24,6 +24,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistici — Beverages App</title>
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
+    <link rel="alternate" type="application/rss+xml" title="Top Băuturi — Beverages App" href="/beverages-app/api/rss.php">
 </head>
 <!--
     data-role transmite rolul utilizatorului spre JavaScript.
@@ -143,9 +144,18 @@ $initial = strtoupper(substr($user['username'], 0, 1));
          Vizibil pentru TOȚI utilizatorii autentificați
          ============================================================ -->
     <section class="page-section">
-        <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
-            🏆 Clasament băuturi populare
-        </h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1.5px solid var(--clr-border)">
+            <h3 style="font-size:1rem;font-weight:700;margin:0">🏆 Clasament băuturi populare</h3>
+            <a href="/beverages-app/api/rss.php" target="_blank" rel="noopener"
+               class="btn btn-outline btn-sm"
+               title="Abonează-te la clasamentul băuturilor populare via RSS"
+               style="display:flex;align-items:center;gap:.35rem;white-space:nowrap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <circle cx="6" cy="18" r="2.5"/><path d="M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7V4z"/><path d="M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6v-3z"/>
+                </svg>
+                RSS
+            </a>
+        </div>
         <div id="top-rated-container"></div>
     </section>
 

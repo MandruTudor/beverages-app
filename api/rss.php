@@ -14,18 +14,22 @@ header('Content-Type: application/rss+xml; charset=utf-8');
 $pdo = get_db();
 
 // ---- Interogăm băuturile cele mai populare ----
-// LEFT JOIN pe user_preferences permite și băuturilor fără rating să apară
-// ORDER BY: mai întâi cele cu rating, apoi celelalte după data adăugării
+// Folosim media bayesiană: score = (v*R + m*C) / (v+m)
+// m=3 (prag), C = media globală — băuturile cu puține review-uri sunt penalizate
 $stmt = $pdo->query('
     SELECT b.id, b.name, b.description, b.price, b.season, b.region,
            b.created_at, c.name AS category_name,
            ROUND(AVG(up.rating), 2) AS avg_rating,
-           COUNT(up.id)             AS rating_count
+           COUNT(up.id)             AS rating_count,
+           ROUND(
+               (COUNT(up.id) * AVG(up.rating) + 3.0 * (SELECT AVG(rating) FROM user_preferences))
+               / (COUNT(up.id) + 3.0),
+           2)                        AS score
     FROM beverages b
-    LEFT JOIN categories c          ON c.id = b.category_id
-    LEFT JOIN user_preferences up   ON up.beverage_id = b.id
+    JOIN categories c          ON c.id = b.category_id
+    JOIN user_preferences up   ON up.beverage_id = b.id
     GROUP BY b.id
-    ORDER BY avg_rating DESC, b.created_at DESC
+    ORDER BY score DESC, rating_count DESC
     LIMIT 10
 ');
 $beverages = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -74,7 +78,7 @@ $buildDate = date(DATE_RSS);
                 if ($b['category_name'])  $parts[] = 'Categorie: ' . $b['category_name'];
                 if ($b['price'])          $parts[] = 'Preț: ' . number_format((float)$b['price'], 2) . ' lei';
                 if ($b['region'])         $parts[] = 'Regiune: ' . $b['region'];
-                if ($b['avg_rating'])     $parts[] = 'Rating mediu: ' . $b['avg_rating'] . '/5 (' . $b['rating_count'] . ' evaluări)';
+                if ($b['avg_rating'])     $parts[] = 'Rating: ' . $b['avg_rating'] . '/5 (' . $b['rating_count'] . ' evaluări)';
                 echo implode(' | ', $parts);
                 ?>
             ]]></description>

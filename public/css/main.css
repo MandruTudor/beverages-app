@@ -1438,6 +1438,42 @@ textarea.form-control {
 }
 
 /* ============================================================
+   Paginare băuturi
+   ============================================================ */
+.pagination-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+    padding: 1.5rem 0 .5rem;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pagination-ellipsis {
+    padding: 0 .35rem;
+    color: var(--clr-muted);
+    font-size: .9rem;
+    line-height: 1;
+}
+
+.pagination-info {
+    font-size: .82rem;
+    color: var(--clr-muted);
+}
+
+@media (max-width: 480px) {
+    .pagination { gap: .2rem; }
+    .btn-sm { padding: .35rem .6rem; font-size: .8rem; }
+}
+
+/* ============================================================
    Statistici
    ============================================================ */
 

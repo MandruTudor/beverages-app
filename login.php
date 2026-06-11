@@ -28,8 +28,8 @@ if (is_logged_in()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Titlul afișat în tab-ul browserului -->
     <title>Autentificare — Beverages App</title>
-    <!-- Includem foaia de stiluri CSS principală -->
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
+    <link rel="alternate" type="application/rss+xml" title="Top Băuturi — Beverages App" href="/beverages-app/api/rss.php">
 </head>
 <body>
 

@@ -14,15 +14,22 @@ class StatsRepository {
     }
 
     public function getTopRated(int $limit = 5): array {
+        // Bayesian average: score = (v*R + m*C) / (v+m)
+        // v = review count, R = beverage avg, m = threshold (3), C = global avg
+        // Prevents a single 5-star review from outranking a beverage with many solid reviews.
         $stmt = $this->pdo->prepare('
             SELECT b.id, b.name, b.price,
-                   ROUND(AVG(up.rating), 2) AS avg_rating,
-                   COUNT(up.id) AS rating_count
+                   ROUND(AVG(up.rating), 2)            AS avg_rating,
+                   COUNT(up.id)                         AS rating_count,
+                   ROUND(
+                       (COUNT(up.id) * AVG(up.rating) + 3.0 * (SELECT AVG(rating) FROM user_preferences))
+                       / (COUNT(up.id) + 3.0),
+                   2)                                   AS score
             FROM beverages b
             JOIN user_preferences up ON up.beverage_id = b.id
             GROUP BY b.id
             HAVING COUNT(up.id) >= 1
-            ORDER BY avg_rating DESC
+            ORDER BY score DESC, rating_count DESC
             LIMIT ?
         ');
         $stmt->execute([$limit]);

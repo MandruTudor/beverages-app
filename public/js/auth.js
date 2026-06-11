@@ -106,6 +106,7 @@ function initLoginPage() {
         setLoading(btn, false);
 
         if (ok) {
+            if (data.token) localStorage.setItem('jwt_token', data.token);
             showAlert(alert, 'Autentificare reușită! Redirecționare…', 'success');
             setTimeout(() => { window.location.href = '/beverages-app/dashboard.php'; }, 800);
         } else {

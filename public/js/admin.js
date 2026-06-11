@@ -1,5 +1,7 @@
 async function api(method, url, body = null) {
-    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const opts  = { method, headers: { 'Content-Type': 'application/json' } };
+    const token = localStorage.getItem('jwt_token');
+    if (token) opts.headers['Authorization'] = 'Bearer ' + token;
     if (body !== null) opts.body = JSON.stringify(body);
     const res  = await fetch(url, opts);
     const data = await res.json();

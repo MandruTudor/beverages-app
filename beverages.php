@@ -31,8 +31,8 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <!-- Viewport responsive: pagina se adaptează la lățimea dispozitivului -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Băuturi — Beverages App</title>
-    <!-- Foaia de stiluri principală -->
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
+    <link rel="alternate" type="application/rss+xml" title="Top Băuturi — Beverages App" href="/beverages-app/api/rss.php">
 </head>
 <!--
     data-role transmite rolul utilizatorului spre JavaScript fără un request API suplimentar.
@@ -125,18 +125,23 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <select id="filter-allergen" class="filter-select" aria-label="Excludeți alergenul">
             <option value="">Fără restricții alergeni</option>
         </select>
-        <!-- Dropdown regim alimentar — populate dinamic din /api/dietary_regimes.php
-             Selecția unui regim INCLUDE DOAR băuturile compatibile cu acesta -->
+        <!-- Dropdown regimuri alimentare — populate dinamic din /api/dietary_regimes.php -->
         <select id="filter-regime" class="filter-select" aria-label="Filtrați după regim alimentar">
             <option value="">Orice regim</option>
         </select>
+        <!-- Dropdown regiuni — populate dinamic din /api/beverages.php?action=regions -->
+        <select id="filter-region" class="filter-select" aria-label="Filtrați după regiune">
+            <option value="">Orice regiune</option>
+        </select>
     </div>
 
-    <!-- Grid-ul de carduri de băuturi
-         Afișează inițial "Se încarcă..." până când JS populează datele -->
+    <!-- Grid-ul de carduri de băuturi -->
     <div id="beverages-grid" class="beverages-grid">
         <p class="loading-text">Se încarcă băuturile...</p>
     </div>
+
+    <!-- Controale de paginare — populate de beverages.js -->
+    <div id="pagination" class="pagination-bar"></div>
 
 </main>
 

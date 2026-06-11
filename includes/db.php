@@ -4,16 +4,12 @@ define('DB_PATH',      __DIR__ . '/../data/beverages.sqlite');
 define('INIT_SQL_PATH', __DIR__ . '/../data/init.sql');
 
 function get_db(): PDO {
-    // $pdo e variabilă statică: persistă între requesturi pe același fir Apache.
-    // O setăm DOAR după ce toată inițializarea reușește — dacă eșuează rămâne null
-    // și requestul următor reîncearcă de la zero (nu returnează o conexiune parțial inițializată).
     static $pdo = null;
     if ($pdo !== null) return $pdo;
 
     $db_exists = file_exists(DB_PATH);
 
     try {
-        // Folosim o variabilă locală $conn; $pdo primește valoarea abia la final
         $conn = new PDO('sqlite:' . DB_PATH);
         $conn->setAttribute(PDO::ATTR_ERRMODE,            PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -32,49 +28,59 @@ function get_db(): PDO {
             $conn->exec(file_get_contents(INIT_SQL_PATH));
         }
 
-        // Grupăm toate migrările într-o singură tranzacție:
-        // - Un singur lock de scriere în loc de N lock-uri separate
-        // - Dacă ceva eșuează, rollback atomic (DB rămâne consistent)
-        $conn->beginTransaction();
+        // Verificăm dacă migrările au fost deja aplicate (citire pură, fără lock de scriere).
+        // Dacă dietary_regimes există, toate migrările sunt aplicate — sărim blocul complet.
+        // Asta elimină lock-ul de scriere pe fiecare request și rezolvă conflictele SQLite
+        // când browser-ul face request-uri simultane (Promise.all).
+        $migrated = (bool)$conn->query(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='dietary_regimes'"
+        )->fetchColumn();
 
-        // ALTER TABLE eșuează dacă coloana există deja — prins separat, ignorat intenționat
-        try { $conn->exec('ALTER TABLE beverages ADD COLUMN valid_until DATE'); } catch (PDOException) {}
+        if (!$migrated) {
+            $conn->beginTransaction();
 
-        $conn->exec('CREATE TABLE IF NOT EXISTS dietary_regimes (
-            id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )');
-        $conn->exec('CREATE TABLE IF NOT EXISTS beverage_dietary_regimes (
-            beverage_id INTEGER NOT NULL REFERENCES beverages(id) ON DELETE CASCADE,
-            regime_id   INTEGER NOT NULL REFERENCES dietary_regimes(id) ON DELETE CASCADE,
-            PRIMARY KEY (beverage_id, regime_id)
-        )');
+            $has_valid_until = (bool)$conn->query(
+                "SELECT 1 FROM pragma_table_info('beverages') WHERE name='valid_until'"
+            )->fetchColumn();
+            if (!$has_valid_until) {
+                $conn->exec('ALTER TABLE beverages ADD COLUMN valid_until DATE');
+            }
 
-        $stmt = $conn->prepare('INSERT OR IGNORE INTO dietary_regimes (name) VALUES (?)');
-        foreach (['Vegan','Vegetarian','Fara Gluten','Fara Zahar','Fara Lactoza','Keto','Bio','Fara Cofeina'] as $r) {
-            $stmt->execute([$r]);
+            $conn->exec('CREATE TABLE IF NOT EXISTS dietary_regimes (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE
+            )');
+            $conn->exec('CREATE TABLE IF NOT EXISTS beverage_dietary_regimes (
+                beverage_id INTEGER NOT NULL REFERENCES beverages(id) ON DELETE CASCADE,
+                regime_id   INTEGER NOT NULL REFERENCES dietary_regimes(id) ON DELETE CASCADE,
+                PRIMARY KEY (beverage_id, regime_id)
+            )');
+
+            $stmt = $conn->prepare('INSERT OR IGNORE INTO dietary_regimes (name) VALUES (?)');
+            foreach (['Vegan','Vegetarian','Fara Gluten','Fara Zahar','Fara Lactoza','Keto','Bio','Fara Cofeina'] as $r) {
+                $stmt->execute([$r]);
+            }
+
+            $stmt = $conn->prepare('INSERT OR IGNORE INTO allergens (name) VALUES (?)');
+            foreach (['Gluten','Lactoze','Nuci','Soia','Sulfiti','Arahide','Oua'] as $name) {
+                $stmt->execute([$name]);
+            }
+
+            $stmt = $conn->prepare('
+                INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id)
+                SELECT b.id, a.id FROM beverages b, allergens a WHERE b.name = ? AND a.name = ?
+            ');
+            foreach ([
+                ['Lapte de vanilie','Lactoze'], ['Kefir natural','Lactoze'],
+                ['Ceai de musetel','Sulfiti'],  ['Sirop de zmeura','Sulfiti'],
+                ['Ceai de ghimbir','Sulfiti'],
+            ] as [$b, $a]) {
+                $stmt->execute([$b, $a]);
+            }
+
+            $conn->commit();
         }
 
-        $stmt = $conn->prepare('INSERT OR IGNORE INTO allergens (name) VALUES (?)');
-        foreach (['Gluten','Lactoze','Nuci','Soia','Sulfiti','Arahide','Oua'] as $name) {
-            $stmt->execute([$name]);
-        }
-
-        $stmt = $conn->prepare('
-            INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id)
-            SELECT b.id, a.id FROM beverages b, allergens a WHERE b.name = ? AND a.name = ?
-        ');
-        foreach ([
-            ['Lapte de vanilie','Lactoze'], ['Kefir natural','Lactoze'],
-            ['Ceai de musetel','Sulfiti'],  ['Sirop de zmeura','Sulfiti'],
-            ['Ceai de ghimbir','Sulfiti'],
-        ] as [$b, $a]) {
-            $stmt->execute([$b, $a]);
-        }
-
-        $conn->commit();
-
-        // Totul a reușit — acum setăm $pdo (static) pentru requesturile ulterioare
         $pdo = $conn;
 
     } catch (PDOException $e) {

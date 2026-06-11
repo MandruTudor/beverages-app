@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/jwt.php';
+
 function session_init(): void {
     if (session_status() === PHP_SESSION_NONE) session_start();
 }
@@ -41,6 +43,17 @@ function logout_user(): void {
 }
 
 function require_auth(): void {
+    // Verifică JWT Bearer token primul — permite acces fără cookie de sesiune
+    $jwt = jwt_from_request();
+    if ($jwt) {
+        session_init();
+        $_SESSION['user_id']  = $jwt['user_id'];
+        $_SESSION['username'] = $jwt['username'];
+        $_SESSION['email']    = $jwt['email'];
+        $_SESSION['role']     = $jwt['role'];
+        return;
+    }
+
     if (!is_logged_in()) {
         http_response_code(401);
         echo json_encode(['error' => 'Autentificare necesara.']);
