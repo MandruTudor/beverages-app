@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 logout_user();
 ?>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@ logout_user();
 <body>
 <script>
     localStorage.removeItem('jwt_token');
-    window.location.replace('/beverages-app/login.php');
+    window.location.replace('/beverages-app/pages/login.php');
 </script>
 </body>
 </html>

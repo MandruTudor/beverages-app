@@ -23,7 +23,7 @@ async function loadRecommendations() {
             const season = SEASONS[b.season] ?? '';
             const meta   = [b.category_name, season, b.region].filter(Boolean).join(' · ');
             return `
-            <a href="/beverages-app/beverages.php" class="dash-card" style="text-align:left;gap:.4rem">
+            <a href="/beverages-app/pages/beverages.php" class="dash-card" style="text-align:left;gap:.4rem">
                 <div class="dash-card__icon">🍵</div>
                 <strong class="dash-card__title">${escHtml(b.name)}</strong>
                 ${price ? `<span style="font-size:.85rem;color:var(--clr-primary);font-weight:600">${price}</span>` : ''}

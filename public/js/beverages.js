@@ -292,7 +292,7 @@ async function openDetail(id) {
             </div>
             <p id="detail-list-feedback" style="font-size:.82rem;margin-top:.35rem;min-height:1.2em"></p>
             ` : `<p style="font-size:.85rem;color:var(--clr-muted)">
-                Nu ai liste de cumpărături. <a href="/beverages-app/lists.php">Creează una</a>.
+                Nu ai liste de cumpărături. <a href="/beverages-app/pages/lists.php">Creează una</a>.
             </p>`}
         </div>
         <div class="detail-section" id="detail-rating-section">

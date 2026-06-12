@@ -4,7 +4,7 @@
 // ============================================================
 
 // Includem funcțiile de sesiune și autentificare.
-require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // Pornim sesiunea PHP.
 session_init();
@@ -12,7 +12,7 @@ session_init();
 // Dacă utilizatorul e deja logat, nu are sens să vadă pagina de login.
 // Îl trimitem direct la dashboard.
 if (is_logged_in()) {
-    header('Location: /beverages-app/dashboard.php');
+    header('Location: /beverages-app/pages/dashboard.php');
     exit; // Oprim execuția după redirect
 }
 // Dacă ajungem aici, userul NU este logat → afișăm formularul.
@@ -133,7 +133,7 @@ if (is_logged_in()) {
             <!-- Link spre pagina de înregistrare -->
             <div class="auth-footer">
                 Nu ai cont?
-                <a href="/beverages-app/register.php">Înregistrează-te</a>
+                <a href="/beverages-app/pages/register.php">Înregistrează-te</a>
             </div>
 
             <!-- Hint pentru contul de admin seeden în baza de date -->

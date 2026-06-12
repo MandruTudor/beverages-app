@@ -4,14 +4,14 @@
 // Utilizatorii pot crea, vizualiza și gestiona liste personale.
 // ============================================================
 
-require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // Pornim sesiunea PHP
 session_init();
 
 // Protecție: utilizatori neautentificați → login
 if (!is_logged_in()) {
-    header('Location: /beverages-app/login.php');
+    header('Location: /beverages-app/pages/login.php');
     exit;
 }
 
@@ -34,21 +34,21 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <div class="topbar-brand">🧃 Beverages App</div>
     <nav>
         <ul class="topbar-nav">
-            <li><a href="/beverages-app/dashboard.php">Dashboard</a></li>
-            <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
-            <li><a href="/beverages-app/lists.php" class="active">Liste</a></li>
-            <li><a href="/beverages-app/groups.php">Grupuri</a></li>
-            <li><a href="/beverages-app/stats.php">Statistici</a></li>
-            <li><a href="/beverages-app/preferences.php">Preferințe</a></li>
+            <li><a href="/beverages-app/pages/dashboard.php">Dashboard</a></li>
+            <li><a href="/beverages-app/pages/beverages.php">Băuturi</a></li>
+            <li><a href="/beverages-app/pages/lists.php" class="active">Liste</a></li>
+            <li><a href="/beverages-app/pages/groups.php">Grupuri</a></li>
+            <li><a href="/beverages-app/pages/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/pages/preferences.php">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
-            <li><a href="/beverages-app/admin.php">Admin</a></li>
+            <li><a href="/beverages-app/pages/admin.php">Admin</a></li>
             <?php endif; ?>
         </ul>
     </nav>
     <div class="topbar-user">
         <span class="avatar"><?= htmlspecialchars($initial) ?></span>
         <span><?= htmlspecialchars($user['username']) ?></span>
-        <a href="/beverages-app/logout.php">Ieșire</a>
+        <a href="/beverages-app/pages/logout.php">Ieșire</a>
     </div>
 </header>
 

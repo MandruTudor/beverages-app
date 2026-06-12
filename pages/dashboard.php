@@ -4,14 +4,14 @@
 // Accesibilă doar utilizatorilor autentificați.
 // ============================================================
 
-require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // Pornim sesiunea PHP pentru a accesa datele utilizatorului logat
 session_init();
 
 // Protecție server-side: utilizatori neautentificați → redirecționare la login
 if (!is_logged_in()) {
-    header('Location: /beverages-app/login.php');
+    header('Location: /beverages-app/pages/login.php');
     exit;
 }
 
@@ -41,21 +41,21 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <nav>
         <ul class="topbar-nav">
             <!-- clasa 'active' marchează pagina curentă -->
-            <li><a href="/beverages-app/dashboard.php" class="active">Dashboard</a></li>
-            <li><a href="/beverages-app/beverages.php">Băuturi</a></li>
-            <li><a href="/beverages-app/lists.php">Liste</a></li>
-            <li><a href="/beverages-app/groups.php">Grupuri</a></li>
-            <li><a href="/beverages-app/stats.php">Statistici</a></li>
-            <li><a href="/beverages-app/preferences.php">Preferințe</a></li>
+            <li><a href="/beverages-app/pages/dashboard.php" class="active">Dashboard</a></li>
+            <li><a href="/beverages-app/pages/beverages.php">Băuturi</a></li>
+            <li><a href="/beverages-app/pages/lists.php">Liste</a></li>
+            <li><a href="/beverages-app/pages/groups.php">Grupuri</a></li>
+            <li><a href="/beverages-app/pages/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/pages/preferences.php">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
-            <li><a href="/beverages-app/admin.php">Admin</a></li>
+            <li><a href="/beverages-app/pages/admin.php">Admin</a></li>
             <?php endif; ?>
         </ul>
     </nav>
     <div class="topbar-user">
         <span class="avatar"><?= htmlspecialchars($initial) ?></span>
         <span><?= htmlspecialchars($user['username']) ?></span>
-        <a href="/beverages-app/logout.php">Ieșire</a>
+        <a href="/beverages-app/pages/logout.php">Ieșire</a>
     </div>
 </header>
 
@@ -90,11 +90,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <?php
         // Fiecare card: [emoji, titlu, descriere, URL destinație]
         $cards = [
-            ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',       '/beverages-app/beverages.php'],
-            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup',  '/beverages-app/lists.php'],
-            ['👥', 'Grupuri',    'Gestionează grupuri și preferințe comune',          '/beverages-app/groups.php'],
-            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',      '/beverages-app/preferences.php'],
-            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',           '/beverages-app/stats.php'],
+            ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',       '/beverages-app/pages/beverages.php'],
+            ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup',  '/beverages-app/pages/lists.php'],
+            ['👥', 'Grupuri',    'Gestionează grupuri și preferințe comune',          '/beverages-app/pages/groups.php'],
+            ['⭐', 'Preferințe', 'Rating-urile și notițele tale despre băuturi',      '/beverages-app/pages/preferences.php'],
+            ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',           '/beverages-app/pages/stats.php'],
         ];
 
         // foreach iterează prin fiecare card; destructurăm array-ul în variabile

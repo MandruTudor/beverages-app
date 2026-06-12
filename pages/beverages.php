@@ -6,14 +6,14 @@
 // ============================================================
 
 // Includem funcțiile de sesiune și autentificare
-require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 // Pornim sesiunea PHP pentru a verifica dacă userul e logat
 session_init();
 
 // Protecție server-side: utilizatori neautentificați sunt trimiși la login
 if (!is_logged_in()) {
-    header('Location: /beverages-app/login.php');
+    header('Location: /beverages-app/pages/login.php');
     exit;
 }
 
@@ -52,14 +52,14 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     <!-- Meniu de navigare principal -->
     <nav>
         <ul class="topbar-nav">
-            <li><a href="/beverages-app/dashboard.php">Dashboard</a></li>
-            <li><a href="/beverages-app/beverages.php" class="active">Băuturi</a></li>
-            <li><a href="/beverages-app/lists.php">Liste</a></li>
-            <li><a href="/beverages-app/groups.php">Grupuri</a></li>
-            <li><a href="/beverages-app/stats.php">Statistici</a></li>
-            <li><a href="/beverages-app/preferences.php">Preferințe</a></li>
+            <li><a href="/beverages-app/pages/dashboard.php">Dashboard</a></li>
+            <li><a href="/beverages-app/pages/beverages.php" class="active">Băuturi</a></li>
+            <li><a href="/beverages-app/pages/lists.php">Liste</a></li>
+            <li><a href="/beverages-app/pages/groups.php">Grupuri</a></li>
+            <li><a href="/beverages-app/pages/stats.php">Statistici</a></li>
+            <li><a href="/beverages-app/pages/preferences.php">Preferințe</a></li>
             <?php if ($user['role'] === 'admin'): ?>
-            <li><a href="/beverages-app/admin.php">Admin</a></li>
+            <li><a href="/beverages-app/pages/admin.php">Admin</a></li>
             <?php endif; ?>
         </ul>
     </nav>
@@ -70,7 +70,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <span class="avatar"><?= htmlspecialchars($initial) ?></span>
         <!-- Username sanitizat cu htmlspecialchars pentru prevenirea XSS -->
         <span><?= htmlspecialchars($user['username']) ?></span>
-        <a href="/beverages-app/logout.php">Ieșire</a>
+        <a href="/beverages-app/pages/logout.php">Ieșire</a>
     </div>
 </header>
 

@@ -16,10 +16,10 @@ session_init();
 if (is_logged_in()) {
     // header('Location: ...') trimite un header HTTP de redirect (302 Found).
     // Browserul va naviga automat la URL-ul specificat.
-    header('Location: /beverages-app/dashboard.php');
+    header('Location: /beverages-app/pages/dashboard.php');
 } else {
     // Dacă nu e nimeni logat, îl trimitem spre pagina de login.
-    header('Location: /beverages-app/login.php');
+    header('Location: /beverages-app/pages/login.php');
 }
 
 // exit oprește execuția PHP după trimiterea header-ului de redirect.

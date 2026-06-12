@@ -108,7 +108,7 @@ function initLoginPage() {
         if (ok) {
             if (data.token) localStorage.setItem('jwt_token', data.token);
             showAlert(alert, 'Autentificare reușită! Redirecționare…', 'success');
-            setTimeout(() => { window.location.href = '/beverages-app/dashboard.php'; }, 800);
+            setTimeout(() => { window.location.href = '/beverages-app/pages/dashboard.php'; }, 800);
         } else {
             showAlert(alert, data.error || 'Eroare la autentificare.');
         }
@@ -164,7 +164,7 @@ function initRegisterPage() {
 
         if (ok) {
             showAlert(alert, 'Cont creat cu succes! Redirecționare spre login…', 'success');
-            setTimeout(() => { window.location.href = '/beverages-app/login.php'; }, 1200);
+            setTimeout(() => { window.location.href = '/beverages-app/pages/login.php'; }, 1200);
         } else {
             showAlert(alert, data.error || 'Eroare la înregistrare.');
         }
