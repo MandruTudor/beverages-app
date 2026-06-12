@@ -29,7 +29,7 @@ function is_admin(): bool {
 
 function login_user(array $user): void {
     session_init();
-    session_regenerate_id(true); // Prevents session fixation
+    session_regenerate_id(true);
     $_SESSION['user_id']  = $user['id'];
     $_SESSION['username'] = $user['username'];
     $_SESSION['email']    = $user['email'];
@@ -43,7 +43,6 @@ function logout_user(): void {
 }
 
 function require_auth(): void {
-    // Verifică JWT Bearer token primul — permite acces fără cookie de sesiune
     $jwt = jwt_from_request();
     if ($jwt) {
         session_init();

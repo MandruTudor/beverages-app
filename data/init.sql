@@ -1,14 +1,5 @@
--- ============================================================
--- init.sql — Schema și date inițiale ale bazei de date SQLite.
--- Rulat O SINGURĂ DATĂ de db.php când fișierul .sqlite nu există.
--- Toate instrucțiunile sunt învelite într-o tranzacție pentru viteză.
--- ============================================================
-
 BEGIN;
 
--- ============================================================
--- USERS — utilizatorii aplicației
--- ============================================================
 CREATE TABLE IF NOT EXISTS users (
     id            INTEGER  PRIMARY KEY AUTOINCREMENT,
     username      TEXT     NOT NULL UNIQUE,
@@ -18,9 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- ============================================================
--- GROUPS — grupuri de utilizatori
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS groups (
     id         INTEGER  PRIMARY KEY AUTOINCREMENT,
     name       TEXT     NOT NULL,
@@ -34,18 +23,13 @@ CREATE TABLE IF NOT EXISTS group_members (
     PRIMARY KEY (group_id, user_id)
 );
 
--- ============================================================
--- CATEGORIES — categorii de băuturi
--- ============================================================
 CREATE TABLE IF NOT EXISTS categories (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT    NOT NULL UNIQUE,
     description TEXT
 );
 
--- ============================================================
--- BEVERAGES — produsele principale
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS beverages (
     id                 INTEGER  PRIMARY KEY AUTOINCREMENT,
     name               TEXT     NOT NULL,
@@ -61,9 +45,7 @@ CREATE TABLE IF NOT EXISTS beverages (
     created_at         DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- ============================================================
--- INGREDIENTS — ingrediente reutilizabile
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS ingredients (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT    NOT NULL UNIQUE
@@ -76,9 +58,7 @@ CREATE TABLE IF NOT EXISTS beverage_ingredients (
     PRIMARY KEY (beverage_id, ingredient_id)
 );
 
--- ============================================================
--- ALLERGENS — alergeni
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS allergens (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT    NOT NULL UNIQUE
@@ -90,9 +70,7 @@ CREATE TABLE IF NOT EXISTS beverage_allergens (
     PRIMARY KEY (beverage_id, allergen_id)
 );
 
--- ============================================================
--- VENUES — localuri fizice
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS venues (
     id       INTEGER PRIMARY KEY AUTOINCREMENT,
     name     TEXT    NOT NULL,
@@ -106,9 +84,7 @@ CREATE TABLE IF NOT EXISTS beverage_venues (
     PRIMARY KEY (beverage_id, venue_id)
 );
 
--- ============================================================
--- DIETARY_REGIMES — regimuri alimentare speciale
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS dietary_regimes (
     id   INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT    NOT NULL UNIQUE
@@ -120,9 +96,7 @@ CREATE TABLE IF NOT EXISTS beverage_dietary_regimes (
     PRIMARY KEY (beverage_id, regime_id)
 );
 
--- ============================================================
--- SHOPPING_LISTS — liste de cumpărături
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS shopping_lists (
     id         INTEGER  PRIMARY KEY AUTOINCREMENT,
     user_id    INTEGER  REFERENCES users(id)  ON DELETE CASCADE,
@@ -139,9 +113,7 @@ CREATE TABLE IF NOT EXISTS shopping_list_items (
     checked     INTEGER NOT NULL DEFAULT 0
 );
 
--- ============================================================
--- PREFERENCES — evaluări individuale și de grup
--- ============================================================
+
 CREATE TABLE IF NOT EXISTS user_preferences (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id     INTEGER NOT NULL REFERENCES users(id)     ON DELETE CASCADE,
@@ -160,11 +132,7 @@ CREATE TABLE IF NOT EXISTS group_preferences (
     UNIQUE(group_id, beverage_id)
 );
 
--- ============================================================
--- SEED DATA
--- INSERT OR IGNORE: ignoră silențios dacă înregistrarea există deja.
--- Ordinea respectă dependențele FK: tabele referite înainte de cele care referă.
--- ============================================================
+
 
 -- ---- Utilizatori (parola pentru toți: 'password') ----
 INSERT OR IGNORE INTO users (username, email, password_hash, role) VALUES

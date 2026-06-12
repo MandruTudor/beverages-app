@@ -1,31 +1,23 @@
 <?php
-// ============================================================
-// dashboard.php — Pagina principală post-autentificare.
-// Accesibilă doar utilizatorilor autentificați.
-// ============================================================
+
 
 require_once __DIR__ . '/../includes/auth.php';
 
-// Pornim sesiunea PHP pentru a accesa datele utilizatorului logat
 session_init();
 
-// Protecție server-side: utilizatori neautentificați → redirecționare la login
 if (!is_logged_in()) {
     header('Location: /beverages-app/pages/login.php');
     exit;
 }
 
-// Preluăm datele utilizatorului din sesiune
 $user = current_user();
 
-// Prima literă din username pentru avatar circular (ex: "Tudor" → "T")
 $initial = strtoupper(substr($user['username'], 0, 1));
 ?>
 <!DOCTYPE html>
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport responsive: pagina se adaptează la lățimea dispozitivului -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Beverages App</title>
     <link rel="stylesheet" href="/beverages-app/public/css/main.css">
@@ -33,14 +25,11 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 </head>
 <body>
 
-<!-- ============================================================
-     Bara de navigare fixă (topbar)
-     ============================================================ -->
+
 <header class="topbar">
     <div class="topbar-brand">🧃 Beverages App</div>
     <nav>
         <ul class="topbar-nav">
-            <!-- clasa 'active' marchează pagina curentă -->
             <li><a href="/beverages-app/pages/dashboard.php" class="active">Dashboard</a></li>
             <li><a href="/beverages-app/pages/beverages.php">Băuturi</a></li>
             <li><a href="/beverages-app/pages/lists.php">Liste</a></li>
@@ -59,22 +48,15 @@ $initial = strtoupper(substr($user['username'], 0, 1));
     </div>
 </header>
 
-<!-- ============================================================
-     Conținut principal
-     ============================================================ -->
+
 <main class="page-main">
 
-    <!-- Banner de bun venit -->
     <div class="dash-welcome">
-        <!-- Avatar mare cu inițiala utilizatorului -->
         <div class="dash-welcome__avatar"><?= htmlspecialchars($initial) ?></div>
         <div>
-            <!-- Salut personalizat -->
             <h2 class="dash-welcome__title">Bun venit, <?= htmlspecialchars($user['username']) ?>!</h2>
-            <!-- Rolul utilizatorului: 'user' sau 'admin' -->
             <p class="dash-welcome__sub">
                 Ești autentificat ca
-                <!-- Badge colorat diferit pentru admin față de user -->
                 <span class="role-badge role-badge--<?= htmlspecialchars($user['role']) ?>">
                     <?= htmlspecialchars($user['role']) ?>
                 </span>
@@ -82,13 +64,10 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
-    <!-- Titlul secțiunii de navigare rapidă -->
     <h3 class="dash-section-title">Navigare rapidă</h3>
 
-    <!-- Grid de carduri — 4 coloane pe desktop, 2 pe tabletă, 1 pe mobil -->
     <div class="dash-grid">
         <?php
-        // Fiecare card: [emoji, titlu, descriere, URL destinație]
         $cards = [
             ['🍵', 'Băuturi',    'Catalogul complet de băuturi non-alcoolice',       '/beverages-app/pages/beverages.php'],
             ['🛒', 'Liste',      'Listele tale de cumpărături personale și de grup',  '/beverages-app/pages/lists.php'],
@@ -97,22 +76,16 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             ['📊', 'Statistici', 'Grafice, exporturi CSV/SVG și clasamente',           '/beverages-app/pages/stats.php'],
         ];
 
-        // foreach iterează prin fiecare card; destructurăm array-ul în variabile
         foreach ($cards as [$icon, $title, $desc, $href]):
         ?>
-        <!-- Cardul întreg e un link — fără JS inline, hover-ul e gestionat de CSS -->
         <a href="<?= htmlspecialchars($href) ?>" class="dash-card">
-            <!-- Iconița emoji în cerc colorat -->
             <div class="dash-card__icon"><?= $icon ?></div>
-            <!-- Titlul categoriei -->
             <strong class="dash-card__title"><?= $title ?></strong>
-            <!-- Descrierea scurtă -->
             <span class="dash-card__desc"><?= $desc ?></span>
         </a>
         <?php endforeach; ?>
     </div>
 
-    <!-- Sectiunea de recomandari personalizate -->
     <h3 class="dash-section-title" style="margin-top:2.5rem">Recomandate pentru tine</h3>
     <p class="page-subtitle" style="margin-bottom:1rem">
         Bazate pe băuturile pe care le-ai evaluat cu 4-5 stele.
