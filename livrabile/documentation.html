@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <title>Beverages App — Documentație Tehnică</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #1a1a1a;
+      max-width: 860px;
+      margin: 2rem auto;
+      padding: 0 1.5rem 4rem;
+      background: #fff;
+    }
+    h1 { font-size: 1.9rem; margin-bottom: .3rem; }
+    h2 { font-size: 1.35rem; border-bottom: 1px solid #ccc; padding-bottom: .2rem; margin-top: 2.2rem; }
+    h3 { font-size: 1.1rem; margin-top: 1.6rem; }
+    h4 { font-size: 1rem; margin-top: 1.3rem; font-style: italic; }
+    code, pre { font-family: 'Courier New', monospace; background: #f5f5f5; }
+    code { padding: .1rem .35rem; border-radius: 3px; font-size: .88rem; }
+    pre { padding: 1rem 1.2rem; border-left: 3px solid #888; overflow-x: auto; font-size: .83rem; line-height: 1.5; }
+    figure { margin: 1.5rem 0; }
+    figcaption { font-size: .85rem; color: #555; margin-top: .4rem; font-style: italic; }
+    table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: 1rem 0; }
+    th, td { border: 1px solid #ccc; padding: .4rem .75rem; text-align: left; }
+    th { background: #f0f0f0; }
+    [role="contentinfo"] { background: #fafafa; border: 1px solid #e0e0e0; padding: 1rem 1.5rem; margin: 1.5rem 0 2.5rem; border-radius: 4px; }
+    [role="contentinfo"] h2 { font-size: 1rem; border: none; margin-top: .5rem; }
+    [role="doc-abstract"] { background: #f9f9f9; border-left: 4px solid #aaa; padding: .8rem 1.2rem; margin: 1.5rem 0; }
+    ol[role="doc-bibliography"] li { margin-bottom: .5rem; }
+    .toc { background: #f5f5f5; padding: 1rem 1.5rem; margin-bottom: 2rem; border-radius: 4px; }
+    .toc ol { margin: .3rem 0; padding-left: 1.4rem; }
+    .toc a { color: #1a1a1a; }
+    .badge-admin { background:#fef3c7; color:#92400e; padding:.1rem .4rem; border-radius:3px; font-size:.8rem; }
+    .badge-user  { background:#eff6ff; color:#1d4ed8; padding:.1rem .4rem; border-radius:3px; font-size:.8rem; }
+  </style>
+</head>
+<body>
+
+<article resource="#" typeof="schema:ScholarlyArticle">
+
+<header>
+  <h1 property="schema:name">Beverages App — Aplicație Web pentru Gestionarea Băuturilor</h1>
+  <p role="doc-subtitle" property="schema:alternateName">
+    Documentație Tehnică — Proiect Web
+  </p>
+</header>
+
+<!-- ── Autor & Afiliere ───────────────────────────────────────────── -->
+<div role="contentinfo">
+  <section typeof="sa:AuthorsList">
+    <h2>Autori</h2>
+    <ul>
+      <li typeof="sa:ContributorRole" property="schema:author">
+        <span typeof="schema:Person">
+          <span property="schema:name">Casian Enea</span>
+        </span>
+        <ul>
+          <li property="schema:roleContactPoint" typeof="schema:ContactPoint">
+            <a href="mailto:casianenea14@gmail.com" property="schema:email">casianenea14@gmail.com</a>
+          </li>
+        </ul>
+      </li>
+      <li typeof="sa:ContributorRole" property="schema:author">
+        <span typeof="schema:Person">
+          <span property="schema:name">Mandru Tudor</span>
+        </span>
+        <ul>
+          <li property="schema:roleContactPoint" typeof="schema:ContactPoint">
+            <a href="mailto:casianenea14@gmail.com" property="schema:email">tudor.mandru13@gmail.com</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <section typeof="sa:Abstract" role="doc-abstract">
+    <h2>Abstract</h2>
+    <p>
+      Beverages App este o aplicație web pentru catalogarea și gestionarea băuturilor,
+      construită pe o arhitectură PHP pură fără framework, cu bază de date SQLite.
+      Sistemul implementează autentificare cu JWT și sesiuni PHP, control al accesului
+      pe două roluri (<em>user</em> / <em>admin</em>), operații CRUD complete pentru
+      băuturi și categorii, upload de imagini, import CSV și JSON, liste de cumpărături
+      personale și de grup, preferințe cu rating, statistici și integrare cu API-ul
+      Open Food Facts. Interfața frontend este construită în PHP și JavaScript vanilla,
+      fără niciun framework JS.
+    </p>
+  </section>
+</div>
+
+<!-- ── Cuprins ────────────────────────────────────────────────────── -->
+<nav class="toc" aria-label="Cuprins">
+  <strong>Cuprins</strong>
+  <ol>
+    <li><a href="#s1">Introducere</a></li>
+    <li><a href="#s2">Arhitectura aplicației</a>
+      <ol>
+        <li><a href="#s2-1">Structura directoarelor</a></li>
+        <li><a href="#s2-2">Fluxul unei cereri HTTP</a></li>
+        <li><a href="#s2-3">Stratul includes</a></li>
+      </ol>
+    </li>
+    <li><a href="#s3">Baza de date</a>
+      <ol>
+        <li><a href="#s3-1">Schema și tabele</a></li>
+        <li><a href="#s3-2">Constrângeri și integritate referențială</a></li>
+        <li><a href="#s3-3">Date seed</a></li>
+      </ol>
+    </li>
+    <li><a href="#s4">Backend — implementare</a>
+      <ol>
+        <li><a href="#s4-1">Autentificare și autorizare</a></li>
+        <li><a href="#s4-2">Modulul Beverages</a></li>
+        <li><a href="#s4-3">Alte module API</a></li>
+        <li><a href="#s4-4">Upload imagini</a></li>
+        <li><a href="#s4-5">Export și RSS</a></li>
+      </ol>
+    </li>
+    <li><a href="#s5">Frontend — implementare</a>
+      <ol>
+        <li><a href="#s5-1">Pagini PHP</a></li>
+        <li><a href="#s5-2">auth.js</a></li>
+        <li><a href="#s5-3">beverages.js</a></li>
+        <li><a href="#s5-4">admin.js</a></li>
+      </ol>
+    </li>
+    <li><a href="#s6">Securitate</a></li>
+    <li><a href="#s7">Funcționalități avansate</a></li>
+    <li><a href="#s8">Concluzie</a></li>
+    <li><a href="#references">Referințe</a></li>
+  </ol>
+</nav>
+
+<!-- ── 1. Introducere ─────────────────────────────────────────────── -->
+<section id="s1" role="doc-introduction">
+  <h2>1. Introducere</h2>
+  <p>
+    Aplicația a fost concepută ca un catalog interactiv de băuturi (ceaiuri, sucuri,
+    smoothie-uri, infuzii etc.) cu posibilitatea de a gestiona categorii, ingrediente,
+    alergeni, regimuri alimentare, locații de vânzare, preferințe personale și de grup,
+    și liste de cumpărături. Platforma este destinată atât utilizatorilor obișnuiți
+    (care pot naviga, evalua și salva băuturi), cât și administratorilor (care pot
+    adăuga, edita, șterge băuturi și gestiona utilizatorii).
+  </p>
+  <p>
+    Din punct de vedere tehnic, proiectul demonstrează utilizarea PHP fără framework
+    (arhitectură proprie în 4 straturi), gestionarea unei baze de date SQLite cu relații
+    many-to-many, securitate prin JWT, hashing BCrypt, protecție XSS și injecție SQL,
+    precum și interactivitate frontend prin JavaScript asincron (Fetch API, Promise.all,
+    debounce, paginare client-side).
+  </p>
+</section>
+
+<!-- ── 2. Arhitectura ─────────────────────────────────────────────── -->
+<section id="s2">
+  <h2>2. Arhitectura aplicației</h2>
+  <p>
+    Aplicația adoptă o arhitectură stratificată în 4 niveluri:
+    <strong>Controller → Service → Repository → DTO</strong>, inspirată din
+    principiile MVC și DDD, dar implementată manual în PHP pur, fără niciun framework.
+  </p>
+
+  <section id="s2-1">
+    <h3>2.1 Structura directoarelor</h3>
+
+    <figure typeof="sa:formula">
+      <pre>
+beverages-app/
+├── api/              # Punct de intrare HTTP (câte un fișier per resursă)
+│   ├── auth.php
+│   ├── beverages.php
+│   ├── categories.php
+│   ├── users.php
+│   ├── upload.php
+│   ├── stats.php
+│   ├── export.php
+│   ├── rss.php
+│   └── … (16 fișiere total)
+├── controllers/      # Rutare internă, parsare parametri HTTP
+├── services/         # Logică de business, validare
+├── repositories/     # Acces la baza de date (PDO)
+├── dto/              # Obiecte de transfer de date (validare intrare)
+├── includes/         # Utilitare partajate: db.php, auth.php, helpers.php,
+│                     #   autoload.php, jwt.php
+├── pages/            # Pagini PHP vizibile utilizatorului
+├── public/
+│   ├── css/
+│   ├── js/           # auth.js, beverages.js, admin.js, …
+│   └── images/beverages/   # Imagini uploadate
+├── data/
+│   ├── init.sql      # Schema + date seed
+│   └── beverages.sqlite    # Baza de date (generată automat)
+└── index.php         # Redirect spre pages/dashboard.php sau pages/login.php</pre>
+      <figcaption>Structura completă a directoarelor proiectului.</figcaption>
+    </figure>
+
+    <p>
+      Separarea în straturi are rolul de a izola responsabilitățile: controllerul nu
+      cunoaște SQL-ul, repository-ul nu cunoaște regulile de business, iar service-ul
+      nu cunoaște HTTP-ul. Aceasta permite testarea și modificarea fiecărui strat
+      independent.
+    </p>
+  </section>
+
+  <section id="s2-2">
+    <h3>2.2 Fluxul unei cereri HTTP</h3>
+    <p>
+      Un exemplu complet pentru <code>POST /api/beverages.php</code> (adăugare băutură):
+    </p>
+    <ol>
+      <li>
+        <strong>api/beverages.php</strong> — instanțiază dependențele și apelează
+        controllerul:
+        <pre>$ctrl = new BeverageController(
+    new BeverageService(
+        new BeverageRepository(get_db())
+    )
+);
+$ctrl->handle(get_param('action') ?? '');</pre>
+      </li>
+      <li>
+        <strong>BeverageController::handle()</strong> — folosește <code>match(true)</code>
+        pentru rutare bazată pe metodă HTTP + prezența parametrului <code>id</code>:
+        <pre>match(true) {
+    $isGet  &amp;&amp; !$id =&gt; $this->list(),
+    $isGet  &amp;&amp;  $id =&gt; $this->get($id),
+    $isPost             =&gt; $this->create(),
+    $isPatch &amp;&amp;  $id =&gt; $this->update($id),
+    $isDel   &amp;&amp;  $id =&gt; $this->delete($id),
+};</pre>
+      </li>
+      <li>
+        <strong>BeverageController::create()</strong> — parsează corpul JSON cu
+        <code>json_body()</code>, construiește un <code>BeverageCreateDto</code>,
+        apelează <code>BeverageService::create()</code>.
+      </li>
+      <li>
+        <strong>BeverageService::create()</strong> — apelează <code>require_admin()</code>
+        (returnează 403 dacă utilizatorul nu este admin), validează câmpurile, apelează
+        <code>BeverageRepository::create()</code> urmat de 4 apeluri
+        <code>sync*()</code> pentru relațiile many-to-many.
+      </li>
+      <li>
+        <strong>BeverageRepository::create()</strong> — execută un
+        <code>INSERT</code> cu statement pregătit PDO, returnează ID-ul noii înregistrări.
+      </li>
+      <li>
+        <strong>json_response()</strong> — serializează răspunsul ca JSON cu codul
+        HTTP corespunzător și <code>exit</code>.
+      </li>
+    </ol>
+
+    <p>
+      Autoloading-ul claselor este asigurat de <code>includes/autoload.php</code>,
+      care înregistrează un callback cu <code>spl_autoload_register()</code> ce
+      caută fișierul clasei în directoarele <code>controllers/</code>,
+      <code>services/</code>, <code>repositories/</code> și <code>dto/</code>.
+    </p>
+  </section>
+
+  <section id="s2-3">
+    <h3>2.3 Stratul includes</h3>
+
+    <h4>includes/db.php — Singleton PDO</h4>
+    <p>
+      Funcția <code>get_db()</code> implementează pattern-ul Singleton cu o variabilă
+      statică <code>$pdo</code>. La prima apelare creează conexiunea SQLite, aplică
+      trei PRAGMA în ordinea obligatorie: <code>busy_timeout = 10000</code> (înainte de
+      WAL pentru a evita race condition), <code>journal_mode = WAL</code> (scrieri
+      concurente), <code>foreign_keys = ON</code>. Dacă fișierul bazei de date nu
+      există, execută <code>init.sql</code> pentru a crea schema și a insera datele seed.
+      Migrațiile lazy sunt aplicate atomic în <code>BEGIN/COMMIT</code>.
+    </p>
+
+    <h4>includes/helpers.php — Utilitare HTTP</h4>
+    <p>
+      Exportă: <code>json_response($data, $status=200)</code> și
+      <code>json_error($msg, $status=400)</code> (ambele setează header-ul
+      <code>Content-Type: application/json</code> și apelează <code>exit</code>);
+      <code>json_body()</code> (decodifică JSON din <code>php://input</code>);
+      <code>missing_field($fields, $data)</code> (returnează primul câmp lipsă);
+      <code>get_param($key)</code> (citire din <code>$_GET</code>);
+      <code>sanitize($str)</code> (trim + strip_tags).
+    </p>
+
+    <h4>includes/auth.php — Sesiuni și garduri de acces</h4>
+    <p>
+      <code>session_init()</code> pornește sesiunea PHP cu cookie
+      <code>HttpOnly; SameSite=Strict</code>. <code>login_user($user)</code> scrie
+      datele utilizatorului în <code>$_SESSION</code> și apelează
+      <code>session_regenerate_id(true)</code> pentru a preveni session fixation.
+      <code>require_auth()</code> verifică mai întâi un token Bearer JWT în header-ul
+      <code>Authorization</code> (pentru cererile API din JS) și apoi sesiunea PHP
+      (pentru paginile PHP). <code>require_admin()</code> apelează
+      <code>require_auth()</code> și verifică rolul.
+    </p>
+
+    <h4>includes/jwt.php — Token-uri JWT</h4>
+    <p>
+      Implementare manuală HS256 (HMAC-SHA256). <code>jwt_generate($payload)</code>
+      construiește header-ul și payload-ul ca JSON, le codifică în Base64URL, calculează
+      semnătura cu <code>hash_hmac('sha256', …, JWT_SECRET, true)</code> și
+      concatenează cele trei părți separate de puncte. <code>jwt_validate($token)</code>
+      recalculează semnătura și o compară cu <code>hash_equals()</code> (protecție
+      timing attack), verifică câmpul <code>exp</code>. <code>jwt_from_request()</code>
+      extrage token-ul din header-ul HTTP și apelează <code>jwt_validate()</code>.
+    </p>
+    <p>
+      <strong>Important:</strong> JWT nu criptează datele, ci le <em>semnează</em>.
+      Payload-ul este vizibil în clar (Base64URL decodabil), dar nu poate fi falsificat
+      fără cheia secretă.
+    </p>
+  </section>
+</section>
+
+<!-- ── 3. Baza de date ────────────────────────────────────────────── -->
+<section id="s3">
+  <h2>3. Baza de date</h2>
+
+  <section id="s3-1">
+    <h3>3.1 Schema și tabele</h3>
+    <p>Baza de date conține 18 tabele organizate în trei grupuri funcționale:</p>
+
+    <figure typeof="sa:table">
+      <table>
+        <caption>Tabele principale și rolul lor</caption>
+        <thead>
+          <tr><th>Tabel</th><th>Rol</th><th>Relații cheie</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>users</code></td><td>Utilizatori (rol: user / admin)</td><td>—</td></tr>
+          <tr><td><code>groups</code></td><td>Grupuri de utilizatori</td><td>created_by → users</td></tr>
+          <tr><td><code>group_members</code></td><td>Apartenența la grupuri (N:M)</td><td>group_id, user_id</td></tr>
+          <tr><td><code>categories</code></td><td>Categorii băuturi</td><td>—</td></tr>
+          <tr><td><code>beverages</code></td><td>Catalog băuturi</td><td>category_id → categories (SET NULL)</td></tr>
+          <tr><td><code>ingredients</code></td><td>Ingrediente distincte</td><td>—</td></tr>
+          <tr><td><code>beverage_ingredients</code></td><td>Legătură N:M + cantitate</td><td>beverage_id, ingredient_id</td></tr>
+          <tr><td><code>allergens</code></td><td>Alergeni</td><td>—</td></tr>
+          <tr><td><code>beverage_allergens</code></td><td>Legătură N:M alergeni</td><td>CASCADE</td></tr>
+          <tr><td><code>venues</code></td><td>Locații de vânzare</td><td>—</td></tr>
+          <tr><td><code>beverage_venues</code></td><td>Legătură N:M locații</td><td>CASCADE</td></tr>
+          <tr><td><code>dietary_regimes</code></td><td>Regimuri alimentare</td><td>—</td></tr>
+          <tr><td><code>beverage_dietary_regimes</code></td><td>Legătură N:M regimuri</td><td>CASCADE</td></tr>
+          <tr><td><code>shopping_lists</code></td><td>Liste de cumpărături</td><td>user_id / group_id (NULL = personal)</td></tr>
+          <tr><td><code>shopping_list_items</code></td><td>Articole în liste</td><td>list_id, beverage_id</td></tr>
+          <tr><td><code>user_preferences</code></td><td>Rating + notițe per utilizator</td><td>UNIQUE(user_id, beverage_id)</td></tr>
+          <tr><td><code>group_preferences</code></td><td>Rating + notițe per grup</td><td>UNIQUE(group_id, beverage_id)</td></tr>
+        </tbody>
+      </table>
+    </figure>
+  </section>
+
+  <section id="s3-2">
+    <h3>3.2 Constrângeri și integritate referențială</h3>
+    <p>
+      SQLite nu activează cheile externe implicit. Fiecare conexiune PDO execută
+      <code>PRAGMA foreign_keys = ON</code>. Comportamentul la ștergere este diferit
+      în funcție de contextul semantic:
+    </p>
+    <ul>
+      <li>
+        <strong>ON DELETE CASCADE</strong> — pentru tabelele de legătură (ex.:
+        <code>beverage_ingredients</code>): ștergerea unei băuturi șterge automat
+        toate legăturile ei.
+      </li>
+      <li>
+        <strong>ON DELETE SET NULL</strong> — pentru <code>beverages.category_id</code>:
+        ștergerea unei categorii nu șterge băuturile, doar le dezasociază.
+      </li>
+    </ul>
+    <p>
+      Constrângeri suplimentare notabile: <code>CHECK(rating BETWEEN 1 AND 5)</code>
+      pe <code>user_preferences.rating</code> și <code>group_preferences.rating</code>;
+      <code>UNIQUE(user_id, beverage_id)</code> pe <code>user_preferences</code>
+      (un utilizator are o singură preferință per băutură).
+    </p>
+
+    <h4>Pattern-ul sync pentru relații N:M</h4>
+    <p>
+      La crearea sau actualizarea unei băuturi, relațiile many-to-many sunt sincronizate
+      prin metode de tip <code>syncIngredients()</code>, <code>syncAllergens()</code>,
+      <code>syncVenues()</code>, <code>syncDietaryRegimes()</code> din repository.
+      Fiecare metodă execută un <code>DELETE</code> urmat de <code>INSERT OR IGNORE</code>
+      cu subquery:
+    </p>
+    <pre>DELETE FROM beverage_allergens WHERE beverage_id = ?;
+INSERT OR IGNORE INTO beverage_allergens (beverage_id, allergen_id)
+    SELECT ?, id FROM allergens WHERE id = ?;</pre>
+    <p>
+      Subquery-ul previne inserarea ID-urilor invalide (dacă clientul trimite un ID
+      inexistent, <code>SELECT</code> nu returnează niciun rând și <code>INSERT</code>
+      nu se execută).
+    </p>
+  </section>
+
+  <section id="s3-3">
+    <h3>3.3 Date seed</h3>
+    <p>
+      Fișierul <code>init.sql</code> este învelit într-o tranzacție
+      <code>BEGIN / COMMIT</code> pentru atomicitate. Toate inserările folosesc
+      <code>INSERT OR IGNORE</code> — dacă datele există deja, comanda nu eșuează și
+      nu creează duplicate. Datele seed includ: 6 utilizatori (toți cu parola
+      <code>password</code>, hash BCrypt), 8 categorii, 8 regimuri alimentare,
+      7 alergeni, 20 ingrediente și băuturi de exemplu.
+    </p>
+  </section>
+</section>
+
+<!-- ── 4. Backend ─────────────────────────────────────────────────── -->
+<section id="s4">
+  <h2>4. Backend — implementare</h2>
+
+  <section id="s4-1">
+    <h3>4.1 Autentificare și autorizare</h3>
+
+    <h4>Fluxul de înregistrare</h4>
+    <ol>
+      <li>JS trimite <code>POST /api/auth.php?action=register</code> cu JSON
+          <code>{username, email, password}</code>.</li>
+      <li><code>AuthController::register()</code> apelează <code>missing_field()</code>
+          și delegă la <code>AuthService::register()</code>.</li>
+      <li>Service-ul validează: format email cu <code>filter_var()</code>, lungime
+          minimă parolă ≥ 8 caractere, unicitate username/email în baza de date.</li>
+      <li>Parola este hashată cu <code>password_hash($password, PASSWORD_BCRYPT)</code>
+          — BCrypt generează automat un salt random și produce un hash de 60 caractere.</li>
+      <li>Utilizatorul este creat cu rolul implicit <code>user</code>.</li>
+    </ol>
+
+    <h4>Fluxul de autentificare</h4>
+    <ol>
+      <li>JS trimite <code>POST /api/auth.php?action=login</code> cu
+          <code>{email, password}</code>.</li>
+      <li><code>AuthService::login()</code> caută utilizatorul după email cu
+          <code>findByEmail()</code>.</li>
+      <li>Verifică parola cu <code>password_verify($password, $user['password_hash'])</code>
+          — BCrypt recalculează hash-ul cu saltul stocat și compară.
+          <strong>Dacă email-ul sau parola sunt greșite, răspunsul este identic</strong>
+          (nu se dezvăluie care dintre ele).</li>
+      <li>Apelează <code>login_user($user)</code>: scrie datele în <code>$_SESSION</code>
+          și regenerează ID-ul sesiunii (<code>session_regenerate_id(true)</code>)
+          pentru a preveni <em>session fixation</em>.</li>
+      <li>Generează un token JWT cu payload
+          <code>{user_id, username, email, role, iat, exp}</code> și îl returnează
+          clientului. JS îl stochează în <code>localStorage</code> sub cheia
+          <code>jwt_token</code>.</li>
+    </ol>
+
+    <h4>Verificarea autentificării la fiecare cerere API</h4>
+    <p>
+      <code>require_auth()</code> din <code>includes/auth.php</code> verifică mai întâi
+      header-ul <code>Authorization: Bearer &lt;token&gt;</code> (folosit de JS prin
+      Fetch API). Dacă token-ul este valid și neexpirat, utilizatorul este autentificat.
+      Dacă nu există token Bearer, verifică <code>$_SESSION['user_id']</code> (folosit
+      de paginile PHP renderizate server-side). Dacă niciuna nu este prezentă, returnează
+      HTTP 401. <code>require_admin()</code> apelează <code>require_auth()</code> și
+      verifică suplimentar că <code>role === 'admin'</code>, altfel returnează HTTP 403.
+    </p>
+  </section>
+
+  <section id="s4-2">
+    <h3>4.2 Modulul Beverages</h3>
+
+    <h4>Listare cu filtre dinamice (BeverageRepository::findAll)</h4>
+    <p>
+      Interogarea SQL este construită dinamic prin acumularea condițiilor în array-ul
+      <code>$where[]</code> și a parametrilor în <code>$params[]</code>, în funcție
+      de filtrele trimise (categorie, alergeni, regimuri, sezon, regiune, preț minim/maxim).
+      Câmpurile <code>allergen_count</code> și <code>regime_count</code> sunt calculate
+      cu subqueries SQL pentru a permite filtrarea combinată:
+    </p>
+    <pre>SELECT b.*,
+  (SELECT COUNT(*) FROM beverage_allergens
+   WHERE beverage_id = b.id AND allergen_id IN (…)) AS allergen_count
+FROM beverages b
+WHERE allergen_count = 0   -- exclude băuturile cu alergeni selectați
+AND …</pre>
+
+    <h4>PATCH cu semantică parțială (BeverageCreateDto)</h4>
+    <p>
+      DTO-ul folosește metoda <code>has($field)</code> pentru a distinge între
+      un câmp lipsă (clientul nu vrea să îl modifice) și un câmp cu valoare
+      <code>null</code> (clientul vrea să îl șteargă). Aceasta permite cereri
+      PATCH care actualizează doar câmpurile trimise, fără a le reseta pe celelalte.
+    </p>
+
+    <h4>Integrare Open Food Facts</h4>
+    <p>
+      La crearea unei băuturi, dacă este furnizat un cod de bare, service-ul interogează
+      API-ul public Open Food Facts pentru a prelua automat informații despre produs
+      (ingrediente, alergeni, imagine). Rezultatele sunt fuzionate cu datele din formular.
+    </p>
+  </section>
+
+  <section id="s4-3">
+    <h3>4.3 Alte module API</h3>
+    <figure typeof="sa:table">
+      <table>
+        <caption>Endpoint-uri implementate</caption>
+        <thead>
+          <tr><th>Fișier API</th><th>Resurse gestionate</th><th>Metode HTTP</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>api/auth.php</code></td><td>register, login, logout, me</td><td>POST</td></tr>
+          <tr><td><code>api/beverages.php</code></td><td>Catalog băuturi + filtre</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/categories.php</code></td><td>Categorii</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/users.php</code></td><td>Lista utilizatori, set_role, delete</td><td>GET, PATCH, DELETE</td></tr>
+          <tr><td><code>api/allergens.php</code></td><td>Alergeni</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/ingredients.php</code></td><td>Ingrediente</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/venues.php</code></td><td>Locații</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/dietary_regimes.php</code></td><td>Regimuri alimentare</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/preferences.php</code></td><td>Preferințe utilizator (rating)</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/group_preferences.php</code></td><td>Preferințe de grup</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/shopping_lists.php</code></td><td>Liste cumpărături + articole</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/groups.php</code></td><td>Grupuri + membri</td><td>GET, POST, PATCH, DELETE</td></tr>
+          <tr><td><code>api/stats.php</code></td><td>Statistici agregate</td><td>GET</td></tr>
+          <tr><td><code>api/export.php</code></td><td>Export CSV/JSON</td><td>GET</td></tr>
+          <tr><td><code>api/upload.php</code></td><td>Upload imagini băuturi</td><td>POST</td></tr>
+          <tr><td><code>api/rss.php</code></td><td>Feed RSS băuturi noi</td><td>GET</td></tr>
+        </tbody>
+      </table>
+    </figure>
+  </section>
+
+  <section id="s4-4">
+    <h3>4.4 Upload imagini</h3>
+    <p>
+      Endpoint-ul <code>api/upload.php</code> acceptă fișiere prin
+      <code>multipart/form-data</code>. Validarea tipului MIME nu se bazează pe
+      extensia fișierului (falsificabilă), ci folosește extensia PHP
+      <code>finfo</code> cu constanta <code>FILEINFO_MIME_TYPE</code> pentru a
+      detecta tipul real din conținutul binar al fișierului. Tipurile acceptate:
+      <code>image/jpeg</code>, <code>image/png</code>, <code>image/webp</code>,
+      <code>image/gif</code>. Limita de dimensiune este 2 MB. Numele fișierului
+      salvat este generat cu <code>uniqid('bev_', true)</code> pentru a evita
+      coliziunile și pentru a preveni traversarea directoarelor.
+    </p>
+  </section>
+
+  <section id="s4-5">
+    <h3>4.5 Export și RSS</h3>
+    <p>
+      <code>api/export.php</code> permite descărcarea întregului catalog ca fișier
+      CSV sau JSON. <code>api/rss.php</code> generează un feed RSS 2.0 valid cu
+      cele mai recente băuturi adăugate, permițând abonarea la actualizări din
+      orice client RSS.
+    </p>
+  </section>
+</section>
+
+<!-- ── 5. Frontend ────────────────────────────────────────────────── -->
+<section id="s5">
+  <h2>5. Frontend — implementare</h2>
+
+  <section id="s5-1">
+    <h3>5.1 Pagini PHP</h3>
+    <p>
+      Toate paginile vizibile utilizatorului se află în directorul <code>pages/</code>.
+      Fiecare pagină PHP aplică garda de autentificare server-side (prin
+      <code>require_auth()</code> sau <code>require_admin()</code>) înainte de
+      orice output HTML. <code>index.php</code> din rădăcina proiectului redirecționează
+      automat spre <code>pages/dashboard.php</code> sau <code>pages/login.php</code>
+      în funcție de starea sesiunii.
+    </p>
+    <p>
+      Paginile care afișează conținut dinamic în funcție de rol transmit informația
+      spre JavaScript prin atributul <code>data-role</code> pe elementul
+      <code>&lt;body&gt;</code>:
+    </p>
+    <pre>&lt;body data-role="&lt;?= htmlspecialchars($user['role']) ?&gt;"&gt;</pre>
+    <p>
+      JS citește <code>document.body.dataset.role</code> și afișează sau ascunde
+      butoanele de administrare corespunzătoare. <strong>Aceasta este protecție
+      vizuală</strong>; protecția reală este aplicată server-side prin
+      <code>require_admin()</code> în fiecare endpoint API.
+    </p>
+  </section>
+
+  <section id="s5-2">
+    <h3>5.2 auth.js</h3>
+    <p>
+      Gestionează autentificarea și înregistrarea în browser. Principalele componente:
+    </p>
+    <ul>
+      <li>
+        <strong>apiFetch(url, body)</strong> — wrapper peste Fetch API pentru cereri
+        <code>POST JSON</code>; returnează <code>{ok, status, data}</code>.
+      </li>
+      <li>
+        <strong>initPasswordStrength()</strong> — evaluează parola cu 5 criterii
+        (lungime ≥ 8, lungime ≥ 12, majuscule, cifre, caractere speciale); actualizează
+        vizual un indicator de tip bară colorată (<em>Prea slabă → Excelentă</em>).
+      </li>
+      <li>
+        <strong>initLoginPage()</strong> — previne submisia nativă cu
+        <code>e.preventDefault()</code>, validează câmpurile local, apelează
+        <code>apiFetch()</code>, stochează token-ul JWT în
+        <code>localStorage.setItem('jwt_token', data.token)</code> și redirecționează
+        spre dashboard.
+      </li>
+      <li>
+        <strong>initRegisterPage()</strong> — validare live a confirmării parolei,
+        plus aceleași etape ca login.
+      </li>
+      <li>
+        <strong>DOMContentLoaded</strong> — apelează ambele funcții <code>init*()</code>;
+        fiecare verifică dacă formularul său există pe pagină și iese imediat dacă nu.
+      </li>
+    </ul>
+  </section>
+
+  <section id="s5-3">
+    <h3>5.3 beverages.js</h3>
+    <p>
+      Cel mai complex fișier JS al proiectului, gestionează pagina de catalog.
+      Stare globală: <code>allBeverages</code>, <code>categories</code>,
+      <code>dietaryRegimes</code>, <code>userLists</code>, <code>myPreferences</code>
+      (dicționar <code>{beverage_id: pref}</code>), <code>currentPage</code>,
+      <code>ITEMS_PER_PAGE = 9</code>.
+    </p>
+    <ul>
+      <li>
+        <strong>Inițializare paralelă</strong> — <code>Promise.all([…6 apeluri API…])</code>
+        la <code>DOMContentLoaded</code> pentru a reduce timpul de așteptare: categorii,
+        alergeni, regimuri, locații, liste cumpărături și preferințele proprii se
+        încarcă simultan.
+      </li>
+      <li>
+        <strong>Strategia de filtrare hibridă</strong> — filtrele de categorie,
+        alergeni, regim, sezon, regiune și preț sunt trimise ca parametri server-side
+        (reduc volumul de date din rețea). Căutarea text liberă se aplică
+        client-side pe <code>allBeverages</code> deja încărcat, cu debounce de 300 ms
+        pentru a evita cereri excesive.
+      </li>
+      <li>
+        <strong>Paginare client-side</strong> — <code>renderPagination()</code>
+        calculează paginile vizibile cu un algoritm cu elipsă, afișând întotdeauna
+        prima și ultima pagină plus contextul paginii curente.
+      </li>
+      <li>
+        <strong>Modal detalii</strong> — <code>openDetail(id)</code> face
+        <code>Promise.all([getBeverage, getLists])</code> și randează HTML-ul complet
+        în modal, inclusiv stele interactive pentru rating (<code>initDetailStarPicker()</code>)
+        cu handlere <code>mouseenter/mouseleave/click</code>.
+      </li>
+      <li>
+        <strong>openForm vs initFormSubmit</strong> — separate intenționat:
+        <code>openForm(id)</code> deschide modalul și îl populează (poate fi apelat
+        de mai multe ori), iar <code>initFormSubmit()</code> adaugă listener-ul
+        de submit o singură dată la inițializare. Dacă ar fi în aceeași funcție,
+        fiecare deschidere a modalului ar adăuga un nou listener, ducând la
+        trimiteri multiple ale formularului.
+      </li>
+      <li>
+        <strong>Upload imagine</strong> — folosește <code>fetch()</code> direct
+        (nu funcția <code>api()</code>) cu <code>FormData</code> pentru
+        <code>multipart/form-data</code>; token-ul JWT este atașat manual
+        în header-ul <code>Authorization</code>.
+      </li>
+      <li>
+        <strong>escHtml()</strong> — înlocuiește <code>&amp;</code>, <code>&lt;</code>,
+        <code>&gt;</code>, <code>"</code>, <code>'</code> cu entitățile HTML
+        corespunzătoare, prevenind XSS la inserarea datelor din API în DOM.
+      </li>
+    </ul>
+  </section>
+
+  <section id="s5-4">
+    <h3>5.4 admin.js</h3>
+    <p>
+      Gestionează panoul de administrare (utilizatori, import CSV, import JSON).
+    </p>
+    <ul>
+      <li>
+        <strong>api(method, url, body)</strong> — diferit de <code>beverages.js</code>:
+        aruncă <code>Error</code> la răspuns non-OK, în loc să returneze
+        <code>{ok, data}</code>. Atașează automat token-ul JWT.
+      </li>
+      <li>
+        <strong>loadUsers()</strong> — randează tabelul de utilizatori cu innerHTML,
+        apoi apelează <code>attachUserListeners()</code>. Ordinea este importantă:
+        listener-ii trebuie adăugați după ce DOM-ul tabelului există.
+      </li>
+      <li>
+        <strong>Import CSV</strong> — <code>parseCSV()</code> este un parser complet
+        care tratează câmpuri cu ghilimele, ghilimele duble escapate și BOM UTF-8.
+        Previzualizarea arată primele 5 rânduri; importul trimite fiecare rând
+        ca cerere <code>POST</code> individuală la <code>api/beverages.php</code>.
+      </li>
+      <li>
+        <strong>Import JSON</strong> — acceptă array direct sau obiect
+        <code>{beverages: […]}</code>; validează prezența câmpului <code>name</code>
+        înainte de import.
+      </li>
+    </ul>
+  </section>
+</section>
+
+<!-- ── 6. Securitate ─────────────────────────────────────────────── -->
+<section id="s6">
+  <h2>6. Securitate</h2>
+
+  <h3>Prevenire injecție SQL</h3>
+  <p>
+    Toate interogările SQL folosesc <em>prepared statements</em> PDO cu parametri
+    legați (<code>?</code> sau <code>:name</code>). PDO separă codul SQL de date,
+    eliminând posibilitatea ca datele utilizatorului să fie interpretate ca instrucțiuni
+    SQL. Nu există nicio concatenare de string-uri în interogările SQL.
+  </p>
+
+  <h3>Prevenire XSS (Cross-Site Scripting)</h3>
+  <p>
+    Orice dată provenită din surse externe (API, baza de date) care este inserată
+    în HTML trece prin <code>escHtml()</code> în JavaScript sau
+    <code>htmlspecialchars()</code> în PHP. Aceasta transformă caracterele speciale
+    HTML în entități, astfel încât un script malițios (<code>&lt;script&gt;…&lt;/script&gt;</code>)
+    ajunge în DOM ca text vizibil, nu ca cod executabil.
+  </p>
+
+  <h3>Hashing parole (BCrypt)</h3>
+  <p>
+    <code>password_hash($password, PASSWORD_BCRYPT)</code> generează un salt aleatoriu
+    de 22 caractere și aplică algoritmul BCrypt (cost factor implicit: 10).
+    Hash-ul final de 60 caractere include saltul și cost factor-ul. La autentificare,
+    <code>password_verify()</code> extrage saltul din hash stocat, recalculează și
+    compară. Stocarea parolelor în clar este imposibilă — hash-ul este ireversibil.
+  </p>
+
+  <h3>JWT — autentificare fără stat (stateless)</h3>
+  <p>
+    Token-ul JWT permite cererilor API din JavaScript să se autentifice fără a depinde
+    de cookie-uri sau sesiuni PHP. Token-ul este semnat cu HMAC-SHA256 folosind o
+    cheie secretă stocare server-side; orice modificare a payload-ului invalidează
+    semnătura. Compararea semnăturilor se face cu <code>hash_equals()</code> pentru
+    a preveni atacurile de tip <em>timing attack</em>. Token-urile au câmp <code>exp</code>
+    (expirare), verificat la fiecare cerere.
+  </p>
+
+  <h3>Session Fixation</h3>
+  <p>
+    <code>session_regenerate_id(true)</code> este apelat la autentificare, generând
+    un nou ID de sesiune și invalidând cel vechi. Aceasta previne atacul în care un
+    atacator forțează un utilizator să folosească un ID de sesiune cunoscut.
+  </p>
+
+  <h3>Validare MIME tip imagini</h3>
+  <p>
+    Extensia fișierului nu este un indicator de securitate (poate fi falsificată).
+    <code>finfo_open(FILEINFO_MIME_TYPE)</code> analizează primii bytes ai fișierului
+    (magic bytes) pentru a determina tipul real, indiferent de extensia declarată.
+  </p>
+
+  <h3>Autorizare dublă</h3>
+  <p>
+    Butoanele de administrare sunt ascunse în UI pe baza rolului (<code>data-role</code>),
+    dar fiecare endpoint API sensibil apelează independent <code>require_admin()</code>
+    server-side. Un utilizator malițios care ar bypassa UI-ul și ar trimite cereri
+    direct la API ar primi HTTP 403.
+  </p>
+</section>
+
+<!-- ── 7. Funcționalități avansate ───────────────────────────────── -->
+<section id="s7">
+  <h2>7. Funcționalități avansate</h2>
+
+  <h3>Statistici</h3>
+  <p>
+    Pagina <code>pages/stats.php</code> afișează grafice generate cu biblioteca
+    Chart.js: distribuția băuturilor pe categorii, distribuția pe regiuni, prețul
+    mediu per categorie și distribuția alergenilor. Datele sunt furnizate de
+    <code>api/stats.php</code> cu interogări SQL agregate.
+  </p>
+
+  <h3>Liste de cumpărături</h3>
+  <p>
+    Listele pot fi personale (<code>group_id = NULL</code>) sau aparținând unui grup.
+    Articolele dintr-o listă pot fi bifate (<code>checked = 1</code>), permițând
+    urmărirea progresului de cumpărare. Autocomplete-ul din câmpul de căutare a
+    articolelor folosește debounce pentru a limita cererile API.
+  </p>
+
+  <h3>Grupuri de utilizatori</h3>
+  <p>
+    Utilizatorii pot crea grupuri, invita alți utilizatori și gestiona preferințe și
+    liste de cumpărături comune. Apartenența la grup este gestionată prin tabela
+    de legătură <code>group_members</code>.
+  </p>
+
+  <h3>Import în masă</h3>
+  <p>
+    Administratorii pot importa băuturi din fișiere CSV sau JSON prin drag-and-drop
+    sau selecție clasică. Previzualizarea arată primele 5 rânduri înainte de import.
+    Importul se face rând cu rând, cu raportarea succeselor și erorilor.
+  </p>
+
+  <h3>Feed RSS</h3>
+  <p>
+    <code>api/rss.php</code> generează un feed RSS 2.0 valid cu cele mai recente
+    10 băuturi adăugate, permițând urmărirea actualizărilor din orice client RSS.
+  </p>
+
+  <h3>Integrare Open Food Facts</h3>
+  <p>
+    Prin furnizarea unui cod de bare la adăugarea unei băuturi, aplicația interogează
+    automat API-ul public Open Food Facts și preia date despre produs (ingrediente,
+    alergeni, imagine), reducând efortul de completare manuală.
+  </p>
+</section>
+
+<!-- ── 8. Concluzie ───────────────────────────────────────────────── -->
+<section id="s8" role="doc-conclusion">
+  <h2>8. Concluzie</h2>
+  <p>
+    Beverages App demonstrează că o arhitectură web robustă poate fi construită
+    în PHP pur, fără dependențe externe, respectând principii fundamentale de
+    inginerie software: separarea responsabilităților, securitate în profunzime,
+    și o interfață utilizator interactivă construită cu JavaScript vanilla.
+    Proiectul acoperă un spectru larg de concepte web moderne: autentificare
+    stateless cu JWT, hashing criptografic, relații de baze de date complexe,
+    programare asincronă în browser și integrare cu API-uri externe.
+  </p>
+</section>
+
+<!-- ── Referințe ──────────────────────────────────────────────────── -->
+<section id="references" role="doc-bibliography">
+  <h2>9. Referințe</h2>
+  <ol role="doc-bibliography">
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://www.php.net/manual/en/book.pdo.php"
+        property="schema:citation" id="ref-pdo">
+      <cite property="schema:name">
+        <a href="https://www.php.net/manual/en/book.pdo.php">PHP Data Objects (PDO)</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">The PHP Group</span>
+      </span>.
+    </li>
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://www.sqlite.org/wal.html"
+        property="schema:citation" id="ref-wal">
+      <cite property="schema:name">
+        <a href="https://www.sqlite.org/wal.html">Write-Ahead Logging — SQLite</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">SQLite Consortium</span>
+      </span>.
+    </li>
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://datatracker.ietf.org/doc/html/rfc7519"
+        property="schema:citation" id="ref-jwt">
+      <cite property="schema:name">
+        <a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 — JSON Web Token (JWT)</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">IETF</span>
+      </span>;
+      publicat în <time property="schema:datePublished" datetime="2015">2015</time>.
+    </li>
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://www.php.net/manual/en/function.password-hash.php"
+        property="schema:citation" id="ref-bcrypt">
+      <cite property="schema:name">
+        <a href="https://www.php.net/manual/en/function.password-hash.php">password_hash — PHP Manual</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">The PHP Group</span>
+      </span>.
+    </li>
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://owasp.org/www-community/attacks/xss/"
+        property="schema:citation" id="ref-xss">
+      <cite property="schema:name">
+        <a href="https://owasp.org/www-community/attacks/xss/">Cross Site Scripting (XSS)</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">OWASP Foundation</span>
+      </span>.
+    </li>
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API"
+        property="schema:citation" id="ref-fetch">
+      <cite property="schema:name">
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API">Fetch API — MDN Web Docs</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">Mozilla Foundation</span>
+      </span>.
+    </li>
+    <li typeof="schema:WebPage" role="doc-biblioentry"
+        resource="https://world.openfoodfacts.org/api"
+        property="schema:citation" id="ref-off">
+      <cite property="schema:name">
+        <a href="https://world.openfoodfacts.org/api">Open Food Facts API</a>
+      </cite>,
+      <span property="schema:author" typeof="schema:Organization">
+        <span property="schema:name">Open Food Facts</span>
+      </span>.
+    </li>
+  </ol>
+</section>
+
+</article>
+</body>
+</html>
