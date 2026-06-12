@@ -506,7 +506,6 @@ async function addToShoppingList(beverageId, beverageName) {
     }
 }
 
-// Not using api() here — multipart/form-data requires the browser to set Content-Type with boundary
 async function uploadImage(file) {
     const form = new FormData();
     form.append('image', file);
