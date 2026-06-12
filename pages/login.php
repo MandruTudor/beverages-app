@@ -136,10 +136,7 @@ if (is_logged_in()) {
                 <a href="/beverages-app/pages/register.php">Înregistrează-te</a>
             </div>
 
-            <!-- Hint pentru contul de admin seeden în baza de date -->
-            <div class="auth-footer" style="margin-top:.5rem;font-size:.8rem;color:var(--clr-muted)">
-                Admin implicit: <code>admin@beverages.local</code> / <code>password</code>
-            </div>
+            
         </div>
     </div>
 

@@ -76,7 +76,7 @@ function renderGroupDetail(group) {
         `Owner: ${group.owner_name} · ${group.members.length} ${group.members.length === 1 ? 'membru' : 'membri'}`;
 
     const btnDelete = document.getElementById('btn-delete-group');
-    btnDelete.style.display = group.created_by === getCurrentUserId() ? '' : 'none';
+    btnDelete.style.display = Number(group.created_by) === getCurrentUserId() ? '' : 'none';
 
     renderMembers(group);
 
@@ -91,7 +91,7 @@ function renderGroupDetail(group) {
 
 function renderMembers(group) {
     const el      = document.getElementById('members-list');
-    const isOwner = group.created_by === getCurrentUserId();
+    const isOwner = Number(group.created_by) === getCurrentUserId();
     if (!group.members.length) { el.innerHTML = '<p class="loading-text">Niciun membru.</p>'; return; }
     el.innerHTML = group.members.map(m => `
         <div class="list-card" style="display:flex;align-items:center;gap:.75rem;cursor:default">

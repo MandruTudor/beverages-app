@@ -1,9 +1,4 @@
 <?php
-// ============================================================
-// preferences.php — Rating-uri și notițe personale.
-// Fiecare utilizator poate evalua băuturile (1-5 stele) și
-// adăuga notițe personale.
-// ============================================================
 
 require_once __DIR__ . '/../includes/auth.php';
 
@@ -57,7 +52,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <h2>Recenziile mele</h2>
             <p class="page-subtitle">Băuturile evaluate de tine. Deschide orice băutură pentru a modifica sau adăuga o recenzie.</p>
         </div>
-        <!-- Filtru: toate băuturile vs. doar cele evaluate -->
         <div style="display:flex;gap:.5rem">
             <button class="btn btn-outline btn-sm pref-filter" data-filter="all">Toate</button>
             <button class="btn btn-outline btn-sm pref-filter active" data-filter="rated">Evaluate</button>
@@ -65,14 +59,12 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
-    <!-- Grid cu cardurile băuturilor — populate de JS -->
     <div id="pref-grid" class="pref-grid">
         <p class="loading-text">Se încarcă...</p>
     </div>
 
 </main>
 
-<!-- Modal pentru editarea unui rating -->
 <div id="modal-pref" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-box" style="max-width:440px">
         <button class="modal-close" onclick="closeModal()" aria-label="Închide">✕</button>
@@ -81,27 +73,22 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         <form id="pref-form" novalidate>
             <input type="hidden" id="pref-beverage-id">
 
-            <!-- Selector stele 1-5 -->
             <div class="form-group">
                 <label>Rating</label>
-                <div class="star-picker" id="star-picker" role="radiogroup" aria-label="Rating 1-5 stele">
-                    <!-- Stelele sunt generate de JS -->
-                </div>
+                <div class="star-picker" id="star-picker" role="radiogroup" aria-label="Rating 1-5 stele"></div>
                 <input type="hidden" id="pref-rating" value="0">
             </div>
 
-            <!-- Notița personală -->
             <div class="form-group">
                 <label for="pref-notes">Notițe personale</label>
                 <textarea id="pref-notes" class="form-control" rows="3"
                           placeholder="Impresii, sugestii, combinații..."></textarea>
             </div>
 
-            <!-- Mesaj de eroare în formular -->
             <div id="pref-alert" class="alert alert-error" role="alert"></div>
 
             <div class="form-actions">
-                <!-- Butonul de ștergere apare doar dacă există deja un rating -->
+                <!-- apare doar dacă există deja un rating salvat -->
                 <button type="button" id="btn-delete-pref" class="btn btn-danger btn-sm"
                         style="display:none;margin-right:auto">🗑 Șterge</button>
                 <button type="button" class="btn btn-outline btn-sm" onclick="closeModal()">Anulează</button>

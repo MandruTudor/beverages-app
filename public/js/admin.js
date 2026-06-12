@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUsers();
     initImport();
     initJsonImport();
-    initOFF();
 });
 
 async function loadUsers() {
@@ -197,7 +196,7 @@ async function importRows(header, rows) {
         if (obj.category_id)        obj.category_id        = parseInt(obj.category_id) || null;
         if (obj.perishability_days) obj.perishability_days = parseInt(obj.perishability_days) || null;
 
-        // Parsează ID-urile separate prin '|' în array-uri de obiecte {id: N}
+        // ID-urile separate prin '|' sunt convertite în array de obiecte {id: N}
         obj.allergens       = obj.allergens       ? obj.allergens.split('|').map(id => parseInt(id.trim())).filter(Boolean).map(id => ({ id }))       : [];
         obj.dietary_regimes = obj.dietary_regimes ? obj.dietary_regimes.split('|').map(id => parseInt(id.trim())).filter(Boolean).map(id => ({ id })) : [];
 
@@ -307,139 +306,6 @@ async function importJsonRows(rows) {
     document.getElementById('json-file').value = '';
 }
 
-function initOFF() {
-    const searchBtn  = document.getElementById('off-search-btn');
-    const barcodeBtn = document.getElementById('off-barcode-btn');
-    const searchIn   = document.getElementById('off-search-input');
-    const barcodeIn  = document.getElementById('off-barcode-input');
-
-    searchBtn.addEventListener('click', () => {
-        const q = searchIn.value.trim();
-        if (q.length < 2) { showOFFFeedback('Introdu cel puțin 2 caractere.', 'error'); return; }
-        offSearch(q);
-    });
-    searchIn.addEventListener('keydown', e => { if (e.key === 'Enter') searchBtn.click(); });
-
-    barcodeBtn.addEventListener('click', () => {
-        const b = barcodeIn.value.trim();
-        if (!/^\d{8,14}$/.test(b)) { showOFFFeedback('Cod de bare invalid (8-14 cifre).', 'error'); return; }
-        offGetByBarcode(b);
-    });
-    barcodeIn.addEventListener('keydown', e => { if (e.key === 'Enter') barcodeBtn.click(); });
-}
-
-async function offSearch(q) {
-    const btn = document.getElementById('off-search-btn');
-    btn.disabled = true;
-    btn.classList.add('loading');
-    showOFFFeedback('', '');
-    document.getElementById('off-results').innerHTML = '';
-    try {
-        const data = await api('GET', `/beverages-app/api/openfoodfacts.php?action=search&q=${encodeURIComponent(q)}`);
-        renderOFFResults(data.products ?? []);
-        if (!data.products?.length) showOFFFeedback('Niciun produs găsit pentru această căutare.', 'error');
-    } catch (err) {
-        showOFFFeedback(err.message, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.classList.remove('loading');
-    }
-}
-
-async function offGetByBarcode(barcode) {
-    const btn = document.getElementById('off-barcode-btn');
-    btn.disabled = true;
-    btn.classList.add('loading');
-    showOFFFeedback('', '');
-    document.getElementById('off-results').innerHTML = '';
-    try {
-        const data = await api('GET', `/beverages-app/api/openfoodfacts.php?action=get&barcode=${encodeURIComponent(barcode)}`);
-        renderOFFResults([data.product]);
-    } catch (err) {
-        showOFFFeedback(err.message, 'error');
-    } finally {
-        btn.disabled = false;
-        btn.classList.remove('loading');
-    }
-}
-
-function renderOFFResults(products) {
-    const wrap = document.getElementById('off-results');
-    if (!products.length) { wrap.innerHTML = ''; return; }
-    wrap.innerHTML = `
-    <p style="font-size:.85rem;color:var(--clr-muted);margin-bottom:.75rem">
-        ${products.length} produs${products.length !== 1 ? 'e' : ''} găsit${products.length !== 1 ? 'e' : ''}.
-        Click pe <strong>Importă</strong> pentru a adăuga în catalog.
-    </p>
-    <div class="off-grid">
-        ${products.map((p, idx) => offCardHTML(p, idx)).join('')}
-    </div>`;
-    products.forEach((p, idx) => {
-        document.getElementById(`off-import-${idx}`)?.addEventListener('click', () => importOFFProduct(p, idx));
-    });
-}
-
-function offCardHTML(p, idx) {
-    const allergenNames = (p.allergens ?? []).length
-        ? `<span style="color:var(--clr-danger);font-size:.8rem">⚠ ${p.allergens.length} alergen${p.allergens.length !== 1 ? 'i' : ''} detectat${p.allergens.length !== 1 ? 'i' : ''}</span>`
-        : '';
-    const img = p.image_path
-        ? `<img src="${escHtml(p.image_path)}" alt="${escHtml(p.name)}"
-               style="width:100%;height:120px;object-fit:contain;background:#f8f9fa;border-radius:4px;margin-bottom:.5rem"
-               loading="lazy" onerror="this.style.display='none'">`
-        : `<div style="width:100%;height:120px;background:var(--clr-surface);border-radius:4px;display:flex;align-items:center;justify-content:center;margin-bottom:.5rem;color:var(--clr-muted);font-size:2rem">🧃</div>`;
-    const barcode = p._barcode
-        ? `<span style="font-size:.75rem;color:var(--clr-muted)">Cod: ${escHtml(p._barcode)}</span>`
-        : '';
-    return `
-    <div class="off-card" id="off-card-${idx}">
-        ${img}
-        <div style="font-weight:700;font-size:.95rem;margin-bottom:.25rem">${escHtml(p.name)}</div>
-        ${p.region      ? `<div style="font-size:.82rem;color:var(--clr-muted)">📍 ${escHtml(p.region)}</div>` : ''}
-        ${p.description ? `<div style="font-size:.8rem;color:var(--clr-muted);margin:.25rem 0;max-height:3em;overflow:hidden">${escHtml(p.description.slice(0, 120))}${p.description.length > 120 ? '…' : ''}</div>` : ''}
-        ${allergenNames}
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem">
-            ${barcode}
-            <button class="btn btn-primary btn-sm" id="off-import-${idx}">
-                <span class="spinner"></span><span class="btn-text">Importă</span>
-            </button>
-        </div>
-    </div>`;
-}
-
-async function importOFFProduct(p, idx) {
-    const btn  = document.getElementById(`off-import-${idx}`);
-    const card = document.getElementById(`off-card-${idx}`);
-    if (!btn || !card) return;
-
-    btn.disabled = true;
-    btn.classList.add('loading');
-
-    // _barcode is an internal lookup key, not a beverage field
-    const payload = {
-        name:        p.name,
-        category_id: p.category_id  ?? null,
-        description: p.description  ?? null,
-        image_path:  p.image_path   ?? null,
-        region:      p.region       ?? null,
-        allergens:   p.allergens    ?? [],
-    };
-
-    try {
-        await api('POST', '/beverages-app/api/beverages.php', payload);
-        btn.classList.remove('loading');
-        btn.textContent       = '✓ Importat';
-        btn.style.background  = 'var(--clr-success, #16a34a)';
-        btn.style.borderColor = 'transparent';
-        btn.style.color       = '#fff';
-        card.style.opacity    = '0.65';
-    } catch (err) {
-        btn.disabled = false;
-        btn.classList.remove('loading');
-        showOFFFeedback(`Eroare la importul "${p.name}": ${err.message}`, 'error');
-    }
-}
-
 function showFeedback(message, type = 'success') {
     const el = document.getElementById('users-feedback');
     el.textContent = message;
@@ -456,13 +322,6 @@ function showImportFeedback(message, type = 'success') {
 
 function showJsonFeedback(message, type = 'success') {
     const el = document.getElementById('import-json-feedback');
-    el.textContent = message;
-    el.className   = `list-feedback visible ${type}`;
-    if (message) setTimeout(() => el.classList.remove('visible'), 5000);
-}
-
-function showOFFFeedback(message, type = 'success') {
-    const el = document.getElementById('off-feedback');
     el.textContent = message;
     el.className   = `list-feedback visible ${type}`;
     if (message) setTimeout(() => el.classList.remove('visible'), 5000);

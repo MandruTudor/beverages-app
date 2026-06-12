@@ -8,21 +8,14 @@ class GroupController {
         $action = get_param('action') ?? null;
 
         match (true) {
-            // Căutare utilizatori după username (pentru add member)
-            $method === 'GET'    && $action === 'search_users'                   => $this->searchUsers(),
-            // Lista grupurilor userului curent
-            $method === 'GET'    && $id === null                                 => $this->list(),
-            // Detalii grup cu membri
-            $method === 'GET'    && $id !== null                                 => $this->get($id),
-            // Creare grup nou
-            $method === 'POST'   && $id === null                                 => $this->create(),
-            // Ștergere grup
-            $method === 'DELETE' && $id !== null && $action === null             => $this->delete($id),
-            // Adaugă un membru în grup: POST /groups.php?id=X&action=add_member
-            $method === 'POST'   && $id !== null && $action === 'add_member'     => $this->addMember($id),
-            // Elimină un membru din grup: DELETE /groups.php?id=X&action=remove_member
-            $method === 'DELETE' && $id !== null && $action === 'remove_member'  => $this->removeMember($id),
-            default                                                              => json_error('Metoda sau ruta invalida.', 405),
+            $method === 'GET'    && $action === 'search_users'                  => $this->searchUsers(),
+            $method === 'GET'    && $id === null                                => $this->list(),
+            $method === 'GET'    && $id !== null                                => $this->get($id),
+            $method === 'POST'   && $id === null                                => $this->create(),
+            $method === 'DELETE' && $id !== null && $action === null            => $this->delete($id),
+            $method === 'POST'   && $id !== null && $action === 'add_member'    => $this->addMember($id),
+            $method === 'DELETE' && $id !== null && $action === 'remove_member' => $this->removeMember($id),
+            default                                                             => json_error('Metoda sau ruta invalida.', 405),
         };
     }
 
@@ -39,7 +32,6 @@ class GroupController {
     }
 
     private function create(): void {
-        // GroupCreateDto validează că 'name' există.
         $dto = new GroupCreateDto(json_body());
         $id  = $this->service->create($dto);
         json_response(['message' => 'Grupul a fost creat cu succes.', 'id' => $id], 201);
@@ -51,7 +43,6 @@ class GroupController {
     }
 
     private function addMember(int $groupId): void {
-        // GroupMemberDto validează că 'user_id' există și e întreg.
         $dto = new GroupMemberDto(json_body());
         $this->service->addMember($groupId, $dto);
         json_response(['message' => 'Membrul a fost adaugat in grup.']);

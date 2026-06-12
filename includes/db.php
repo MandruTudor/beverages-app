@@ -14,13 +14,8 @@ function get_db(): PDO {
         $conn->setAttribute(PDO::ATTR_ERRMODE,            PDO::ERRMODE_EXCEPTION);
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-        // busy_timeout PRIMUL — protejează toate operațiunile ulterioare, inclusiv WAL.
-        // Dacă DB-ul e blocat, PDO așteaptă până la 10s înainte de a arunca excepție.
-        // Fără asta, PRAGMA journal_mode = WAL de mai jos poate eșua imediat cu SQLITE_BUSY
-        // dacă un alt thread Apache încearcă simultan să deschidă conexiunea.
         $conn->exec('PRAGMA busy_timeout = 10000;');
-        // WAL: permite citiri și scrieri simultane pe thread-uri diferite (esențial pe XAMPP).
-        // Persistă pe fișierul .sqlite — se setează o dată, rămâne permanent.
+        
         $conn->exec('PRAGMA journal_mode = WAL;');
         $conn->exec('PRAGMA foreign_keys = ON;');
 
@@ -28,10 +23,6 @@ function get_db(): PDO {
             $conn->exec(file_get_contents(INIT_SQL_PATH));
         }
 
-        // Verificăm dacă migrările au fost deja aplicate (citire pură, fără lock de scriere).
-        // Dacă dietary_regimes există, toate migrările sunt aplicate — sărim blocul complet.
-        // Asta elimină lock-ul de scriere pe fiecare request și rezolvă conflictele SQLite
-        // când browser-ul face request-uri simultane (Promise.all).
         $migrated = (bool)$conn->query(
             "SELECT 1 FROM sqlite_master WHERE type='table' AND name='dietary_regimes'"
         )->fetchColumn();
@@ -84,7 +75,6 @@ function get_db(): PDO {
         $pdo = $conn;
 
     } catch (PDOException $e) {
-        // Nu setăm $pdo → requestul următor reîncearcă inițializarea de la zero
         http_response_code(500);
         echo json_encode(['error' => 'Database connection failed.']);
         exit;

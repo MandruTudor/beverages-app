@@ -5,19 +5,14 @@ class PreferenceController {
     public function handle(): void {
         $method     = http_method();
         $beverageId = get_param('beverage_id') ? (int) get_param('beverage_id') : null;
-
-        $action = get_param('action');
+        $action     = get_param('action');
 
         match (true) {
-            // Recomandari personalizate bazate pe preferinte
             $method === 'GET' && $action === 'recommendations' => $this->recommendations(),
-            // Lista tuturor preferințelor userului curent
-            $method === 'GET'                            => $this->list(),
-            // Creare sau actualizare preferință (upsert)
-            $method === 'POST'                           => $this->upsert(),
-            // Ștergere preferință pentru o băutură: DELETE ?beverage_id=X
-            $method === 'DELETE' && $beverageId !== null => $this->delete($beverageId),
-            default                                      => json_error('Metoda sau ruta invalida.', 405),
+            $method === 'GET'                                  => $this->list(),
+            $method === 'POST'                                 => $this->upsert(),
+            $method === 'DELETE' && $beverageId !== null       => $this->delete($beverageId),
+            default                                            => json_error('Metoda sau ruta invalida.', 405),
         };
     }
 
@@ -31,8 +26,6 @@ class PreferenceController {
     }
 
     private function upsert(): void {
-        // PreferenceDto validează beverage_id, rating (1-5) ca obligatorii.
-        // Validarea rating-ului 1–5 se face și în DTO (nu doar în Service cum era înainte).
         $dto = new PreferenceDto(json_body());
         $this->service->upsert($dto);
         json_response(['message' => 'Preferinta salvata cu succes.']);

@@ -53,20 +53,13 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
-    <!-- Formular creare grup nou -->
     <section class="page-section">
         <h3>Grup nou</h3>
         <form id="create-group-form" class="form-stack" novalidate>
             <div class="form-group">
                 <label for="group-name">Nume grup</label>
-                <input
-                    type="text"
-                    id="group-name"
-                    class="form-control"
-                    placeholder="ex: Familia Popescu"
-                    required
-                    autocomplete="off"
-                >
+                <input type="text" id="group-name" class="form-control"
+                       placeholder="ex: Familia Popescu" required autocomplete="off">
                 <span id="create-group-error" class="field-error" aria-live="polite"></span>
             </div>
             <button type="submit" class="btn btn-primary btn-auto">
@@ -76,10 +69,8 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </form>
     </section>
 
-    <!-- Layout principal: sidebar cu grupuri + panou detalii -->
     <div class="lists-layout">
 
-        <!-- Coloana stângă: lista grupurilor -->
         <aside>
             <h3 class="dash-section-title">Grupurile mele</h3>
             <div id="groups-sidebar" class="lists-sidebar">
@@ -87,7 +78,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             </div>
         </aside>
 
-        <!-- Coloana dreaptă: detaliile grupului selectat -->
         <section id="group-detail-panel">
 
             <div id="no-group-selected" class="list-empty-state">
@@ -108,34 +98,23 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 
                 <div id="group-feedback" class="list-feedback" role="alert"></div>
 
-                <!-- Secțiunea de adăugare membri -->
                 <div class="page-section" style="margin-top:1.5rem">
                     <h4 style="margin-bottom:.75rem">Adaugă un membru</h4>
                     <div class="list-add-bar">
-                        <input
-                            type="text"
-                            id="member-search-input"
-                            class="form-control"
-                            placeholder="Caută după username..."
-                            autocomplete="off"
-                        >
+                        <input type="text" id="member-search-input" class="form-control"
+                               placeholder="Caută după username..." autocomplete="off">
                         <button id="btn-search-user" class="btn btn-outline btn-sm">Caută</button>
                     </div>
-                    <!-- Rezultatele căutării -->
                     <div id="user-search-results" style="margin-top:.5rem"></div>
                 </div>
 
-                <!-- Lista membrilor -->
                 <div class="page-section" style="margin-top:1rem">
                     <h4 style="margin-bottom:.75rem">Membri</h4>
                     <div id="members-list"></div>
                 </div>
 
-                <!-- Preferinte de grup -->
                 <div class="page-section" style="margin-top:1.5rem">
                     <h4 style="margin-bottom:.75rem">Preferințe de grup</h4>
-
-                    <!-- Formular adaugare preferinta -->
                     <div class="list-add-bar" style="flex-wrap:wrap;gap:.5rem">
                         <select id="pref-beverage-select" class="form-control" style="flex:1;min-width:160px">
                             <option value="">— Alege băutură —</option>
@@ -146,8 +125,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                                placeholder="Notițe (opțional)" style="flex:2;min-width:140px">
                         <button id="btn-save-group-pref" class="btn btn-primary btn-sm">Salvează</button>
                     </div>
-
-                    <!-- Lista preferintelor existente -->
                     <div id="group-prefs-list" style="margin-top:.75rem"></div>
                 </div>
 
