@@ -73,7 +73,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </p>
         <div class="import-zone" id="import-zone">
             <input type="file" id="csv-file" accept=".csv" style="display:none">
-            <!-- click pe zonă deschide selectorul de fișiere, gestionat în JS -->
             <div class="import-drop" id="import-drop" tabindex="0" role="button"
                  aria-label="Selectează fișier CSV">
                 <span style="font-size:2rem">📄</span>

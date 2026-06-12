@@ -1,15 +1,8 @@
 <?php
-// ============================================================
-// lists.php — Gestionarea listelor de cumpărături.
-// Utilizatorii pot crea, vizualiza și gestiona liste personale.
-// ============================================================
-
 require_once __DIR__ . '/../includes/auth.php';
 
-// Pornim sesiunea PHP
 session_init();
 
-// Protecție: utilizatori neautentificați → login
 if (!is_logged_in()) {
     header('Location: /beverages-app/pages/login.php');
     exit;
@@ -29,7 +22,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 </head>
 <body>
 
-<!-- Bara de navigare fixă -->
 <header class="topbar">
     <div class="topbar-brand">🧃 Beverages App</div>
     <nav>
@@ -54,7 +46,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
 
 <main class="page-main">
 
-    <!-- Titlul paginii + formular de creare listă -->
     <div class="page-header">
         <div>
             <h2>Liste de cumpărături</h2>
@@ -62,7 +53,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </div>
     </div>
 
-    <!-- Formular creare listă nouă -->
     <section class="page-section">
         <h3>Listă nouă</h3>
         <form id="create-form" class="form-stack" novalidate>
@@ -91,47 +81,34 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </form>
     </section>
 
-    <!-- Layout principal: sidebar cu liste + panou detalii -->
     <div class="lists-layout">
 
-        <!-- Coloana stângă: cardurile listelor utilizatorului -->
         <aside>
             <h3 class="dash-section-title">Listele mele</h3>
-            <!-- Populat de JavaScript după loadLists() -->
             <div id="lists-sidebar" class="lists-sidebar"></div>
         </aside>
 
-        <!-- Coloana dreaptă: detaliile listei selectate -->
         <section id="list-detail-panel">
 
-            <!-- Starea inițială: nicio listă selectată -->
             <div id="no-list-selected" class="list-empty-state">
                 <p>🛒 Selectează o listă din stânga sau creează una nouă.</p>
             </div>
 
-            <!-- Panoul de detalii — ascuns până la selectarea unei liste -->
             <div id="list-detail" class="list-detail" style="display:none">
 
-                <!-- Header-ul panoului -->
                 <div class="list-detail__header">
                     <div>
-                        <!-- Titlul listei selectate — completat de JS -->
                         <div class="list-detail__title" id="detail-title"></div>
-                        <!-- Numărul de iteme — completat de JS -->
                         <div class="list-detail__meta" id="detail-meta"></div>
                     </div>
-                    <!-- Butoanele de acțiune ale listei -->
                     <div class="list-detail__actions">
                         <button id="btn-delete-list" class="btn btn-danger btn-sm">🗑 Șterge lista</button>
                     </div>
                 </div>
 
-                <!-- Feedback mesaj (succes/eroare) -->
                 <div id="list-feedback" class="list-feedback" role="alert"></div>
 
-                <!-- Bara de adăugare a unui item nou din catalog -->
                 <div class="list-add-bar">
-                    <!-- Căutare băutură cu autocomplete -->
                     <div style="position:relative;flex:1;min-width:180px">
                         <input
                             type="text"
@@ -142,9 +119,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                             aria-label="Caută băutură"
                             aria-autocomplete="list"
                         >
-                        <!-- ID-ul băuturii selectate — trimis la API -->
                         <input type="hidden" id="add-beverage-id">
-                        <!-- Lista de rezultate — apare sub câmp la tastare -->
                         <ul id="beverage-results" class="beverage-search-results" role="listbox"></ul>
                     </div>
                     <input
@@ -158,7 +133,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                     <button id="btn-add-item" class="btn btn-primary btn-sm">+ Adaugă</button>
                 </div>
 
-                <!-- Sugestii bazate pe preferinte -->
                 <div id="suggestions-bar" style="margin:.75rem 0;display:none">
                     <div style="font-size:.82rem;color:var(--clr-muted);margin-bottom:.4rem">
                         ⭐ Sugerate pentru tine:
@@ -166,7 +140,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                     <div id="suggestions-list" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
                 </div>
 
-                <!-- Sortare iteme -->
                 <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
                     <label for="sort-items" style="font-size:.85rem;color:var(--clr-muted);white-space:nowrap">Sortare:</label>
                     <select id="sort-items" class="filter-select" style="width:auto;padding:.35rem .7rem;font-size:.85rem">
@@ -180,7 +153,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                     </select>
                 </div>
 
-                <!-- Tabelul cu itemele listei -->
                 <table class="list-items-table">
                     <thead>
                         <tr>
@@ -188,10 +160,9 @@ $initial = strtoupper(substr($user['username'], 0, 1));
                             <th>Cant.</th>
                             <th>Preț total</th>
                             <th style="text-align:center">Bifat</th>
-                            <th></th><!-- Coloana pentru butoanele de acțiune -->
+                            <th></th>
                         </tr>
                     </thead>
-                    <!-- Corpul tabelului — populat de JS -->
                     <tbody id="items-tbody"></tbody>
                 </table>
 

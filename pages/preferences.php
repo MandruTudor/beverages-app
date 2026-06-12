@@ -88,7 +88,6 @@ $initial = strtoupper(substr($user['username'], 0, 1));
             <div id="pref-alert" class="alert alert-error" role="alert"></div>
 
             <div class="form-actions">
-                <!-- apare doar dacă există deja un rating salvat -->
                 <button type="button" id="btn-delete-pref" class="btn btn-danger btn-sm"
                         style="display:none;margin-right:auto">🗑 Șterge</button>
                 <button type="button" class="btn btn-outline btn-sm" onclick="closeModal()">Anulează</button>
