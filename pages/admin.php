@@ -99,7 +99,7 @@ $initial = strtoupper(substr($user['username'], 0, 1));
         </p>
         <div class="import-zone" id="import-json-zone">
             <input type="file" id="json-file" accept=".json" style="display:none">
-            <div class="import-json-drop" id="import-json-drop" tabindex="0" role="button"
+            <div class="import-drop" id="import-json-drop" tabindex="0" role="button"
                  aria-label="Selectează fișier JSON">
                 <span style="font-size:2rem">{ }</span>
                 <p>Trage fișierul JSON aici sau <strong>click pentru a selecta</strong></p>
