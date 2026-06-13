@@ -773,8 +773,7 @@ a:hover { text-decoration: underline; } /* Subliniere la hover pentru feedback v
     font-size: .85rem;
     color: var(--clr-muted);
     line-height: 1.5;
-    /* Webkit multi-line clamp: standard de facto, funcționează în toate browserele moderne */
-    display: -webkit-box;
+    display: block;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -1623,7 +1622,7 @@ textarea.form-control {
     color: var(--clr-muted);
     font-style: italic;
     line-height: 1.4;
-    display: -webkit-box;
+    display: block;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
